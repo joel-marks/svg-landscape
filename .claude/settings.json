@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "Bash(find /Users/joel/dev/vs-code -maxdepth 3 -iname \"CONTEXT*\" 2>/dev/null; echo \"---claude dir---\"; find /Users/joel/dev/vs-code/svg-landscape/.claude -type f | head -20; echo \"---git---\"; git status --short)",
+      "Read(//Users/joel/dev/vs-code/**)",
+      "Bash(rm -rf viteinit)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\(p.dependencies,null,2\\),JSON.stringify\\(p.devDependencies,null,2\\)\\)\")",
+      "Bash(npm run *)",
+      "Bash(curl -s --retry 10 --retry-all-errors --retry-delay 1 --retry-connrefused http://localhost:5173/svg-landscape/ -o /tmp/idx.html -w \"index: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5173/svg-landscape/src/main.js -o /dev/null -w \"main.js: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5173/svg-landscape/src/archetypes/index.js -o /dev/null -w \"archetypes/index.js: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5173/svg-landscape/favicon.svg -o /dev/null -w \"favicon: %{http_code}\\\\n\")",
+      "Bash(lsof -nP -iTCP:5173 -iTCP:5174 -sTCP:LISTEN)",
+      "Bash(curl -s http://localhost:5174/svg-landscape/ -o /tmp/idx5174.html -w \"index: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5174/svg-landscape/src/main.js -o /tmp/main5174.js -w \"main.js: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5174/svg-landscape/src/archetypes/index.js -o /dev/null -w \"archetypes/index.js: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5174/svg-landscape/favicon.svg -o /dev/null -w \"favicon: %{http_code}\\\\n\")",
+      "Bash(ps -p 79614 -o pid,command)",
+      "Bash(kill 79614)",
+      "Bash(git add *)"
+    ]
+  }
+}
