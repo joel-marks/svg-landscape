@@ -12,8 +12,11 @@
     "vite": "^8.1.1"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "chroma-js": "^3.2.0",
+    "lucide": "^1.27.0",
     "simplex-noise": "^4.0.3",
+    "tailwindcss": "^4.3.3",
     "tweakpane": "^4.0.5"
   }
 }

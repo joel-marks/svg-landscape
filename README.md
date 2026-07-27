@@ -11,8 +11,11 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 1 scaffold. The project shell, build, and deploy pipeline
-> are in place; generation, render, and control logic land in later phases.
+> **Status:** Phase 2. The generation pipeline runs end to end for one
+> archetype — Open valley renders on load, **New View** reseeds it, and
+> **Download SVG** exports the live scene. The grouped control panel, the
+> remaining archetypes, lighting, and the full palette system land in later
+> phases.
 
 ## Stack
 
@@ -20,7 +23,9 @@ deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 - Vanilla JS (ES modules) — no UI framework
 - [simplex-noise](https://github.com/jwagner/simplex-noise.js) — noise base
 - [chroma-js](https://gka.github.io/chroma.js/) — palette generation and interpolation
-- [Tweakpane](https://tweakpane.github.io/docs/) — control panel UI
+- [Tweakpane](https://tweakpane.github.io/docs/) — control panel UI (Phase 3)
+- [Tailwind CSS v4](https://tailwindcss.com/) — page chrome and design tokens
+- [Lucide](https://lucide.dev/) — icons
 
 ## Local development
 
@@ -68,11 +73,22 @@ src/
   download.js        SVG export + settings JSON export
   help.js            help modal content + open/close
   theme.js           UI light/dark theme, prefers-color-scheme, persistence
+  style.css          Tailwind entry + light/dark design tokens
   archetypes/        one module per landscape type, each exporting generate()
     index.js         registry mapping name -> generator module
 public/              favicon, static assets
 index.html           single page, semantic landmarks, meta tags
 ```
+
+## Theming
+
+The interface has three modes — Light, Dark, and System — cycled from the
+header button and remembered in localStorage. System follows
+`prefers-color-scheme` live. All three resolve to a single `dark` class on
+`<html>`, which the tokens in `src/style.css` key off.
+
+This is interface chrome only. The in-scene time-of-day lighting that tints the
+sky and drives shadows is a separate system, arriving in Phase 4.
 
 `CONTEXT.md` at the repo root is the authoritative project spec.
 

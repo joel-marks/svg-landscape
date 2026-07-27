@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+/* The UI chrome theme is driven by a `dark` class on <html>, set by theme.js.
+   Overriding Tailwind's default media-query dark variant lets Light / Dark /
+   System (CONTEXT.md section 5) resolve through one code path: theme.js
+   resolves System via prefers-color-scheme, then applies the class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens. Values live on :root / .dark; @theme below exposes them to
+   Tailwind so `bg-surface`, `text-muted`, etc. work as normal utilities.
+   These style the interface only — in-scene landscape colors come from
+   palette.js and are unrelated (CONTEXT.md section 5). */
+:root {
+  --surface: #f4f6f8;
+  --surface-raised: #ffffff;
+  --surface-sunken: #e7ebef;
+  --border: #d9dfe6;
+  --text: #16191d;
+  --text-muted: #59636e;
+  --accent: #2f6f8f;
+  --accent-contrast: #ffffff;
+  color-scheme: light;
+}
+
+.dark {
+  --surface: #0e1317;
+  --surface-raised: #161d23;
+  --surface-sunken: #090d10;
+  --border: #27323b;
+  --text: #e9eef3;
+  --text-muted: #94a2af;
+  --accent: #6fb7d4;
+  --accent-contrast: #0e1317;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border-token: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--text);
+  }
+
+  /* CONTEXT.md section 11: respect prefers-reduced-motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}

@@ -25,15 +25,81 @@
     <meta name="twitter:card" content="summary_large_image" />
   </head>
 
-  <body>
-    <header>
-      <h1>Landscape SVG Generator</h1>
+  <body class="flex min-h-dvh flex-col">
+    <header class="border-b border-border-token bg-surface-raised">
+      <div class="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-3">
+        <h1 class="text-base font-semibold tracking-tight">
+          Landscape SVG Generator
+        </h1>
+
+        <button
+          id="theme-toggle"
+          type="button"
+          class="ml-auto inline-flex items-center gap-2 rounded-md border border-border-token bg-surface px-2.5 py-1.5 text-sm text-muted transition-colors hover:text-text"
+          aria-label="Theme: system"
+        >
+          <span data-theme-icon="system"><i data-lucide="monitor"></i></span>
+          <span data-theme-icon="light" hidden><i data-lucide="sun"></i></span>
+          <span data-theme-icon="dark" hidden><i data-lucide="moon"></i></span>
+          <span id="theme-label" class="hidden sm:inline">System</span>
+        </button>
+      </div>
     </header>
 
-    <main id="app"></main>
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      <figure class="m-0">
+        <div
+          class="overflow-hidden rounded-lg border border-border-token bg-surface-sunken shadow-sm"
+        >
+          <svg
+            id="landscape"
+            class="block aspect-video w-full"
+            role="img"
+            aria-label="Procedurally generated open valley landscape"
+          ></svg>
+        </div>
 
-    <footer>
-      <p>MIT licensed. Source on GitHub.</p>
+        <figcaption class="sr-only">
+          A generated open valley scene. Use New View to regenerate it.
+        </figcaption>
+      </figure>
+
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          id="new-view"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-accent-contrast transition-opacity hover:opacity-90"
+        >
+          <i data-lucide="refresh-cw"></i>
+          New View
+        </button>
+
+        <button
+          id="download-svg"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-md border border-border-token bg-surface-raised px-3.5 py-2 text-sm font-medium transition-colors hover:bg-surface"
+        >
+          <i data-lucide="download"></i>
+          Download SVG
+        </button>
+
+        <p class="text-sm text-muted" aria-live="polite">
+          Seed <span id="seed-readout" class="font-mono">—</span>
+        </p>
+      </div>
+    </main>
+
+    <footer class="border-t border-border-token bg-surface-raised">
+      <div class="mx-auto w-full max-w-6xl px-4 py-3 text-sm text-muted">
+        <p>
+          MIT licensed.
+          <a
+            class="underline underline-offset-2 hover:text-text"
+            href="https://github.com/joel-marks/svg-landscape"
+            >Source on GitHub</a
+          >.
+        </p>
+      </div>
     </footer>
 
     <script type="module" src="/src/main.js"></script>

@@ -1,46 +1,72 @@
 // main.js — entry point: wires state, controls, render.
-// Phase 1 scaffold only. The imports below exist to confirm every module and
-// the archetype registry resolve correctly through Vite; no state, generation,
-// or render logic runs yet.
+// Phase 2 scope: noise -> archetype generation -> SVG render on load, plus
+// New View (reseed) and Download SVG. The grouped Tweakpane panel is Phase 3,
+// so controls.js is not initialised yet.
 
-import { state, loadState, saveState } from './state.js';
-import { fbm, ridgedFbm } from './noise.js';
-import { themes, generatePalette } from './palette.js';
-import { computeLighting } from './lighting.js';
+import './style.css';
+
+import { createIcons, Download, Monitor, Moon, RefreshCw, Sun } from 'lucide';
+
+import { state, newSeed } from './state.js';
+import { createPalette } from './palette.js';
+import { getArchetype } from './archetypes/index.js';
 import { render } from './render.js';
-import { initControls } from './controls.js';
-import { downloadSVG, downloadSettings } from './download.js';
-import { initHelp } from './help.js';
-import { initTheme } from './theme.js';
-import { archetypes } from './archetypes/index.js';
+import { downloadSVG } from './download.js';
+import { cycleThemeMode, getThemeMode, initTheme, onThemeChange } from './theme.js';
 
-const modules = {
-  state,
-  loadState,
-  saveState,
-  fbm,
-  ridgedFbm,
-  themes,
-  generatePalette,
-  computeLighting,
-  render,
-  initControls,
-  downloadSVG,
-  downloadSettings,
-  initHelp,
-  initTheme,
-};
+const svg = document.querySelector('#landscape');
+const seedReadout = document.querySelector('#seed-readout');
+const themeToggle = document.querySelector('#theme-toggle');
+const themeLabel = document.querySelector('#theme-label');
 
-const resolved = Object.keys(modules).length;
-const archetypeNames = Object.keys(archetypes);
+const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 
-const target = document.querySelector('#app');
-target.innerHTML = `
-  <p class="scaffold-status">Scaffold ready.</p>
-  <p class="scaffold-detail">
-    ${resolved} module exports resolved ·
-    ${archetypeNames.length} archetypes registered
-  </p>
-`;
+function draw() {
+  const archetype = getArchetype(state.archetype);
+  const geometry = archetype.module.generate({
+    width: state.width,
+    height: state.height,
+    seed: state.seed,
+    complexity: state.complexity,
+    elevation: state.elevation,
+  });
 
-console.info('[svg-landscape] scaffold ready', { archetypes: archetypeNames });
+  render(svg, geometry, createPalette(state.palette));
+
+  seedReadout.textContent = state.seed;
+  svg.setAttribute('aria-label', `Procedurally generated ${archetype.label} landscape, seed ${state.seed}`);
+}
+
+function syncThemeButton() {
+  const mode = getThemeMode();
+  for (const icon of themeToggle.querySelectorAll('[data-theme-icon]')) {
+    icon.hidden = icon.dataset.themeIcon !== mode;
+  }
+  themeLabel.textContent = THEME_LABELS[mode];
+  themeToggle.setAttribute('aria-label', `Theme: ${THEME_LABELS[mode].toLowerCase()}`);
+}
+
+document.querySelector('#new-view').addEventListener('click', () => {
+  newSeed();
+  draw();
+});
+
+document.querySelector('#download-svg').addEventListener('click', () => {
+  downloadSVG(svg, `landscape-${state.archetype}-${state.seed}.svg`);
+});
+
+themeToggle.addEventListener('click', () => {
+  cycleThemeMode();
+  syncThemeButton();
+});
+
+onThemeChange(syncThemeButton);
+
+createIcons({
+  icons: { Download, Monitor, Moon, RefreshCw, Sun },
+  attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
+});
+
+initTheme();
+syncThemeButton();
+draw();
