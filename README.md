@@ -11,11 +11,47 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 2. The generation pipeline runs end to end for one
-> archetype — Open valley renders on load, **New View** reseeds it, and
-> **Download SVG** exports the live scene. The grouped control panel, the
-> remaining archetypes, lighting, and the full palette system land in later
-> phases.
+> **Status:** Phase 3. All nine landscape archetypes generate and are selectable
+> from a Tweakpane control panel, with complexity, viewpoint height, seed
+> lock/randomize, and aspect-ratio controls. Lighting and the pseudo-3D shadow
+> split (Phase 4), the curated palette list and colour controls (Phase 5), and
+> persistence, settings export and help (Phase 6) are still to come.
+
+## Landscape types
+
+Nine archetypes, each its own generator module under `src/archetypes/`:
+
+| Type | Reads as |
+| --- | --- |
+| Open valley | Layered ridges opening outward around a wide valley floor |
+| Valley floor | Standing deep in a valley, tall peaks crowding the upper frame |
+| V valley | Alternating spurs nesting toward a convergence point |
+| Gorge | Terraced plateaus broken by a steep, narrow slot |
+| In gorge | Inside the canyon, walls filling both edges |
+| Mountain top | High horizon with peak clusters falling away below |
+| Stacked ridges | Evenly spaced ridgelines, long-lens compression |
+| Dominant peak | One summit outranking its flanking peaks |
+| Twin peaks | Exactly two peaks of similar height |
+
+## Controls
+
+**Scene** — landscape type, complexity, point-of-view height, seed
+(display / randomize / lock), New View.
+**Canvas** — aspect ratio: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1.
+**Actions** — Download SVG.
+
+Canvas height is fixed at 900 and the aspect ratio sets the width. Feature
+density scales with width so wider canvases get proportionally more ridges and
+spurs — and never fewer than the 16:9 baseline.
+
+Point-of-view height drives `elevation` (0–1). Only V valley responds to it so
+far: raising it lifts the horizon and convergence point while the spurs
+multiply and nest tighter. Every other archetype accepts the parameter and
+ignores it, and will adopt it incrementally.
+
+The seed lock is authoritative — while it is on, nothing draws a new seed, so
+changing complexity or aspect re-renders the same layout. With it off, any
+Scene or Canvas change draws a fresh view.
 
 ## Stack
 
@@ -73,6 +109,7 @@ src/
   download.js        SVG export + settings JSON export
   help.js            help modal content + open/close
   theme.js           UI light/dark theme, prefers-color-scheme, persistence
+  utils.js           shared geometry helpers + width-scaling rules
   style.css          Tailwind entry + light/dark design tokens
   archetypes/        one module per landscape type, each exporting generate()
     index.js         registry mapping name -> generator module
@@ -89,6 +126,13 @@ header button and remembered in localStorage. System follows
 
 This is interface chrome only. The in-scene time-of-day lighting that tints the
 sky and drives shadows is a separate system, arriving in Phase 4.
+
+Every archetype exports
+`generate({ seed, elevation, complexity, width, height })` and returns
+`{ archetype, width, height, horizonY, mistAfter, layers }`, where each layer is
+`{ index, depth, points }` and `points` is a closed polygon in absolute
+coordinates. `depth` runs 0 (farthest) to 1 (nearest) and picks the palette ramp
+position.
 
 `CONTEXT.md` at the repo root is the authoritative project spec.
 

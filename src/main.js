@@ -1,41 +1,37 @@
 // main.js — entry point: wires state, controls, render.
-// Phase 2 scope: noise -> archetype generation -> SVG render on load, plus
-// New View (reseed) and Download SVG. The grouped Tweakpane panel is Phase 3,
-// so controls.js is not initialised yet.
+// Phase 3 scope: the Tweakpane panel drives generation for all nine
+// archetypes. Lighting, palette controls, and persistence arrive in later
+// phases.
 
 import './style.css';
 
-import { createIcons, Download, Monitor, Moon, RefreshCw, Sun } from 'lucide';
+import { createIcons, Monitor, Moon, Sun } from 'lucide';
 
-import { state, newSeed } from './state.js';
-import { createPalette } from './palette.js';
+import { regenerate, setRenderer, state } from './state.js';
 import { getArchetype } from './archetypes/index.js';
 import { render } from './render.js';
+import { initControls } from './controls.js';
 import { downloadSVG } from './download.js';
 import { cycleThemeMode, getThemeMode, initTheme, onThemeChange } from './theme.js';
 
 const svg = document.querySelector('#landscape');
-const seedReadout = document.querySelector('#seed-readout');
+const frame = document.querySelector('#canvas-frame');
 const themeToggle = document.querySelector('#theme-toggle');
 const themeLabel = document.querySelector('#theme-label');
 
 const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 
-function draw() {
-  const archetype = getArchetype(state.archetype);
-  const geometry = archetype.module.generate({
-    width: state.width,
-    height: state.height,
-    seed: state.seed,
-    complexity: state.complexity,
-    elevation: state.elevation,
-  });
+setRenderer((geometry, palette, archetype) => {
+  render(svg, geometry, palette);
 
-  render(svg, geometry, createPalette(state.palette));
-
-  seedReadout.textContent = state.seed;
-  svg.setAttribute('aria-label', `Procedurally generated ${archetype.label} landscape, seed ${state.seed}`);
-}
+  // Keep the frame's box matching the generated canvas so wider aspects get a
+  // shorter frame rather than a letterboxed one.
+  frame.style.aspectRatio = `${geometry.width} / ${geometry.height}`;
+  svg.setAttribute(
+    'aria-label',
+    `Procedurally generated ${archetype.label} landscape, seed ${state.seed}`,
+  );
+});
 
 function syncThemeButton() {
   const mode = getThemeMode();
@@ -43,17 +39,11 @@ function syncThemeButton() {
     icon.hidden = icon.dataset.themeIcon !== mode;
   }
   themeLabel.textContent = THEME_LABELS[mode];
-  themeToggle.setAttribute('aria-label', `Theme: ${THEME_LABELS[mode].toLowerCase()}`);
+  themeToggle.setAttribute(
+    'aria-label',
+    `Theme: ${THEME_LABELS[mode].toLowerCase()}`,
+  );
 }
-
-document.querySelector('#new-view').addEventListener('click', () => {
-  newSeed();
-  draw();
-});
-
-document.querySelector('#download-svg').addEventListener('click', () => {
-  downloadSVG(svg, `landscape-${state.archetype}-${state.seed}.svg`);
-});
 
 themeToggle.addEventListener('click', () => {
   cycleThemeMode();
@@ -63,10 +53,19 @@ themeToggle.addEventListener('click', () => {
 onThemeChange(syncThemeButton);
 
 createIcons({
-  icons: { Download, Monitor, Moon, RefreshCw, Sun },
+  icons: { Monitor, Moon, Sun },
   attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
+});
+
+initControls({
+  container: document.querySelector('#panel'),
+  onDownload: () => {
+    const { label } = getArchetype(state.archetype);
+    const slug = label.toLowerCase().replace(/\s+/g, '-');
+    downloadSVG(svg, `landscape-${slug}-${state.seed}.svg`);
+  },
 });
 
 initTheme();
 syncThemeButton();
-draw();
+regenerate();

@@ -46,47 +46,29 @@
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-      <figure class="m-0">
+    <main
+      class="mx-auto grid w-full max-w-7xl flex-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_19rem]"
+    >
+      <figure class="m-0 min-w-0">
         <div
-          class="overflow-hidden rounded-lg border border-border-token bg-surface-sunken shadow-sm"
+          id="canvas-frame"
+          class="aspect-video overflow-hidden rounded-lg border border-border-token bg-surface-sunken shadow-sm"
         >
           <svg
             id="landscape"
-            class="block aspect-video w-full"
+            class="block h-full w-full"
             role="img"
-            aria-label="Procedurally generated open valley landscape"
+            aria-label="Procedurally generated landscape"
           ></svg>
         </div>
 
         <figcaption class="sr-only">
-          A generated open valley scene. Use New View to regenerate it.
+          A generated landscape scene. Use the Scene controls to change the
+          landscape type or draw a new view.
         </figcaption>
       </figure>
 
-      <div class="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          id="new-view"
-          type="button"
-          class="inline-flex items-center gap-2 rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-accent-contrast transition-opacity hover:opacity-90"
-        >
-          <i data-lucide="refresh-cw"></i>
-          New View
-        </button>
-
-        <button
-          id="download-svg"
-          type="button"
-          class="inline-flex items-center gap-2 rounded-md border border-border-token bg-surface-raised px-3.5 py-2 text-sm font-medium transition-colors hover:bg-surface"
-        >
-          <i data-lucide="download"></i>
-          Download SVG
-        </button>
-
-        <p class="text-sm text-muted" aria-live="polite">
-          Seed <span id="seed-readout" class="font-mono">—</span>
-        </p>
-      </div>
+      <aside id="panel" aria-label="Controls"></aside>
     </main>
 
     <footer class="border-t border-border-token bg-surface-raised">

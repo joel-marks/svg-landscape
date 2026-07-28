@@ -37,7 +37,23 @@
       "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/page-check.mjs http://localhost:5174/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad)",
       "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/theme-check.mjs http://localhost:5174/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad)",
       "Bash(pkill -f \"remote-debugging-port=9222\")",
-      "Bash(rsvg-convert -w 600 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/s4242.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/s4242.png)"
+      "Bash(rsvg-convert -w 600 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/s4242.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/s4242.png)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/all-check.mjs /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad '{}')",
+      "Bash(node -e ' *)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --disable-gpu --hide-scrollbars --window-size=1500,1160 --screenshot=/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.png file:///private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.html)",
+      "Bash(chmod +x /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh)",
+      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh sheet *)",
+      "Bash(rsvg-convert -w 700 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/a-gorge.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/gorge-only.png)",
+      "Bash(chmod +x /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/chrome.sh)",
+      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/chrome.sh)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/phase3-check.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/probe.mjs http://localhost:5173/svg-landscape/)",
+      "Bash(python3 - /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/phase3-check.mjs)",
+      "Bash(perl -pi -e 's/\\\\$\\\\{'\\\\''\\\\$\\\\{checked\\\\}'\\\\''\\\\}/\\\\$\\\\{checked\\\\}/' /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/phase3-check.mjs)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'V valley' 16:9 page-panel)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'Stacked ridges' 'LinkedIn 4:1' page-wide)",
+      "Bash(rm -f /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/a-*.svg)",
+      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh final *)"
     ]
   }
 }

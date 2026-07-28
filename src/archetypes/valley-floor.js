@@ -1,8 +1,149 @@
 // Archetype: Valley floor.
-// Owns its own generation logic. Signature per CONTEXT.md section 3:
-// generate(params) -> geometryItems. `params` carries the global `elevation`
-// (section 6a) even though this archetype does not use it meaningfully yet.
+//
+// Standing deep inside a valley, looking down its length. Tall peaked ridges
+// crowd the upper frame, the terrain recedes down into an open floor, and two
+// low rolling spurs meet near centre-bottom with a soft split between their
+// tips.
 
-export function generate(params) {
-  return [];
+import { createNoise } from '../noise.js';
+import {
+  octaveCount,
+  peakField,
+  ridgeLayer,
+  ridgeNoise,
+  sampleCount,
+  scaleCount,
+  scaleFrequency,
+  spurCrest,
+  widthScale,
+} from '../utils.js';
+
+export function generate({
+  seed = 0,
+  elevation = 0.5,
+  complexity = 0.5,
+  width = 1600,
+  height = 900,
+} = {}) {
+  // Accepted but unused — see CONTEXT.md section 6a.
+  void elevation;
+
+  const noise2D = createNoise(seed);
+  const octaves = octaveCount(complexity);
+  const samples = sampleCount(complexity, width);
+  const horizonY = height * 0.3;
+  const scale = widthScale(width);
+
+  const layers = [];
+
+  // Tall peaked ridges, close together near the top of frame.
+  const bandCount = scaleCount(4 + Math.round(complexity * 2), width);
+  const peakCount = scaleCount(6, width);
+
+  for (let k = 0; k < bandCount; k += 1) {
+    const p = k / Math.max(1, bandCount - 1);
+    const base = horizonY + height * 0.05 + p * height * 0.24;
+    const amplitude = height * (0.19 - p * 0.07);
+
+    // Peak cluster riding on the ridge line, seeded per band.
+    const peaks = [];
+    for (let n = 0; n < peakCount; n += 1) {
+      peaks.push({
+        t: (n + 0.5) / peakCount + noise2D(n * 3.1, k * 5.7) * 0.06,
+        height: 0.45 + 0.55 * Math.abs(noise2D(n * 9.4, k * 2.2)),
+        width: 0.1 / scale,
+        sharpness: 1.4,
+      });
+    }
+
+    layers.push(
+      ridgeLayer({
+        index: layers.length,
+        depth: p * 0.3,
+        samples,
+        width,
+        height,
+        crest: (t) =>
+          base -
+          amplitude *
+            (0.55 *
+              ridgeNoise(noise2D, t, 12.5 + k * 8.3, {
+                octaves,
+                frequency: scaleFrequency(5, width),
+                ridgeWeight: 0.9,
+              }) +
+              0.45 * peakField(peaks, t)),
+      }),
+    );
+  }
+
+  // The floor itself: broad, low-relief ground receding toward the viewer.
+  for (let k = 0; k < 2; k += 1) {
+    const base = height * (0.66 + k * 0.12);
+    layers.push(
+      ridgeLayer({
+        index: layers.length,
+        depth: 0.42 + k * 0.16,
+        samples,
+        width,
+        height,
+        crest: (t) =>
+          base -
+          height *
+            0.05 *
+            ridgeNoise(noise2D, t, 40.2 + k * 6.9, {
+              octaves,
+              frequency: scaleFrequency(1.8, width),
+              ridgeWeight: 0.2,
+            }),
+      }),
+    );
+  }
+
+  // Two low rolling spurs framing a soft split near centre-bottom.
+  const split = 0.5 + noise2D(21.3, 4.4) * 0.05;
+  const gap = 0.07;
+
+  for (const [k, side] of [[0, 'left'], [1, 'right']]) {
+    const tipT = side === 'left' ? split - gap : split + gap;
+    const tipY = height * (1.0 + k * 0.02);
+    const outerY = height * (0.74 - k * 0.02);
+
+    layers.push(
+      ridgeLayer({
+        index: layers.length,
+        depth: 0.82 + k * 0.18,
+        samples,
+        width,
+        height,
+        crest: (t) =>
+          spurCrest({
+            t,
+            side,
+            tipT,
+            tipY,
+            outerY,
+            plunge: height * 0.32,
+            ease: 1.7,
+            fall: 0.5,
+          }) -
+          height *
+            0.035 *
+            ridgeNoise(noise2D, t, 70 + k * 12.1, {
+              octaves,
+              frequency: scaleFrequency(2.4, width),
+              ridgeWeight: 0.2,
+            }),
+      }),
+    );
+  }
+
+  return {
+    archetype: 'valley-floor',
+    width,
+    height,
+    horizonY,
+    mistAfter: 1,
+    layers,
+  };
 }

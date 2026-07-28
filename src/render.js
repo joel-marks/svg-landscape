@@ -8,11 +8,8 @@
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-// How many of the farthest layers sit behind the haze band.
-const MIST_AFTER_LAYER = 1;
-
 export function render(svg, geometry, palette) {
-  const { width, height, horizonY, layers } = geometry;
+  const { width, height, horizonY, layers, mistAfter = 1 } = geometry;
 
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
@@ -33,18 +30,19 @@ export function render(svg, geometry, palette) {
   );
 
   // The haze is painted over the farthest layers and under the nearer ones, so
-  // distance actually reads as atmosphere rather than as a band floating in
-  // the sky gap.
-  for (const layer of layers) {
-    if (layer.index === MIST_AFTER_LAYER + 1) svg.append(mistBand(horizonY, width, height));
+  // distance actually reads as atmosphere rather than as a band floating in the
+  // sky gap. Each archetype says where that break falls, since "how far back
+  // the distance begins" differs between a wide valley and a narrow gorge.
+  layers.forEach((layer, i) => {
+    if (i === mistAfter + 1) svg.append(mistBand(horizonY, width, height));
 
     svg.append(
       el('path', {
-        d: layerPath(layer, width, height),
+        d: polygonPath(layer.points),
         fill: palette.terrainAt(layer.depth),
       }),
     );
-  }
+  });
 
   return svg;
 }
@@ -60,12 +58,13 @@ function mistBand(horizonY, width, height) {
   });
 }
 
-// Silhouette across the top, then closed down the sides to the bottom edge.
-function layerPath(layer, width, height) {
-  const [first, ...rest] = layer.points;
+// Archetypes emit closed polygons in absolute coordinates — crest lines closed
+// to the bottom edge, or vertical wall silhouettes closed to a side.
+function polygonPath(points) {
+  const [first, ...rest] = points;
   const head = `M ${round(first[0])} ${round(first[1])}`;
   const body = rest.map(([x, y]) => `L ${round(x)} ${round(y)}`).join(' ');
-  return `${head} ${body} L ${round(width)} ${height} L 0 ${height} Z`;
+  return `${head} ${body} Z`;
 }
 
 function skyGradient(palette) {

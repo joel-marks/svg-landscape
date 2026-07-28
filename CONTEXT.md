@@ -9,6 +9,8 @@ One-page web app generating procedural 2D landscape SVGs (noise/algorithmic-base
 - **simplex-noise** (npm) — noise base.
 - **chroma-js** (npm) — palette generation/interpolation.
 - **Tweakpane** — control panel UI.
+- **Tailwind CSS v4** (via `@tailwindcss/vite`, no PostCSS config needed) — page shell styling: layout, light/dark theme, responsive breakpoints. Tweakpane's own panel keeps its native styling; Tailwind covers everything outside it (header/main/footer, canvas frame, buttons, help modal).
+- **Lucide** (static SVG icons, imported per-icon) — icon set for UI buttons (download, help, theme toggle, etc.). Chosen over an icon font: no font-loading step, and inline SVG is consistent with an app whose whole output is SVG.
 - No routing, no state-management library — a single plain state object is sufficient.
 
 *Assumption: no framework. Flag now if you want React/Vue instead — changes the build slightly.*
@@ -61,7 +63,7 @@ Open valley · Valley floor · V valley · Gorge · In gorge · Mountain top · 
 **Color**
 - Theme preset (dropdown, curated palettes)
 - Randomize palette (algorithmic — complementary/analogous/split-hue strategies)
-- Color depth (slider — interpolation bands / contrast between near and far)
+- Color depth (slider — controls contrast between near and far layers. Low = layers compressed toward the palette midpoint (flat, low depth cue). High = near/far pushed toward the ramp's extremes, exaggerating separation. Not a literal band/posterize count.)
 - Distance haze (slider — mist opacity/spread)
 
 **Canvas**
@@ -127,7 +129,7 @@ CC runs from repo root with standing permission to execute bash, git, and stack-
 ## 17. Next step — phased CC prompt breakdown
 1. Scaffold: Vite project, folder structure, GH Actions deploy pipeline, empty index.html shell
 2. Noise + render pipeline for one archetype (Open valley) end-to-end, confirming SVG output and download
-3. Remaining nine archetypes + landscape type control
+3. Remaining eight archetypes + landscape type control
 4. Lighting system: time-of-day slider, sky/mist gradients, shadow/pseudo-3D split
 5. Palette system: curated themes + algorithmic generator, color depth/haze controls
 6. Persistence, settings export, help modal, tips toggle
