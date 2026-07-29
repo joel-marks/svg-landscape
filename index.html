@@ -27,7 +27,9 @@
 
   <body class="flex min-h-dvh flex-col">
     <header class="border-b border-border-token bg-surface-raised">
-      <div class="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-3">
+      <!-- `shell` is shared by header, main and footer so every side margin
+           resolves to the same computed value (CONTEXT.md section 5). -->
+      <div class="shell flex items-center gap-4 py-3">
         <h1 class="text-base font-semibold tracking-tight">
           Landscape SVG Generator
         </h1>
@@ -46,10 +48,8 @@
       </div>
     </header>
 
-    <main
-      class="mx-auto grid w-full max-w-7xl flex-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_19rem]"
-    >
-      <figure class="m-0 min-w-0">
+    <main class="shell flex-1 py-6">
+      <figure class="m-0">
         <div
           id="canvas-frame"
           class="aspect-video overflow-hidden rounded-lg border border-border-token bg-surface-sunken shadow-sm"
@@ -63,16 +63,46 @@
         </div>
 
         <figcaption class="sr-only">
-          A generated landscape scene. Use the Scene controls to change the
-          landscape type or draw a new view.
+          A generated landscape scene. Use the Scene controls below to change
+          the landscape type or draw a new view.
         </figcaption>
       </figure>
 
-      <aside id="panel" aria-label="Controls"></aside>
+      <!-- Controls sit below the canvas: a side panel is unworkable once the
+           canvas can be an X-Pan or LinkedIn strip (CONTEXT.md section 5). -->
+      <div
+        class="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]"
+      >
+        <div id="panel" aria-label="Scene and canvas controls"></div>
+
+        <section
+          id="actions"
+          aria-labelledby="actions-heading"
+          class="rounded-md border border-border-token bg-surface-raised p-4 shadow-sm"
+        >
+          <h2
+            id="actions-heading"
+            class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted"
+          >
+            Actions
+          </h2>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              id="download-svg"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-accent-contrast transition-opacity hover:opacity-90"
+            >
+              <i data-lucide="download"></i>
+              Download SVG
+            </button>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer class="border-t border-border-token bg-surface-raised">
-      <div class="mx-auto w-full max-w-6xl px-4 py-3 text-sm text-muted">
+      <div class="shell py-3 text-sm text-muted">
         <p>
           MIT licensed.
           <a

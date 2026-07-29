@@ -9,12 +9,13 @@
 import { createNoise, fbm } from '../noise.js';
 import {
   closeToSide,
+  featureCount,
   lerp,
   octaveCount,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
-  scaleCount,
   scaleFrequency,
   wallPoints,
 } from '../utils.js';
@@ -23,6 +24,8 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
@@ -54,7 +57,7 @@ export function generate({
             ridgeNoise(noise2D, t, 6.1 + k * 11.3, {
               octaves,
               frequency: scaleFrequency(6 - k, width),
-              ridgeWeight: 0.9,
+              ridgeWeight: ridgeWeightFor(0.9, sharpness),
             }),
       }),
     );
@@ -77,7 +80,7 @@ export function generate({
           ridgeNoise(noise2D, t, 120.7, {
             octaves,
             frequency: scaleFrequency(2, width),
-            ridgeWeight: 0.2,
+            ridgeWeight: ridgeWeightFor(0.2, sharpness),
           }),
     }),
   );
@@ -86,7 +89,7 @@ export function generate({
   // and near walls at the bottom, so each stays visible instead of the nearest
   // one hiding everything behind it. Width adds strata rather than stretching
   // two walls across a wide canvas.
-  const wallCount = scaleCount(2, width);
+  const wallCount = featureCount(peakCount, 2, 5, width);
   const wallSamples = Math.round(120 + complexity * 100);
 
   for (let m = 0; m < wallCount; m += 1) {

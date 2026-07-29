@@ -7,11 +7,12 @@
 
 import { createNoise } from '../noise.js';
 import {
+  featureCount,
   octaveCount,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
-  scaleCount,
   scaleFrequency,
   spurCrest,
 } from '../utils.js';
@@ -20,6 +21,8 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
@@ -34,7 +37,7 @@ export function generate({
   const horizonY = convergeY - height * 0.03;
   const axis = 0.5 + noise2D(11.7, 2.9) * 0.05;
 
-  const spurCount = scaleCount(6 + Math.round(complexity * 3), width);
+  const spurCount = featureCount(peakCount, 4, 12, width);
 
   const layers = [];
 
@@ -53,7 +56,7 @@ export function generate({
           ridgeNoise(noise2D, t, 4.2, {
             octaves,
             frequency: scaleFrequency(5, width),
-            ridgeWeight: 0.9,
+            ridgeWeight: ridgeWeightFor(0.9, sharpness),
           }),
     }),
   );
@@ -98,7 +101,7 @@ export function generate({
           const h = ridgeNoise(noise2D, t, row, {
             octaves,
             frequency: scaleFrequency(3.4, width),
-            ridgeWeight: 0.25,
+            ridgeWeight: ridgeWeightFor(0.25, sharpness),
           });
           return base - amplitude * h;
         },

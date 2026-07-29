@@ -18,6 +18,7 @@ import {
   octaveCount,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
   scaleCount,
   scaleFrequency,
@@ -28,6 +29,8 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
@@ -36,20 +39,23 @@ export function generate({
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
 
-  // Horizon and convergence rise together as the viewer climbs.
-  const convergeY = lerp(height * 0.72, height * 0.3, e);
+  // Horizon and convergence rise together as the viewer climbs. The travel is
+  // deliberately most of the frame's height — a subtle shift reads as a bug
+  // rather than as a change of viewpoint.
+  const convergeY = lerp(height * 0.82, height * 0.2, e);
   const horizonY = convergeY - height * 0.03;
   const axis = 0.5 + noise2D(3.3, 8.1) * 0.06;
 
-  // Spur count grows with elevation (tighter nesting), complexity, and width.
+  // Peak count sets the base; elevation adds spurs on top, since nesting
+  // tightens as the viewer rises (CONTEXT.md section 6a).
   const spurCount = scaleCount(
-    4 + Math.round(e * 6) + Math.round(complexity * 2),
+    Math.round(lerp(3, 9, clamp01(peakCount))) + Math.round(e * 5),
     width,
   );
 
   // How far each tip reaches past the axis, and how tall the spurs stand.
-  const spread = lerp(1.35, 0.6, e);
-  const riseScale = lerp(1, 0.72, e);
+  const spread = lerp(1.5, 0.42, e);
+  const riseScale = lerp(1.05, 0.58, e);
 
   const layers = [];
 
@@ -70,7 +76,7 @@ export function generate({
             ridgeNoise(noise2D, t, 5.5 + k * 9.1, {
               octaves,
               frequency: scaleFrequency(4.5 - k, width),
-              ridgeWeight: 0.85,
+              ridgeWeight: ridgeWeightFor(0.85, sharpness),
             }),
       }),
     );
@@ -104,17 +110,19 @@ export function generate({
             tipT,
             tipY,
             outerY,
-            plunge: height * 0.55,
+            plunge: height * 0.35,
             // Near-linear: a straight diagonal shoulder is what makes the
             // spurs read as interlocking wedges rather than one soft funnel.
             ease: 1.1,
-            // A quicker fall past the tip exposes the next spur behind it.
-            fall: 0.5,
+            // Linear. A sub-1 exponent puts a vertical tangent right at the
+            // tip, which at high elevation stacks every spur's drop into a
+            // staircase of cliffs down the middle of the frame.
+            fall: 1,
           });
           const h = ridgeNoise(noise2D, t, row, {
             octaves,
             frequency: scaleFrequency(2.2 + (1 - d) * 1.8, width),
-            ridgeWeight: 0.45,
+            ridgeWeight: ridgeWeightFor(0.45, sharpness),
           });
           return base - amplitude * h;
         },

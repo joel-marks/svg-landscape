@@ -6,12 +6,14 @@
 
 import { createNoise } from '../noise.js';
 import {
+  featureCount,
   octaveCount,
+  peakExponent,
   peakField,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
-  scaleCount,
   scaleFrequency,
   widthScale,
 } from '../utils.js';
@@ -20,6 +22,8 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
@@ -37,8 +41,8 @@ export function generate({
   // Fewer bands than stacked-ridges, and spaced by an accelerating curve rather
   // than evenly — even spacing is what makes a range read as a repeating
   // silhouette, which is the other archetype's job, not this one's.
-  const ridgeCount = scaleCount(4 + Math.round(complexity * 2), width);
-  const clusterSize = scaleCount(4, width);
+  const ridgeCount = featureCount(peakCount, 3, 7, width);
+  const clusterSize = featureCount(peakCount, 3, 9, width);
 
   for (let k = 0; k < ridgeCount; k += 1) {
     const p = k / (ridgeCount - 1);
@@ -56,7 +60,7 @@ export function generate({
         t: (n + 0.5) / clusterSize + noise2D(n * 4.7, k * 6.3) * 0.09,
         height: 0.55 + 0.45 * Math.abs(noise2D(n * 2.9, k * 8.1)),
         width: (0.12 - p * 0.02) / scale,
-        sharpness: 1.35 + p * 0.8,
+        sharpness: peakExponent(sharpness, p * 0.5),
       });
     }
 
@@ -76,7 +80,7 @@ export function generate({
               ridgeNoise(noise2D, t, 15.1 + k * 9.7, {
                 octaves,
                 frequency: scaleFrequency(4.2 - p * 1.6, width),
-                ridgeWeight: 0.85 - p * 0.4,
+                ridgeWeight: ridgeWeightFor(0.85 - p * 0.4, sharpness),
               }) +
               peakWeight * peakField(peaks, t)),
       }),
@@ -98,7 +102,7 @@ export function generate({
           ridgeNoise(noise2D, t, 90.4, {
             octaves,
             frequency: scaleFrequency(1.3, width),
-            ridgeWeight: 0.1,
+            ridgeWeight: ridgeWeightFor(0.1, sharpness),
           }),
     }),
   );

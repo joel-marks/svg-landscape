@@ -7,12 +7,14 @@
 
 import { createNoise } from '../noise.js';
 import {
+  featureCount,
   octaveCount,
+  peakExponent,
   peakField,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
-  scaleCount,
   scaleFrequency,
   widthScale,
 } from '../utils.js';
@@ -21,6 +23,8 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
@@ -40,21 +44,21 @@ export function generate({
       t: summitT,
       height: 1,
       width: 0.22 / scale,
-      sharpness: 1.45,
+      sharpness: peakExponent(sharpness),
     },
   ];
 
-  // Flanking peaks: two on a 16:9 canvas, more as the canvas widens, but always
-  // well below the summit so the hierarchy survives.
-  const flankCount = scaleCount(2, width);
+  // Flanking peaks. Peak count sets how many, and the canvas width adds more,
+  // but they stay well below the summit so the hierarchy survives.
+  const flankCount = featureCount(peakCount, 1, 6, width);
   for (let n = 0; n < flankCount; n += 1) {
     const side = n % 2 === 0 ? -1 : 1;
     const rank = Math.floor(n / 2) + 1;
     peaks.push({
-      t: summitT + side * (0.17 + rank * 0.13) / scale,
+      t: summitT + (side * (0.17 + rank * 0.13)) / scale,
       height: 0.42 + 0.12 * Math.abs(noise2D(n * 5.5, 3.3)),
-      width: (0.14 - rank * 0.02) / scale,
-      sharpness: 1.6,
+      width: (0.14 - Math.min(rank, 4) * 0.02) / scale,
+      sharpness: peakExponent(sharpness, 0.15),
     });
   }
 
@@ -78,7 +82,7 @@ export function generate({
               ridgeNoise(noise2D, t, 33.7, {
                 octaves,
                 frequency: scaleFrequency(4.5, width),
-                ridgeWeight: 0.85,
+                ridgeWeight: ridgeWeightFor(0.85, sharpness),
               })),
     }),
   );
@@ -105,7 +109,7 @@ export function generate({
             ridgeNoise(noise2D, t, 50 + k * 11.7, {
               octaves,
               frequency: scaleFrequency(spec.frequency, width),
-              ridgeWeight: spec.ridgeWeight,
+              ridgeWeight: ridgeWeightFor(spec.ridgeWeight, sharpness),
             }),
       }),
     );

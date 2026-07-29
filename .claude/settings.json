@@ -53,7 +53,20 @@
       "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'V valley' 16:9 page-panel)",
       "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'Stacked ridges' 'LinkedIn 4:1' page-wide)",
       "Bash(rm -f /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/a-*.svg)",
-      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh final *)"
+      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh final *)",
+      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.85,/ridgeWeight: ridgeWeightFor\\(0.85, sharpness\\),/; s/ridgeWeight: 0\\\\.45,/ridgeWeight: ridgeWeightFor\\(0.45, sharpness\\),/\" src/archetypes/v-valley.js)",
+      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.9,/ridgeWeight: ridgeWeightFor\\(0.9, sharpness\\),/; s/ridgeWeight: 0\\\\.25,/ridgeWeight: ridgeWeightFor\\(0.25, sharpness\\),/\" src/archetypes/gorge.js)",
+      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.9,/ridgeWeight: ridgeWeightFor\\(0.9, sharpness\\),/; s/ridgeWeight: 0\\\\.2,/ridgeWeight: ridgeWeightFor\\(0.2, sharpness\\),/\" src/archetypes/in-gorge.js)",
+      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.9,/ridgeWeight: ridgeWeightFor\\(0.9, sharpness\\),/g; s/ridgeWeight: 0\\\\.2,/ridgeWeight: ridgeWeightFor\\(0.2, sharpness\\),/g\" src/archetypes/valley-floor.js)",
+      "Bash(perl -0pi -e \"s/sharpness: 1\\\\.35 \\\\+ p \\\\* 0\\\\.8,/sharpness: peakExponent\\(sharpness, p * 0.5\\),/; s/ridgeWeight: 0\\\\.85 - p \\\\* 0\\\\.4,/ridgeWeight: ridgeWeightFor\\(0.85 - p * 0.4, sharpness\\),/; s/ridgeWeight: 0\\\\.1,/ridgeWeight: ridgeWeightFor\\(0.1, sharpness\\),/\" src/archetypes/mountain-top.js)",
+      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.7 - p \\\\* 0\\\\.35,/ridgeWeight: ridgeWeightFor\\(0.7 - p * 0.35, sharpness\\),/\" src/archetypes/stacked-ridges.js)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/margins.mjs http://localhost:5173/svg-landscape/)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad Gorge 16:9 p35-gorge-pov)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot-panel.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad Gorge panel-gorge)",
+      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot-panel.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'V valley' panel-vvalley)",
+      "Bash(rsvg-convert -w 1200 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/a-v-valley.e1.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/vv1.png)",
+      "Bash(perl -0pi -e \"s/^Every archetype exports\\\\n\\\\`generate\\\\\\(\\\\{ seed, elevation, complexity, width, height \\\\}\\\\\\)\\\\` and returns/Every archetype exports\\\\n\\\\`generate\\({ seed, elevation, complexity, peakCount, sharpness, width, height }\\)\\\\`\\\\nand returns/m\" README.md)",
+      "Bash(pkill -f \"headless=new\")"
     ]
   }
 }

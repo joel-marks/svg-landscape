@@ -32,7 +32,12 @@ export const state = {
   // While locked, no control change and no action draws a new seed.
   seedLocked: false,
   elevation: 0.5,
+  // Detail resolution only — octaves and sampling density (CONTEXT.md s5).
   complexity: 0.5,
+  // Feature count. Each archetype maps it to its own integer range.
+  peakCount: 0.5,
+  // Terrain profile: 0 rounded hills, 1 sharp ridgelines.
+  sharpness: 0.5,
   aspect: '16:9',
   width: aspectWidth('16:9'),
   height: CANVAS_HEIGHT,
@@ -56,16 +61,25 @@ export function setAspect(key) {
   return state.width;
 }
 
-// The single entry point every Tweakpane binding calls. `reseed` asks for a new
-// view; the seed lock overrides it.
-export function regenerate({ reseed = false } = {}) {
-  if (reseed && !state.seedLocked) state.seed = randomSeed();
+// The single entry point every control binding calls.
+//
+// `reseed: 'incidental'` — a side effect of changing some other control. The
+// lock exists precisely to suppress this.
+// `reseed: 'explicit'` — the user asked for a new seed (Randomize, New View).
+// The lock does not apply: a control whose whole purpose is to change the seed
+// shouldn't be silently disabled by it (CONTEXT.md section 5).
+export function regenerate({ reseed = 'none' } = {}) {
+  if (reseed === 'explicit' || (reseed === 'incidental' && !state.seedLocked)) {
+    state.seed = randomSeed();
+  }
 
   const archetype = getArchetype(state.archetype);
   const geometry = archetype.module.generate({
     seed: state.seed,
     elevation: state.elevation,
     complexity: state.complexity,
+    peakCount: state.peakCount,
+    sharpness: state.sharpness,
     width: state.width,
     height: state.height,
   });

@@ -7,10 +7,13 @@
 
 import { createNoise } from '../noise.js';
 import {
+  featureCount,
   octaveCount,
+  peakExponent,
   peakField,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
   scaleCount,
   scaleFrequency,
@@ -22,6 +25,8 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
@@ -36,9 +41,10 @@ export function generate({
 
   const layers = [];
 
-  // Tall peaked ridges, close together near the top of frame.
-  const bandCount = scaleCount(4 + Math.round(complexity * 2), width);
-  const peakCount = scaleCount(6, width);
+  // Tall peaked ridges, close together near the top of frame. The band count
+  // is structural; Peak count drives how many summits crowd each band.
+  const bandCount = scaleCount(5, width);
+  const peaksPerBand = featureCount(peakCount, 4, 13, width);
 
   for (let k = 0; k < bandCount; k += 1) {
     const p = k / Math.max(1, bandCount - 1);
@@ -47,12 +53,12 @@ export function generate({
 
     // Peak cluster riding on the ridge line, seeded per band.
     const peaks = [];
-    for (let n = 0; n < peakCount; n += 1) {
+    for (let n = 0; n < peaksPerBand; n += 1) {
       peaks.push({
-        t: (n + 0.5) / peakCount + noise2D(n * 3.1, k * 5.7) * 0.06,
+        t: (n + 0.5) / peaksPerBand + noise2D(n * 3.1, k * 5.7) * 0.06,
         height: 0.45 + 0.55 * Math.abs(noise2D(n * 9.4, k * 2.2)),
         width: 0.1 / scale,
-        sharpness: 1.4,
+        sharpness: peakExponent(sharpness),
       });
     }
 
@@ -70,7 +76,7 @@ export function generate({
               ridgeNoise(noise2D, t, 12.5 + k * 8.3, {
                 octaves,
                 frequency: scaleFrequency(5, width),
-                ridgeWeight: 0.9,
+                ridgeWeight: ridgeWeightFor(0.9, sharpness),
               }) +
               0.45 * peakField(peaks, t)),
       }),
@@ -94,7 +100,7 @@ export function generate({
             ridgeNoise(noise2D, t, 40.2 + k * 6.9, {
               octaves,
               frequency: scaleFrequency(1.8, width),
-              ridgeWeight: 0.2,
+              ridgeWeight: ridgeWeightFor(0.2, sharpness),
             }),
       }),
     );
@@ -132,7 +138,7 @@ export function generate({
             ridgeNoise(noise2D, t, 70 + k * 12.1, {
               octaves,
               frequency: scaleFrequency(2.4, width),
-              ridgeWeight: 0.2,
+              ridgeWeight: ridgeWeightFor(0.2, sharpness),
             }),
       }),
     );

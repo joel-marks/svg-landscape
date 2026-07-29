@@ -11,6 +11,7 @@ import {
   octaveCount,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
   scaleFrequency,
 } from '../utils.js';
@@ -19,19 +20,25 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a.
+  // Both accepted but unused. `elevation` per CONTEXT.md section 6a; Peak count
+  // is a deliberate no-op here because the 6–8 band count is the archetype's
+  // defining trait (CONTEXT.md section 5), the same exemption Twin peaks has.
   void elevation;
+  void peakCount;
 
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
   const horizonY = height * 0.22;
 
-  // Complexity picks the count within the archetype's defining 6–8 band.
-  const ridgeCount = 6 + Math.round(complexity * 2);
+  // The seed picks within the defining 6–8 band, so scenes still vary without
+  // handing the count to a control.
+  const ridgeCount = 6 + Math.round(Math.abs(noise2D(0.37, 0.91)) * 2);
 
   const layers = [];
 
@@ -56,7 +63,7 @@ export function generate({
             ridgeNoise(noise2D, t, 25.5 + k * 14.9, {
               octaves,
               frequency: scaleFrequency(3.6 - p * 1.4, width),
-              ridgeWeight: 0.7 - p * 0.35,
+              ridgeWeight: ridgeWeightFor(0.7 - p * 0.35, sharpness),
             }),
       }),
     );

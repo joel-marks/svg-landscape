@@ -8,9 +8,11 @@
 import { createNoise } from '../noise.js';
 import {
   octaveCount,
+  peakExponent,
   peakField,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
   scaleFrequency,
   widthScale,
@@ -22,11 +24,16 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a.
+  // Both accepted but unused. `elevation` per CONTEXT.md section 6a; Peak count
+  // is a deliberate no-op because exactly two peaks is the defining trait
+  // (CONTEXT.md section 5) — neither a control nor canvas width may add a third.
   void elevation;
+  void peakCount;
 
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
@@ -46,7 +53,7 @@ export function generate({
       t: centre + side * separation,
       height: 0.92 + 0.08 * Math.abs(noise2D(n * 6.1, 4.9)),
       width: 0.19 / scale,
-      sharpness: 1.5,
+      sharpness: peakExponent(sharpness),
     });
   }
 
@@ -69,7 +76,7 @@ export function generate({
               ridgeNoise(noise2D, t, 27.3, {
                 octaves,
                 frequency: scaleFrequency(4.8, width),
-                ridgeWeight: 0.85,
+                ridgeWeight: ridgeWeightFor(0.85, sharpness),
               })),
     }),
   );
@@ -95,7 +102,7 @@ export function generate({
             ridgeNoise(noise2D, t, 55 + k * 13.3, {
               octaves,
               frequency: scaleFrequency(spec.frequency, width),
-              ridgeWeight: spec.ridgeWeight,
+              ridgeWeight: ridgeWeightFor(spec.ridgeWeight, sharpness),
             }),
       }),
     );

@@ -8,11 +8,12 @@
 import { createNoise, fbm } from '../noise.js';
 import {
   clamp01,
+  featureCount,
   octaveCount,
   ridgeLayer,
   ridgeNoise,
+  ridgeWeightFor,
   sampleCount,
-  scaleCount,
   scaleFrequency,
 } from '../utils.js';
 
@@ -20,6 +21,8 @@ export function generate({
   seed = 0,
   elevation = 0.5,
   complexity = 0.5,
+  peakCount = 0.5,
+  sharpness = 0.5,
   width = 1600,
   height = 900,
 } = {}) {
@@ -31,9 +34,10 @@ export function generate({
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
 
-  // Complexity adds depth bands; width adds them too, so a wide canvas keeps
-  // the same visual rhythm rather than stretching seven layers across it.
-  const layerCount = scaleCount(6 + Math.round(complexity * 3), width);
+  // The receding ridges are this archetype's countable feature. Width adds
+  // bands too, so a wide canvas keeps the rhythm rather than stretching a
+  // handful of layers across it.
+  const layerCount = featureCount(peakCount, 5, 11, width);
 
   const layers = [];
 
@@ -48,7 +52,8 @@ export function generate({
     // flanks of the near walls flatten into straight diagonal wedges.
     const amplitude = height * (0.085 + 0.14 * depth);
     const frequency = scaleFrequency(1.6 + (1 - depth) * 2.4, width);
-    const ridgeWeight = 1 - depth;
+    // Far ridges are the sharper ones; sharpness scales the whole set.
+    const ridgeWeight = ridgeWeightFor(1 - depth, sharpness);
     const row = i * 17.3;
 
     // Offset each layer's valley axis so the walls are not mirror-symmetric.

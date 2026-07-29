@@ -29,6 +29,7 @@ One-page web app generating procedural 2D landscape SVGs (noise/algorithmic-base
   download.js            SVG export + settings JSON export
   help.js                 help modal content + open/close
   theme.js                 UI light/dark theme, prefers-color-scheme, persistence
+  utils.js                 shared geometry helpers: feature-density/aspect width scaling, common spur/wall primitives used across archetypes
   /archetypes
     open-valley.js, valley-floor.js, v-valley.js,
     gorge.js, in-gorge.js, mountain-top.js, stacked-ridges.js,
@@ -38,7 +39,7 @@ One-page web app generating procedural 2D landscape SVGs (noise/algorithmic-base
 index.html               single page, semantic landmarks, meta tags
 ```
 
-Each archetype module owns its own generation logic (not shared parameters over one generator) and exports `generate(params) -> geometryItems`. Every `generate()` signature accepts `elevation` (see section 6a) even if a given archetype doesn't yet use it meaningfully — keeps the schema stable as the effect is extended to other types later.
+Each archetype module owns its own generation logic (not shared parameters over one generator) and exports `generate(params) -> geometryItems`. Every `generate()` signature accepts `elevation`, `peakCount`, and `sharpness` (see sections 5, 6a) even where a given archetype treats one as a no-op (e.g. Twin Peaks ignores `peakCount`) — keeps the schema stable as effects are extended to more archetypes later.
 
 ## 4. Landscape types (seed list — carried from prior prototype naming)
 Open valley · Valley floor · V valley · Gorge · In gorge · Mountain top · Stacked ridges · Dominant peak · Twin peaks
@@ -47,11 +48,15 @@ Open valley · Valley floor · V valley · Gorge · In gorge · Mountain top · 
 
 ## 5. Control panel — grouped logically
 
+Layout: all control panel groups render in one area **below** the canvas, not beside it — a side panel doesn't work once the canvas can be an X-Pan (2.71:1) or LinkedIn (4:1) strip. The **Actions** group renders as its own visually distinct panel, physically separate from the Scene/Lighting/Color/Canvas/Preferences parameter panel — an export/download action shouldn't sit among tunable sliders. Header/nav side margins align with the canvas and control-panel side margins so edges line up at every breakpoint.
+
 **Scene**
 - Landscape type (dropdown)
-- Complexity (slider — maps to noise octaves / point density / peak count per archetype)
+- Complexity (slider — noise octave count / point sampling density only. Controls detail resolution — how fine or coarse the terrain silhouette is — not feature count. See Peak count below for that.)
+- Peak count (slider — number of peaks/spurs/ridges, independent of Complexity. Normalized 0–1 like Complexity/Elevation; each archetype maps it to its own sensible integer range. No-op on archetypes where a fixed count is the defining trait (Twin Peaks' 2, Stacked Ridges' band count) or where the concept doesn't apply.)
+- Peak sharpness (slider — blends the terrain profile between smooth/rolling and jagged/ridged. 0 = rounded hills, 1 = sharp ridgelines.)
 - Point of view height (slider, global — see section 6a)
-- Seed value (display + randomize + lock)
+- Seed value (display + randomize + lock). Lock only guards against *incidental* reseeding from other Scene/Canvas control changes (landscape type, complexity, peak count, sharpness, elevation, aspect ratio). Randomize and New View always draw a new seed regardless of lock state — a control whose entire purpose is to change the seed shouldn't be silently disabled by it.
 - Regenerate ("New View")
 
 **Lighting**
@@ -129,7 +134,8 @@ CC runs from repo root with standing permission to execute bash, git, and stack-
 ## 17. Next step — phased CC prompt breakdown
 1. Scaffold: Vite project, folder structure, GH Actions deploy pipeline, empty index.html shell
 2. Noise + render pipeline for one archetype (Open valley) end-to-end, confirming SVG output and download
-3. Remaining eight archetypes + landscape type control
+3. Remaining eight archetypes + landscape type control + Canvas group (aspect ratio, feature-density scaling) — grouped here because per-archetype feature density scaling is naturally built alongside each archetype's geometry
+3.5. Fixes/follow-ups from Phase 3 review: seed lock semantics, elevation fix/verification, Peak count + Peak sharpness sliders, Actions panel separated from parameter panel, layout moved below canvas, nav/canvas margin alignment
 4. Lighting system: time-of-day slider, sky/mist gradients, shadow/pseudo-3D split
 5. Palette system: curated themes + algorithmic generator, color depth/haze controls
 6. Persistence, settings export, help modal, tips toggle

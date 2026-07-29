@@ -5,7 +5,7 @@
 
 import './style.css';
 
-import { createIcons, Monitor, Moon, Sun } from 'lucide';
+import { createIcons, Download, Monitor, Moon, Sun } from 'lucide';
 
 import { regenerate, setRenderer, state } from './state.js';
 import { getArchetype } from './archetypes/index.js';
@@ -52,19 +52,18 @@ themeToggle.addEventListener('click', () => {
 
 onThemeChange(syncThemeButton);
 
+document.querySelector('#download-svg').addEventListener('click', () => {
+  const { label } = getArchetype(state.archetype);
+  const slug = label.toLowerCase().replace(/\s+/g, '-');
+  downloadSVG(svg, `landscape-${slug}-${state.seed}.svg`);
+});
+
 createIcons({
-  icons: { Monitor, Moon, Sun },
+  icons: { Download, Monitor, Moon, Sun },
   attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
 });
 
-initControls({
-  container: document.querySelector('#panel'),
-  onDownload: () => {
-    const { label } = getArchetype(state.archetype);
-    const slug = label.toLowerCase().replace(/\s+/g, '-');
-    downloadSVG(svg, `landscape-${slug}-${state.seed}.svg`);
-  },
-});
+initControls({ container: document.querySelector('#panel') });
 
 initTheme();
 syncThemeButton();

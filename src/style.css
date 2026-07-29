@@ -45,6 +45,18 @@
   --color-accent-contrast: var(--accent-contrast);
 }
 
+@layer components {
+  /* One definition of the page gutter, shared by header, main and footer, so
+     their side margins resolve to identical computed values at every
+     breakpoint (CONTEXT.md section 5). */
+  .shell {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 80rem;
+    padding-inline: 1rem;
+  }
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
@@ -69,5 +81,11 @@
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+  }
+
+  /* Tweakpane keeps its native styling (CONTEXT.md section 2); it only needs
+     to fill the column it is given rather than its default fixed width. */
+  #panel .tp-rotv {
+    width: 100%;
   }
 }

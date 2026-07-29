@@ -41,13 +41,39 @@ export function scaleFrequency(frequency, width) {
   return frequency * widthScale(width);
 }
 
-// Crest resolution. Complexity raises point density (CONTEXT.md section 5).
+// Crest resolution. Complexity drives detail resolution only — octave count and
+// point sampling density — never feature count (CONTEXT.md section 5).
 export function sampleCount(complexity, width) {
-  return Math.round((200 + complexity * 160) * widthScale(width));
+  return Math.round((160 + complexity * 260) * widthScale(width));
 }
 
 export function octaveCount(complexity) {
-  return 3 + Math.round(complexity * 3);
+  return 2 + Math.round(complexity * 5);
+}
+
+// Map the normalized Peak count control onto an archetype's own integer range,
+// then apply canvas-width scaling so wider canvases still gain features.
+export function featureCount(peakCount, min, max, width) {
+  return scaleCount(Math.round(lerp(min, max, clamp01(peakCount))), width);
+}
+
+// Blend a layer's ridged/rolling character by the global Peak sharpness
+// control. `character` is the archetype's own 0..1 sense of how ridged this
+// layer should be relative to its siblings; sharpness scales the whole set
+// without flattening the differences between them.
+export function ridgeWeightFor(character, sharpness) {
+  const s = clamp01(sharpness);
+  const c = clamp01(character);
+  // The low end has to reach near-zero ridging or "rounded hills" doesn't read;
+  // a narrow range around the midpoint makes the control look broken.
+  return clamp01(lerp(c * 0.15, 0.4 + c * 0.6, s));
+}
+
+// Peak profile exponent for peakField: higher is a narrower, pointier summit.
+// The range is wide because peak-led archetypes take most of their silhouette
+// from peakField, so this is the only lever sharpness has on them.
+export function peakExponent(sharpness, bias = 0) {
+  return lerp(0.7, 3.4, clamp01(sharpness)) + bias;
 }
 
 // Blended terrain height in roughly 0..1. ridgeWeight 0 is rolling hills, 1 is
