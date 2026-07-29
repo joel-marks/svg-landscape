@@ -8,6 +8,8 @@
 import { createNoise } from '../noise.js';
 import {
   featureCount,
+  horizonFor,
+  nestingFor,
   octaveCount,
   peakExponent,
   peakField,
@@ -30,13 +32,13 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a.
-  void elevation;
-
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
-  const horizonY = height * 0.3;
+
+  // Height lifts the horizon and draws the framing spurs in toward their split.
+  const horizonY = horizonFor(elevation, height, 0.44, 0.18);
+  const nesting = nestingFor(elevation, 1.3, 0.6);
   const scale = widthScale(width);
 
   const layers = [];
@@ -48,7 +50,7 @@ export function generate({
 
   for (let k = 0; k < bandCount; k += 1) {
     const p = k / Math.max(1, bandCount - 1);
-    const base = horizonY + height * 0.05 + p * height * 0.24;
+    const base = horizonY + height * 0.05 + p * height * 0.24 * nesting;
     const amplitude = height * (0.19 - p * 0.07);
 
     // Peak cluster riding on the ridge line, seeded per band.
@@ -85,7 +87,7 @@ export function generate({
 
   // The floor itself: broad, low-relief ground receding toward the viewer.
   for (let k = 0; k < 2; k += 1) {
-    const base = height * (0.66 + k * 0.12);
+    const base = horizonY + height * (0.36 + k * 0.12) * nesting;
     layers.push(
       ridgeLayer({
         index: layers.length,
@@ -108,7 +110,8 @@ export function generate({
 
   // Two low rolling spurs framing a soft split near centre-bottom.
   const split = 0.5 + noise2D(21.3, 4.4) * 0.05;
-  const gap = 0.07;
+  // The framing spurs pull in toward the split as the viewer climbs.
+  const gap = 0.07 * nesting;
 
   for (const [k, side] of [[0, 'left'], [1, 'right']]) {
     const tipT = side === 'left' ? split - gap : split + gap;
@@ -131,7 +134,9 @@ export function generate({
             outerY,
             plunge: height * 0.32,
             ease: 1.7,
-            fall: 0.5,
+            // Linear, for the same reason as v-valley: a sub-1 exponent puts a
+            // vertical tangent at the tip and the split reads as a cliff.
+            fall: 1,
           }) -
           height *
             0.035 *

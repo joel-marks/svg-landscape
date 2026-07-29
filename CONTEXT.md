@@ -48,14 +48,14 @@ Open valley · Valley floor · V valley · Gorge · In gorge · Mountain top · 
 
 ## 5. Control panel — grouped logically
 
-Layout: all control panel groups render in one area **below** the canvas, not beside it — a side panel doesn't work once the canvas can be an X-Pan (2.71:1) or LinkedIn (4:1) strip. The **Actions** group renders as its own visually distinct panel, physically separate from the Scene/Lighting/Color/Canvas/Preferences parameter panel — an export/download action shouldn't sit among tunable sliders. Header/nav side margins align with the canvas and control-panel side margins so edges line up at every breakpoint.
+Layout: all control panel groups render in one area **below** the canvas, not beside it — a side panel doesn't work once the canvas can be an X-Pan (2.71:1) or LinkedIn (4:1) strip. Below the canvas, panels arrange in three columns: **left** — Scene + Canvas parameter controls; **centre** — Color controls (reserved; populated in Phase 5); **right** — Actions (Download SVG, Download settings). No collapsible/accordion folder behavior anywhere in the parameter panel — controls render flat and always visible; use plain non-collapsible section labels for sub-grouping if needed. Header/nav side margins align with the canvas and control-panel side margins so edges line up at every breakpoint. The canvas frame has a max-height cap so a full-width 16:9 (or taller-relative) frame doesn't push the panels below the fold on common desktop viewport heights — the cap is a display constraint only; it does not change the logical viewBox width passed into `generate()`.
 
 **Scene**
 - Landscape type (dropdown)
 - Complexity (slider — noise octave count / point sampling density only. Controls detail resolution — how fine or coarse the terrain silhouette is — not feature count. See Peak count below for that.)
 - Peak count (slider — number of peaks/spurs/ridges, independent of Complexity. Normalized 0–1 like Complexity/Elevation; each archetype maps it to its own sensible integer range. No-op on archetypes where a fixed count is the defining trait (Twin Peaks' 2, Stacked Ridges' band count) or where the concept doesn't apply.)
 - Peak sharpness (slider — blends the terrain profile between smooth/rolling and jagged/ridged. 0 = rounded hills, 1 = sharp ridgelines.)
-- Point of view height (slider, global — see section 6a)
+- Point of view height (slider, global — see section 6a. Active on all archetypes except In Gorge, which is a deferred edge case; disabled/labelled accordingly there.)
 - Seed value (display + randomize + lock). Lock only guards against *incidental* reseeding from other Scene/Canvas control changes (landscape type, complexity, peak count, sharpness, elevation, aspect ratio). Randomize and New View always draw a new seed regardless of lock state — a control whose entire purpose is to change the seed shouldn't be silently disabled by it.
 - Regenerate ("New View")
 
@@ -77,8 +77,8 @@ Layout: all control panel groups render in one area **below** the canvas, not be
 
 **Actions**
 - Download SVG
-- Download settings (JSON)
-- Reset to defaults
+- Download settings (JSON) — brought forward to Phase 3.6, ahead of the rest of Phase 6
+- Reset to defaults (still Phase 6)
 
 **Preferences**
 - UI theme: Light / Dark / System
@@ -91,7 +91,7 @@ Pseudo-3D and lighting are UX-independent of the UI chrome theme (point 1 confir
 Each hill/peak polygon is split into a light-side and dark-side sub-path along an internal ridge boundary — distinct from the silhouette boundary against the sky. Boundary position and shadow-side is derived from the light source angle (tied to time-of-day). This is treated as its own build task, not a simple style toggle.
 
 ## 6a. Point of view / elevation model
-A global `elevation` (0–1) parameter simulates viewer height, interpolating horizon position and how tightly nested features converge toward the viewer — low elevation reads as ground-level (features fan out, horizon low), high elevation reads as looking down into a landscape (horizon rises, features nest tighter, e.g. converging valley spurs). Currently meaningfully implemented in V valley; other archetypes accept the parameter and may adopt it incrementally.
+A global `elevation` (0–1) parameter simulates viewer height, interpolating horizon position and how tightly nested features converge toward the viewer — low elevation reads as ground-level (features fan out, horizon low), high elevation reads as looking down into a landscape (horizon rises, features nest tighter, e.g. converging valley spurs). Meaningfully implemented across all nine archetypes except In Gorge, which is treated as a deferred edge case — its foreground-wall composition doesn't have an obvious viewer-height analog yet and needs separate design thought.
 
 ## 7. Persistence (localStorage)
 Used generally for user preferences, not just theme:
@@ -136,6 +136,7 @@ CC runs from repo root with standing permission to execute bash, git, and stack-
 2. Noise + render pipeline for one archetype (Open valley) end-to-end, confirming SVG output and download
 3. Remaining eight archetypes + landscape type control + Canvas group (aspect ratio, feature-density scaling) — grouped here because per-archetype feature density scaling is naturally built alongside each archetype's geometry
 3.5. Fixes/follow-ups from Phase 3 review: seed lock semantics, elevation fix/verification, Peak count + Peak sharpness sliders, Actions panel separated from parameter panel, layout moved below canvas, nav/canvas margin alignment
+3.6. Elevation extended to all archetypes except In Gorge (deferred edge case); 3-column below-canvas layout replacing the accordion panel; Download settings (JSON) brought forward; canvas max-height cap
 4. Lighting system: time-of-day slider, sky/mist gradients, shadow/pseudo-3D split
 5. Palette system: curated themes + algorithmic generator, color depth/haze controls
 6. Persistence, settings export, help modal, tips toggle

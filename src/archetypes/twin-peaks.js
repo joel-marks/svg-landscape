@@ -7,6 +7,8 @@
 
 import { createNoise } from '../noise.js';
 import {
+  horizonFor,
+  nestingFor,
   octaveCount,
   peakExponent,
   peakField,
@@ -29,20 +31,24 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Both accepted but unused. `elevation` per CONTEXT.md section 6a; Peak count
-  // is a deliberate no-op because exactly two peaks is the defining trait
-  // (CONTEXT.md section 5) — neither a control nor canvas width may add a third.
-  void elevation;
+  // Peak count is a deliberate no-op because exactly two peaks is the defining
+  // trait (CONTEXT.md section 5) — neither a control nor canvas width may add a
+  // third. Elevation moves the pair's spacing and the horizon, never the count.
   void peakCount;
 
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
-  const horizonY = height * 0.48;
+
+  const horizonY = horizonFor(elevation, height, 0.6, 0.32);
+  const nesting = nestingFor(elevation, 1.4, 0.6);
+  // The lower ridges compress more gently, or the foreground vanishes.
+  const groundNesting = nestingFor(elevation, 1.15, 0.75);
   const scale = widthScale(width);
 
   const centre = 0.5 + noise2D(8.8, 1.4) * 0.04;
-  const separation = (0.15 + Math.abs(noise2D(2.6, 7.7)) * 0.05) / scale;
+  const separation =
+    ((0.15 + Math.abs(noise2D(2.6, 7.7)) * 0.05) * nesting) / scale;
 
   // Similar, not identical — a slight height difference reads as natural
   // without breaking the even pairing.
@@ -96,7 +102,7 @@ export function generate({
         width,
         height,
         crest: (t) =>
-          height * spec.base -
+          horizonY + height * (spec.base - 0.48) * groundNesting -
           height *
             spec.amplitude *
             ridgeNoise(noise2D, t, 55 + k * 13.3, {

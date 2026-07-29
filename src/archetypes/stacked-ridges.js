@@ -8,6 +8,8 @@
 
 import { createNoise } from '../noise.js';
 import {
+  horizonFor,
+  lerp,
   octaveCount,
   ridgeLayer,
   ridgeNoise,
@@ -25,16 +27,19 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Both accepted but unused. `elevation` per CONTEXT.md section 6a; Peak count
-  // is a deliberate no-op here because the 6–8 band count is the archetype's
-  // defining trait (CONTEXT.md section 5), the same exemption Twin peaks has.
-  void elevation;
+  // Peak count is a deliberate no-op here: the 6–8 band count is the
+  // archetype's defining trait (CONTEXT.md section 5), the same exemption Twin
+  // peaks has. Elevation moves the bands' position and spacing, never how many.
   void peakCount;
 
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
-  const horizonY = height * 0.22;
+  const horizonY = horizonFor(elevation, height, 0.36, 0.1);
+
+  // Spacing bias. Above 1 bunches the bands toward the horizon, which is how a
+  // receding range compresses when seen from height; below 1 spreads them.
+  const spacingBias = lerp(0.85, 1.7, Math.min(1, Math.max(0, elevation)));
 
   // The seed picks within the defining 6–8 band, so scenes still vary without
   // handing the count to a control.
@@ -45,8 +50,9 @@ export function generate({
   for (let k = 0; k < ridgeCount; k += 1) {
     const p = k / (ridgeCount - 1);
 
-    // Even spacing is what creates the rhythm — no easing on the baseline.
-    const base = horizonY + p * (height * 1.02 - horizonY);
+    // Spacing stays regular at ground level; elevation biases it so the bands
+    // bunch toward the horizon rather than marching evenly down the frame.
+    const base = horizonY + Math.pow(p, spacingBias) * (height * 1.05 - horizonY);
     // Each ridge slightly larger than the one behind it.
     const amplitude = height * (0.055 + p * 0.045);
 

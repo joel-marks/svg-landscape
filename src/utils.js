@@ -51,6 +51,21 @@ export function octaveCount(complexity) {
   return 2 + Math.round(complexity * 5);
 }
 
+// Horizon position for a given viewer height. Higher elevation lifts the
+// horizon toward the top of frame, so `highFrac` is the smaller y
+// (CONTEXT.md section 6a). Fractions are of canvas height.
+export function horizonFor(elevation, height, lowFrac, highFrac) {
+  return height * lerp(lowFrac, highFrac, clamp01(elevation));
+}
+
+// How tightly an archetype's features nest as the viewer climbs. Returns a
+// multiplier applied to whatever spacing the archetype uses — spur reach, layer
+// separation, peak spread — so ground level fans features out and height pulls
+// them together. Above 1 spreads, below 1 tightens.
+export function nestingFor(elevation, loose = 1.35, tight = 0.6) {
+  return lerp(loose, tight, clamp01(elevation));
+}
+
 // Map the normalized Peak count control onto an archetype's own integer range,
 // then apply canvas-width scaling so wider canvases still gain features.
 export function featureCount(peakCount, min, max, width) {

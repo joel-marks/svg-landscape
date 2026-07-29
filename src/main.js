@@ -5,13 +5,13 @@
 
 import './style.css';
 
-import { createIcons, Download, Monitor, Moon, Sun } from 'lucide';
+import { createIcons, Download, FileJson, Monitor, Moon, Sun } from 'lucide';
 
-import { regenerate, setRenderer, state } from './state.js';
+import { exportSettings, regenerate, setRenderer, state } from './state.js';
 import { getArchetype } from './archetypes/index.js';
 import { render } from './render.js';
 import { initControls } from './controls.js';
-import { downloadSVG } from './download.js';
+import { downloadSettings, downloadSVG } from './download.js';
 import { cycleThemeMode, getThemeMode, initTheme, onThemeChange } from './theme.js';
 
 const svg = document.querySelector('#landscape');
@@ -52,18 +52,28 @@ themeToggle.addEventListener('click', () => {
 
 onThemeChange(syncThemeButton);
 
-document.querySelector('#download-svg').addEventListener('click', () => {
+function exportName() {
   const { label } = getArchetype(state.archetype);
-  const slug = label.toLowerCase().replace(/\s+/g, '-');
-  downloadSVG(svg, `landscape-${slug}-${state.seed}.svg`);
+  return `landscape-${label.toLowerCase().replace(/\s+/g, '-')}-${state.seed}`;
+}
+
+document.querySelector('#download-svg').addEventListener('click', () => {
+  downloadSVG(svg, `${exportName()}.svg`);
+});
+
+document.querySelector('#download-settings').addEventListener('click', () => {
+  downloadSettings(exportSettings(), `${exportName()}.json`);
 });
 
 createIcons({
-  icons: { Download, Monitor, Moon, Sun },
+  icons: { Download, FileJson, Monitor, Moon, Sun },
   attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
 });
 
-initControls({ container: document.querySelector('#panel') });
+initControls({
+  sceneContainer: document.querySelector('#panel-scene'),
+  canvasContainer: document.querySelector('#panel-canvas'),
+});
 
 initTheme();
 syncThemeButton();

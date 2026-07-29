@@ -11,12 +11,12 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 3.5. All nine landscape archetypes generate and are
-> selectable from a Tweakpane control panel, with complexity, peak count, peak
+> **Status:** Phase 3.6. All nine landscape archetypes generate and are
+> selectable from a flat control panel, with complexity, peak count, peak
 > sharpness, viewpoint height, seed lock/randomize, and aspect-ratio controls.
-> Lighting and the pseudo-3D shadow split (Phase 4), the curated palette list
-> and colour controls (Phase 5), and persistence, settings export and help
-> (Phase 6) are still to come.
+> Both the SVG and its settings JSON export. Lighting and the pseudo-3D shadow
+> split (Phase 4), the curated palette list and colour controls (Phase 5), and
+> persistence, reset and help (Phase 6) are still to come.
 
 ## Landscape types
 
@@ -36,14 +36,18 @@ Nine archetypes, each its own generator module under `src/archetypes/`:
 
 ## Controls
 
-The canvas sits at the top of the page and every control panel renders below
-it, full width — a side panel is unworkable once the canvas can be an X-Pan or
-LinkedIn strip.
+The canvas sits at the top of the page and the control panels render below it
+in three columns — a side panel is unworkable once the canvas can be an X-Pan
+or LinkedIn strip. Controls are flat and always visible; there is no
+collapsible accordion anywhere. The canvas frame carries a display-only
+max-height cap so a full-width frame doesn't push the panels off a typical
+desktop viewport; the logical viewBox is unaffected.
 
-**Scene** — landscape type, complexity, peak count, peak sharpness,
-point-of-view height, seed (display / randomize / lock), New View.
-**Canvas** — aspect ratio: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1.
-**Actions** — its own panel, separate from the sliders: Download SVG.
+**Left — Scene + Canvas.** Landscape type, complexity, peak count, peak
+sharpness, point-of-view height, seed (display / randomize / lock), New View;
+then aspect ratio: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1.
+**Centre — Color.** Reserved; populated in Phase 5.
+**Right — Actions.** Download SVG, Download settings.
 
 | Slider | What it does |
 | --- | --- |
@@ -60,10 +64,21 @@ Canvas height is fixed at 900 and the aspect ratio sets the width. Feature
 density scales with width so wider canvases get proportionally more ridges and
 spurs — and never fewer than the 16:9 baseline.
 
-Point-of-view height only affects **V valley** so far: raising it lifts the
-horizon from low in frame to near the top while the spurs multiply and nest
-tighter. On the other eight the slider is greyed out and relabelled, so its
-inertness reads as intentional rather than broken.
+Point-of-view height raises the horizon and tightens how features nest, each
+archetype interpreting that through its own geometry — spurs converging, ridge
+bands compressing, flanking peaks gathering toward the summit. It is active on
+eight of the nine. **In gorge** is a deferred edge case: a composition built
+from foreground walls filling the frame edges has no obvious viewer-height
+analog, so there the slider is greyed out and relabelled rather than left
+silently inert.
+
+## Settings export
+
+**Download settings** writes the current scene's control values — archetype,
+seed, complexity, peak count, sharpness, elevation and aspect — to JSON. Export
+only; there is no import. Reloading the same seed and settings reproduces a
+near-identical scene, though not always pixel-identical, since some draws
+remain unseeded.
 
 The seed lock guards against *incidental* reseeding only. While it is on,
 changing landscape type, complexity, peak count, sharpness, elevation or aspect

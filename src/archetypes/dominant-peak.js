@@ -8,6 +8,8 @@
 import { createNoise } from '../noise.js';
 import {
   featureCount,
+  horizonFor,
+  nestingFor,
   octaveCount,
   peakExponent,
   peakField,
@@ -28,13 +30,16 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a.
-  void elevation;
-
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
-  const horizonY = height * 0.46;
+
+  // Height lifts the horizon and gathers the flanking peaks in around the
+  // summit; ground level lets them spread out along the ridge.
+  const horizonY = horizonFor(elevation, height, 0.58, 0.3);
+  const nesting = nestingFor(elevation, 1.35, 0.55);
+  // The lower ridges compress more gently, or the foreground vanishes.
+  const groundNesting = nestingFor(elevation, 1.15, 0.75);
   const scale = widthScale(width);
 
   const summitT = 0.5 + noise2D(1.7, 6.2) * 0.06;
@@ -55,7 +60,7 @@ export function generate({
     const side = n % 2 === 0 ? -1 : 1;
     const rank = Math.floor(n / 2) + 1;
     peaks.push({
-      t: summitT + (side * (0.17 + rank * 0.13)) / scale,
+      t: summitT + (side * (0.17 + rank * 0.13) * nesting) / scale,
       height: 0.42 + 0.12 * Math.abs(noise2D(n * 5.5, 3.3)),
       width: (0.14 - Math.min(rank, 4) * 0.02) / scale,
       sharpness: peakExponent(sharpness, 0.15),
@@ -103,7 +108,7 @@ export function generate({
         width,
         height,
         crest: (t) =>
-          height * spec.base -
+          horizonY + height * (spec.base - 0.46) * groundNesting -
           height *
             spec.amplitude *
             ridgeNoise(noise2D, t, 50 + k * 11.7, {

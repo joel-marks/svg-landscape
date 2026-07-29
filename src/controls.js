@@ -1,40 +1,43 @@
-// controls.js — Tweakpane panel, grouped folders.
-// Folder structure is fixed by CONTEXT.md section 5: Scene, Lighting, Color,
-// Canvas, Actions, Preferences. All new controls belong in one of these groups.
+// controls.js — Tweakpane parameter controls, grouped per CONTEXT.md section 5.
 //
-// Actions is deliberately not here — an export action shouldn't sit among
-// tunable sliders (section 5), so main.js renders it as its own panel.
-// Lighting (Phase 4), Color (Phase 5) and Preferences (Phase 6) arrive with
-// the features behind them; empty folders would read as broken.
+// No folders anywhere: Tweakpane's Folder is an accordion, and section 5 calls
+// for flat, always-visible controls. Grouping instead comes from two title-less
+// Pane instances mounted under plain HTML headings — a Pane given a `title`
+// grows a collapsible root, so the panes deliberately have none.
+//
+// Actions lives outside this module entirely (an export action shouldn't sit
+// among tunable sliders), as does Color, which is reserved for Phase 5.
 
 import { Pane } from 'tweakpane';
 
 import { archetypeOptions } from './archetypes/index.js';
 import { ASPECTS, regenerate, setAspect, state } from './state.js';
 
-// Elevation is only implemented in V valley so far (CONTEXT.md section 6a).
-// Everywhere else the control is inert, and the UI has to say so rather than
-// leaving the user to wonder whether it is broken.
-const ELEVATION_ARCHETYPES = new Set(['v-valley']);
+// Elevation is implemented everywhere except In gorge, which is a deferred edge
+// case rather than an oversight (CONTEXT.md section 6a). The control has to say
+// so, or an inert slider reads as broken.
+const ELEVATION_DEFERRED = new Set(['in-gorge']);
 const POV_LABEL = 'Point of view height';
-const POV_LABEL_INERT = 'POV height (V valley only)';
+const POV_LABEL_DEFERRED = 'POV height (n/a for In gorge)';
 
-export function initControls({ container }) {
-  const pane = new Pane({ container, title: 'Controls' });
+export function initControls({ sceneContainer, canvasContainer }) {
+  const scene = new Pane({ container: sceneContainer });
+  const canvas = new Pane({ container: canvasContainer });
+  const panes = [scene, canvas];
+
+  const refresh = () => panes.forEach((pane) => pane.refresh());
 
   // Changing a parameter reseeds only incidentally, so the lock suppresses it.
   const onParamChange = () => {
     regenerate({ reseed: 'incidental' });
-    pane.refresh();
+    refresh();
   };
 
   // Randomize and New View exist to change the seed, so the lock never applies.
   const onNewSeed = () => {
     regenerate({ reseed: 'explicit' });
-    pane.refresh();
+    refresh();
   };
-
-  const scene = pane.addFolder({ title: 'Scene' });
 
   const archetypeBinding = scene.addBinding(state, 'archetype', {
     label: 'Landscape type',
@@ -45,32 +48,15 @@ export function initControls({ container }) {
     onParamChange();
   });
 
-  scene
-    .addBinding(state, 'complexity', {
-      label: 'Complexity',
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
-    .on('change', onParamChange);
-
-  scene
-    .addBinding(state, 'peakCount', {
-      label: 'Peak count',
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
-    .on('change', onParamChange);
-
-  scene
-    .addBinding(state, 'sharpness', {
-      label: 'Peak sharpness',
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
-    .on('change', onParamChange);
+  for (const [key, label] of [
+    ['complexity', 'Complexity'],
+    ['peakCount', 'Peak count'],
+    ['sharpness', 'Peak sharpness'],
+  ]) {
+    scene
+      .addBinding(state, key, { label, min: 0, max: 1, step: 0.01 })
+      .on('change', onParamChange);
+  }
 
   const elevationBinding = scene.addBinding(state, 'elevation', {
     label: POV_LABEL,
@@ -91,8 +77,6 @@ export function initControls({ container }) {
   scene.addButton({ title: 'Randomize seed' }).on('click', onNewSeed);
   scene.addButton({ title: 'New View' }).on('click', onNewSeed);
 
-  const canvas = pane.addFolder({ title: 'Canvas' });
-
   canvas
     .addBinding(state, 'aspect', {
       label: 'Aspect ratio',
@@ -104,12 +88,12 @@ export function initControls({ container }) {
     });
 
   function syncElevationAffordance() {
-    const active = ELEVATION_ARCHETYPES.has(state.archetype);
-    elevationBinding.disabled = !active;
-    elevationBinding.label = active ? POV_LABEL : POV_LABEL_INERT;
+    const deferred = ELEVATION_DEFERRED.has(state.archetype);
+    elevationBinding.disabled = deferred;
+    elevationBinding.label = deferred ? POV_LABEL_DEFERRED : POV_LABEL;
   }
 
   syncElevationAffordance();
 
-  return pane;
+  return { panes, refresh };
 }

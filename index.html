@@ -68,12 +68,47 @@
         </figcaption>
       </figure>
 
-      <!-- Controls sit below the canvas: a side panel is unworkable once the
-           canvas can be an X-Pan or LinkedIn strip (CONTEXT.md section 5). -->
-      <div
-        class="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]"
-      >
-        <div id="panel" aria-label="Scene and canvas controls"></div>
+      <!-- Controls sit below the canvas in three columns: parameters, Color
+           (reserved for Phase 5), Actions (CONTEXT.md section 5). A side panel
+           is unworkable once the canvas can be an X-Pan or LinkedIn strip. -->
+      <div class="mt-6 grid items-start gap-4 lg:grid-cols-3">
+        <section
+          id="controls-panel"
+          aria-labelledby="scene-heading"
+          class="rounded-md border border-border-token bg-surface-raised p-4 shadow-sm"
+        >
+          <h2
+            id="scene-heading"
+            class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted"
+          >
+            Scene
+          </h2>
+          <div id="panel-scene"></div>
+
+          <h3
+            class="mb-3 mt-4 text-xs font-semibold uppercase tracking-wider text-muted"
+          >
+            Canvas
+          </h3>
+          <div id="panel-canvas"></div>
+        </section>
+
+        <section
+          id="color-panel"
+          aria-labelledby="color-heading"
+          class="rounded-md border border-dashed border-border-token bg-surface-raised p-4"
+        >
+          <h2
+            id="color-heading"
+            class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted"
+          >
+            Color
+          </h2>
+          <p class="text-sm text-muted">
+            Theme presets, palette randomizer, colour depth and distance haze
+            arrive in a later phase.
+          </p>
+        </section>
 
         <section
           id="actions"
@@ -95,6 +130,15 @@
             >
               <i data-lucide="download"></i>
               Download SVG
+            </button>
+
+            <button
+              id="download-settings"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-md border border-border-token bg-surface px-3.5 py-2 text-sm font-medium transition-colors hover:bg-surface-sunken"
+            >
+              <i data-lucide="file-json"></i>
+              Download settings
             </button>
           </div>
         </section>

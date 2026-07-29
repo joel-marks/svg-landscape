@@ -85,7 +85,21 @@
 
   /* Tweakpane keeps its native styling (CONTEXT.md section 2); it only needs
      to fill the column it is given rather than its default fixed width. */
-  #panel .tp-rotv {
+  #controls-panel .tp-rotv {
     width: 100%;
+  }
+
+  /* Display cap only — the logical viewBox passed to generate() is untouched
+     (CONTEXT.md section 5). Without it a full-width 16:9 frame runs ~700px tall
+     and pushes the control columns off a 900px-high desktop viewport. The SVG
+     uses preserveAspectRatio="meet", so a capped frame pillarboxes rather than
+     cropping: the preview keeps matching the file you download. */
+  #canvas-frame {
+    /* The explicit width matters: with only `aspect-ratio` and `max-height`,
+       the ratio resolves the other way and shrinks the frame's *width* to match
+       the capped height, pulling its right edge off the shell gutter. A
+       definite width makes the ratio derive height, which max-height clamps. */
+    width: 100%;
+    max-height: min(58vh, 620px);
   }
 }

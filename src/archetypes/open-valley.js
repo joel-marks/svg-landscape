@@ -9,6 +9,8 @@ import { createNoise, fbm } from '../noise.js';
 import {
   clamp01,
   featureCount,
+  horizonFor,
+  nestingFor,
   octaveCount,
   ridgeLayer,
   ridgeNoise,
@@ -26,11 +28,13 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a. V valley implements it.
-  void elevation;
-
   const noise2D = createNoise(seed);
-  const horizonY = height * 0.52;
+
+  // Ground level sits the horizon low and lets the layers spread apart; height
+  // lifts it and pulls the layers into a tighter stack (CONTEXT.md section 6a).
+  const horizonY = horizonFor(elevation, height, 0.68, 0.3);
+  const nesting = nestingFor(elevation, 1.25, 0.62);
+
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
 
@@ -44,9 +48,9 @@ export function generate({
   for (let i = 0; i < layerCount; i += 1) {
     const depth = i / (layerCount - 1);
 
-    const edgeY = horizonY - Math.pow(depth, 1.15) * height * 0.34;
+    const edgeY = horizonY - Math.pow(depth, 1.15) * height * 0.34 * nesting;
     const centreY =
-      horizonY + Math.pow(depth, 1.3) * (height - horizonY) * 1.15;
+      horizonY + Math.pow(depth, 1.3) * (height - horizonY) * 1.15 * nesting;
 
     // Noise has to stay legible against the structural sweep, or the steep
     // flanks of the near walls flatten into straight diagonal wedges.

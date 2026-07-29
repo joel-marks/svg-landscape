@@ -12,7 +12,10 @@ export function render(svg, geometry, palette) {
   const { width, height, horizonY, layers, mistAfter = 1 } = geometry;
 
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  // `meet`, not `slice`: once the frame is height-capped its box is wider than
+  // the scene, and cropping would show the user something other than the file
+  // they are about to download.
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   svg.replaceChildren();
 
   const defs = el('defs');

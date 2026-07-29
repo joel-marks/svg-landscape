@@ -29,7 +29,11 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a.
+  // The one archetype where elevation is still a no-op, by decision rather than
+  // omission (CONTEXT.md section 6a): a composition built from foreground walls
+  // filling the frame edges has no obvious viewer-height analog, and forcing one
+  // would mean redesigning the archetype. Deferred, and the UI disables the
+  // control here so the inertness reads as intentional.
   void elevation;
 
   const noise2D = createNoise(seed);

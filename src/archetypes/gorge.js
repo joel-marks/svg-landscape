@@ -7,7 +7,10 @@
 
 import { createNoise } from '../noise.js';
 import {
+  clamp01,
   featureCount,
+  horizonFor,
+  nestingFor,
   octaveCount,
   ridgeLayer,
   ridgeNoise,
@@ -26,18 +29,19 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a.
-  void elevation;
-
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
 
-  const convergeY = height * 0.46;
+  // Shares v-valley's elevation model: the head of the gorge rises and the
+  // walls close in, reading as looking down into the canyon from higher up.
+  const convergeY = horizonFor(elevation, height, 0.64, 0.26);
   const horizonY = convergeY - height * 0.03;
+  const nesting = nestingFor(elevation, 1.45, 0.55);
   const axis = 0.5 + noise2D(11.7, 2.9) * 0.05;
 
-  const spurCount = featureCount(peakCount, 4, 12, width);
+  const spurCount =
+    featureCount(peakCount, 4, 12, width) + Math.round(clamp01(elevation) * 4);
 
   const layers = [];
 
@@ -67,7 +71,7 @@ export function generate({
 
     const tipY = convergeY + Math.pow(d, 1.3) * (height - convergeY);
     // Tighter reach than v-valley — the walls close in on the axis.
-    const reach = 0.015 + 0.05 * d;
+    const reach = (0.015 + 0.05 * d) * nesting;
     const tipT = side === 'left' ? axis + reach : axis - reach;
     // Rise climbs steeply with proximity while the tips fall away, so the
     // plateau tops stay bunched in a narrow band and stack into visible
@@ -92,11 +96,14 @@ export function generate({
             tipT,
             tipY,
             outerY,
-            plunge: height * 0.5,
+            plunge: height * 0.4,
             // High ease holds a near-flat plateau most of the way in, then
             // breaks almost vertically at the tip — the defining gorge profile.
-            ease: 4.5,
-            fall: 0.28,
+            // The break belongs on the approach, not on the far side: a sub-1
+            // fall bulges the spur's back into a convex dome that swallows the
+            // whole quadrant and hides every terrace behind it.
+            ease: 13,
+            fall: 1,
           });
           const h = ridgeNoise(noise2D, t, row, {
             octaves,

@@ -31,8 +31,17 @@ export function downloadSVG(svg, filename = 'landscape.svg') {
   );
 }
 
-export function downloadSettings() {
-  // Phase 6 — serialize all control values plus the numeric seed to JSON.
+// Export-only, per CONTEXT.md section 8 — there is no import counterpart.
+// The numeric seed is included so a scene can be reproduced; the help copy
+// carries the caveat that identical settings give a near-identical, not
+// always pixel-identical, result.
+export function downloadSettings(settings, filename = 'landscape-settings.json') {
+  triggerDownload(
+    new Blob([`${JSON.stringify(settings, null, 2)}\n`], {
+      type: 'application/json;charset=utf-8',
+    }),
+    filename,
+  );
 }
 
 function triggerDownload(blob, filename) {

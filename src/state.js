@@ -88,6 +88,21 @@ export function regenerate({ reseed = 'none' } = {}) {
   return geometry;
 }
 
+// The control values worth exporting (CONTEXT.md section 8). Derived fields
+// such as width are omitted — they follow from `aspect`.
+export function exportSettings() {
+  return {
+    app: 'svg-landscape',
+    archetype: state.archetype,
+    seed: state.seed,
+    complexity: state.complexity,
+    peakCount: state.peakCount,
+    sharpness: state.sharpness,
+    elevation: state.elevation,
+    aspect: state.aspect,
+  };
+}
+
 export function loadState() {
   // Phase 6 — restore last-used control values from localStorage.
 }

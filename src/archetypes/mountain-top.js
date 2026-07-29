@@ -7,6 +7,8 @@
 import { createNoise } from '../noise.js';
 import {
   featureCount,
+  horizonFor,
+  nestingFor,
   octaveCount,
   peakExponent,
   peakField,
@@ -27,13 +29,14 @@ export function generate({
   width = 1600,
   height = 900,
 } = {}) {
-  // Accepted but unused — see CONTEXT.md section 6a.
-  void elevation;
-
   const noise2D = createNoise(seed);
   const octaves = octaveCount(complexity);
   const samples = sampleCount(complexity, width);
-  const horizonY = height * 0.32;
+
+  // Climbing pushes the horizon higher still and compresses the ridgelines
+  // below it, exaggerating the "near the summit looking down" read.
+  const horizonY = horizonFor(elevation, height, 0.44, 0.16);
+  const nesting = nestingFor(elevation, 1.2, 0.58);
   const scale = widthScale(width);
 
   const layers = [];
@@ -46,7 +49,7 @@ export function generate({
 
   for (let k = 0; k < ridgeCount; k += 1) {
     const p = k / (ridgeCount - 1);
-    const base = horizonY + Math.pow(p, 1.55) * (height * 0.52);
+    const base = horizonY + Math.pow(p, 1.55) * (height * 0.52) * nesting;
     // Big relief on the summit-line bands so the peak clusters actually read as
     // peaks; a small amplitude turns them into the wavy bands that make this
     // archetype indistinguishable from stacked-ridges.
