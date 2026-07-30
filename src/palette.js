@@ -57,6 +57,15 @@ export function createPalette(themeId, options = {}) {
   };
 }
 
+// The dark-side fill for the pseudo-3D split (CONTEXT.md section 6). Mixing
+// toward a cold near-black rather than pure black keeps shaded slopes reading
+// as terrain in shadow instead of as holes punched in the scene.
+const SHADOW_BASE = '#070a10';
+
+export function shade(color, amount) {
+  return chroma.mix(color, SHADOW_BASE, clamp01(amount) * 0.62, 'lab').hex();
+}
+
 export function generatePalette() {
   // Phase 5 — algorithmic complementary / analogous / split-hue strategies.
 }

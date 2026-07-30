@@ -133,11 +133,17 @@ export function closeToSide(points, side, width, height) {
 }
 
 // Standard terrain layer: crest sampled across the width, closed to the bottom.
+// The unclosed crest is kept alongside the filled polygon so render.js can
+// build the pseudo-3D shadow boundary from it without having to guess which
+// points belong to the silhouette (CONTEXT.md section 6).
 export function ridgeLayer({ index, depth, samples, width, height, crest }) {
+  const line = crestPoints(samples, width, crest);
   return {
     index,
     depth,
-    points: closeToBottom(crestPoints(samples, width, crest), width, height),
+    kind: 'crest',
+    line,
+    points: closeToBottom(line, width, height),
   };
 }
 

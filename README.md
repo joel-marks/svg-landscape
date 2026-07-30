@@ -11,12 +11,12 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 3.6. All nine landscape archetypes generate and are
-> selectable from a flat control panel, with complexity, peak count, peak
-> sharpness, viewpoint height, seed lock/randomize, and aspect-ratio controls.
-> Both the SVG and its settings JSON export. Lighting and the pseudo-3D shadow
-> split (Phase 4), the curated palette list and colour controls (Phase 5), and
-> persistence, reset and help (Phase 6) are still to come.
+> **Status:** Phase 4. All nine landscape archetypes generate and are selectable
+> from a flat control panel, with complexity, peak count, peak sharpness,
+> viewpoint height, seed lock/randomize, aspect ratio, and a continuous
+> time-of-day lighting system with an optional pseudo-3D shadow split. Both the
+> SVG and its settings JSON export. The curated palette list and colour controls
+> (Phase 5) and persistence, reset and help (Phase 6) are still to come.
 
 ## Landscape types
 
@@ -43,9 +43,10 @@ collapsible accordion anywhere. The canvas frame carries a display-only
 max-height cap so a full-width frame doesn't push the panels off a typical
 desktop viewport; the logical viewBox is unaffected.
 
-**Left — Scene + Canvas.** Landscape type, complexity, peak count, peak
+**Left — Scene, Canvas, Lighting.** Landscape type, complexity, peak count, peak
 sharpness, point-of-view height, seed (display / randomize / lock), New View;
-then aspect ratio: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1.
+aspect ratio: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1; then time of
+day, the shadow toggle, light source angle and shadow intensity.
 **Centre — Color.** Reserved; populated in Phase 5.
 **Right — Actions.** Download SVG, Download settings.
 
@@ -71,6 +72,29 @@ eight of the nine. **In gorge** is a deferred edge case: a composition built
 from foreground walls filling the frame edges has no obvious viewer-height
 analog, so there the slider is greyed out and relabelled rather than left
 silently inert.
+
+## Lighting
+
+**Time of day** is a continuous 0–24 slider, not a set of day/dawn/night
+presets. It drives the sky gradient and mist tint from hand-tuned hourly
+keyframes — dawn and dusk are not colour mirrors of each other, so a physical
+model gets them wrong — while the sun and moon arcs and the star-field opacity
+come from a solar-altitude term, which genuinely is symmetric. Around sunrise
+and sunset both bodies are drawn at partial opacity, so the handover is a
+crossfade rather than a swap.
+
+**Shadow / pseudo-3D** is off by default and adds a light/dark split to every
+layer. Each layer is divided along an internal boundary — distinct from its
+silhouette against the sky — with the band below the crest darkened wherever
+that facet faces away from the light. **Light source angle** sets the direction
+in screen-space degrees (0 from the right, 90 overhead, 180 from the left) and
+is independently controlled: time of day only seeds its starting value at
+startup and never overrides it afterwards. **Shadow intensity** sets how far the
+dark side is pushed toward black; at 0 it matches the base fill and the split
+disappears. Both sliders are greyed out while the toggle is off.
+
+A light placed exactly overhead lights every crest facet, so the split
+legitimately vanishes at 90°; from directly below at 270° every facet shades.
 
 ## Settings export
 

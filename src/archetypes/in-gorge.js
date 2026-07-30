@@ -113,9 +113,14 @@ export function generate({
         return side === 'left' ? offset : width - offset;
       });
 
+      // The only non-crest layers in the project: a vertical silhouette, so the
+      // shadow boundary has to be offset horizontally rather than downward.
       layers.push({
         index: layers.length,
         depth: 0.45 + 0.55 * q,
+        kind: 'wall',
+        side,
+        line: points,
         points: closeToSide(points, side, width, height),
       });
     }

@@ -21,8 +21,8 @@ const themeLabel = document.querySelector('#theme-label');
 
 const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 
-setRenderer((geometry, palette, archetype) => {
-  render(svg, geometry, palette);
+setRenderer((geometry, paint, archetype) => {
+  render(svg, geometry, paint);
 
   // Keep the frame's box matching the generated canvas so wider aspects get a
   // shorter frame rather than a letterboxed one.
@@ -73,6 +73,7 @@ createIcons({
 initControls({
   sceneContainer: document.querySelector('#panel-scene'),
   canvasContainer: document.querySelector('#panel-canvas'),
+  lightingContainer: document.querySelector('#panel-lighting'),
 });
 
 initTheme();

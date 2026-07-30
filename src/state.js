@@ -8,6 +8,7 @@
 // persistence is Phase 6. (theme.js persists the UI theme on its own.)
 
 import { getArchetype } from './archetypes/index.js';
+import { computeLighting, suggestedAngle } from './lighting.js';
 import { createPalette } from './palette.js';
 
 // Height is fixed; the aspect ratio drives width (CONTEXT.md section 5).
@@ -42,9 +43,19 @@ export const state = {
   width: aspectWidth('16:9'),
   height: CANVAS_HEIGHT,
   palette: 'alpine-dusk',
+
+  // Lighting (CONTEXT.md section 5). The default hour is the dusk the palette
+  // was built around, so this phase doesn't change the scene you already had.
+  hour: 18.5,
+  shadow: false,
+  // Seeded from the default hour once, then independently user-controlled —
+  // it is not a live binding to time of day (CONTEXT.md section 6).
+  lightAngle: suggestedAngle(18.5),
+  shadowIntensity: 0.5,
 };
 
 let renderer = null;
+let lastGeometry = null;
 
 // main.js registers the paint step, keeping state.js free of DOM concerns.
 export function setRenderer(fn) {
@@ -74,7 +85,7 @@ export function regenerate({ reseed = 'none' } = {}) {
   }
 
   const archetype = getArchetype(state.archetype);
-  const geometry = archetype.module.generate({
+  lastGeometry = archetype.module.generate({
     seed: state.seed,
     elevation: state.elevation,
     complexity: state.complexity,
@@ -84,8 +95,41 @@ export function regenerate({ reseed = 'none' } = {}) {
     height: state.height,
   });
 
-  renderer?.(geometry, createPalette(state.palette), archetype);
-  return geometry;
+  paint(archetype);
+  return lastGeometry;
+}
+
+// Lighting changes never touch geometry, and are not in the list of controls
+// the seed lock guards against (CONTEXT.md section 5) — so they repaint the
+// existing scene rather than regenerating it.
+export function repaint() {
+  if (!lastGeometry) return regenerate();
+  paint(getArchetype(state.archetype));
+  return lastGeometry;
+}
+
+function paint(archetype) {
+  const lighting = computeLighting({
+    hour: state.hour,
+    seed: state.seed,
+    width: lastGeometry.width,
+    height: lastGeometry.height,
+    horizonY: lastGeometry.horizonY,
+  });
+
+  renderer?.(
+    lastGeometry,
+    {
+      palette: createPalette(state.palette),
+      lighting,
+      shadow: {
+        enabled: state.shadow,
+        angle: state.lightAngle,
+        intensity: state.shadowIntensity,
+      },
+    },
+    archetype,
+  );
 }
 
 // The control values worth exporting (CONTEXT.md section 8). Derived fields

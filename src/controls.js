@@ -11,7 +11,7 @@
 import { Pane } from 'tweakpane';
 
 import { archetypeOptions } from './archetypes/index.js';
-import { ASPECTS, regenerate, setAspect, state } from './state.js';
+import { ASPECTS, regenerate, repaint, setAspect, state } from './state.js';
 
 // Elevation is implemented everywhere except In gorge, which is a deferred edge
 // case rather than an oversight (CONTEXT.md section 6a). The control has to say
@@ -20,10 +20,11 @@ const ELEVATION_DEFERRED = new Set(['in-gorge']);
 const POV_LABEL = 'Point of view height';
 const POV_LABEL_DEFERRED = 'POV height (n/a for In gorge)';
 
-export function initControls({ sceneContainer, canvasContainer }) {
+export function initControls({ sceneContainer, canvasContainer, lightingContainer }) {
   const scene = new Pane({ container: sceneContainer });
   const canvas = new Pane({ container: canvasContainer });
-  const panes = [scene, canvas];
+  const lighting = new Pane({ container: lightingContainer });
+  const panes = [scene, canvas, lighting];
 
   const refresh = () => panes.forEach((pane) => pane.refresh());
 
@@ -87,6 +88,50 @@ export function initControls({ sceneContainer, canvasContainer }) {
       onParamChange();
     });
 
+  // Lighting only ever repaints — geometry is untouched, and the seed lock does
+  // not cover this group (CONTEXT.md section 5).
+  const onLightingChange = () => repaint();
+
+  lighting
+    .addBinding(state, 'hour', {
+      label: 'Time of day',
+      min: 0,
+      max: 24,
+      step: 0.1,
+      format: (v) => `${String(Math.floor(v)).padStart(2, '0')}:${String(Math.round((v % 1) * 60)).padStart(2, '0')}`,
+    })
+    .on('change', onLightingChange);
+
+  const shadowBinding = lighting.addBinding(state, 'shadow', {
+    label: 'Shadow / pseudo-3D',
+  });
+
+  const angleBinding = lighting.addBinding(state, 'lightAngle', {
+    label: 'Light source angle',
+    min: 0,
+    max: 360,
+    step: 1,
+  });
+  angleBinding.on('change', onLightingChange);
+
+  const intensityBinding = lighting.addBinding(state, 'shadowIntensity', {
+    label: 'Shadow intensity',
+    min: 0,
+    max: 1,
+    step: 0.01,
+  });
+  intensityBinding.on('change', onLightingChange);
+
+  shadowBinding.on('change', () => {
+    syncShadowAffordance();
+    onLightingChange();
+  });
+
+  function syncShadowAffordance() {
+    angleBinding.disabled = !state.shadow;
+    intensityBinding.disabled = !state.shadow;
+  }
+
   function syncElevationAffordance() {
     const deferred = ELEVATION_DEFERRED.has(state.archetype);
     elevationBinding.disabled = deferred;
@@ -94,6 +139,7 @@ export function initControls({ sceneContainer, canvasContainer }) {
   }
 
   syncElevationAffordance();
+  syncShadowAffordance();
 
   return { panes, refresh };
 }
