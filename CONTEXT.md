@@ -157,5 +157,7 @@ CC runs from repo root with standing permission to execute bash, git, and stack-
 
 ## 18. Known issues (open)
 - Point of view height has a reported bug/unexpected behavior (nature not yet diagnosed). Deliberately deferred — not being worked in Phase 4.6.
-- Canvas fit/sizing bug (bars appearing on aspects that shouldn't have any) — being addressed in Phase 4.6, remove this line once confirmed fixed.
-- Tweakpane panel doesn't follow UI light/dark theme — being addressed in Phase 4.6, remove this line once confirmed fixed.
+
+### Closed
+- ~~Canvas fit/sizing bug (bars appearing on aspects that shouldn't have any)~~ — fixed in Phase 4.6. Cause was the max-height cap, not the `width`/`aspect-ratio` interaction fixed in Phase 3.6: `min(58vh, 620px)` resolved to 522px on a 900px-tall viewport while 16:9 needs 702px at the 1248px content box, so the cap bound on the default aspect at every common desktop width. Cap is now a fixed 740px — a viewport-relative value reintroduces the bug on shorter screens.
+- ~~Tweakpane panel doesn't follow UI light/dark theme~~ — fixed in Phase 4.6 via `--tp-*` custom properties keyed off the same `dark` class on `<html>` that theme.js toggles.
