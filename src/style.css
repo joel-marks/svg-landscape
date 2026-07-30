@@ -85,7 +85,7 @@
 
   /* Tweakpane keeps its native styling (CONTEXT.md section 2); it only needs
      to fill the column it is given rather than its default fixed width. */
-  #controls-panel .tp-rotv {
+  #control-columns .tp-rotv {
     width: 100%;
   }
 

@@ -38,16 +38,18 @@ Nine archetypes, each its own generator module under `src/archetypes/`:
 
 The canvas sits at the top of the page and the control panels render below it
 in three columns — a side panel is unworkable once the canvas can be an X-Pan
-or LinkedIn strip. Controls are flat and always visible; there is no
-collapsible accordion anywhere. The canvas frame carries a display-only
-max-height cap so a full-width frame doesn't push the panels off a typical
-desktop viewport; the logical viewBox is unaffected.
+or LinkedIn strip. The canvas frame carries a display-only max-height cap so a
+full-width frame doesn't push the panels off a typical desktop viewport; the
+logical viewBox is unaffected.
 
-**Left — Scene, Canvas, Lighting.** Landscape type, complexity, peak count, peak
-sharpness, point-of-view height, seed (display / randomize / lock), New View;
-aspect ratio: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1; then time of
-day, the shadow toggle, light source angle and shadow intensity.
-**Centre — Color.** Reserved; populated in Phase 5.
+Every control is a Tweakpane control, one pane per column, and each group is a
+collapsible folder:
+
+**Left — Canvas, Scene.** Aspect ratio (4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1,
+LinkedIn 4:1); then landscape type, complexity, peak count, peak sharpness,
+point-of-view height, seed (display / randomize / lock), New View.
+**Centre — Lighting, Color.** Time of day, the shadow toggle, light source angle
+and shadow intensity; Color is reserved and populated in Phase 5.
 **Right — Actions.** Download SVG, Download settings.
 
 | Slider | What it does |

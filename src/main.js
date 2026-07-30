@@ -5,7 +5,7 @@
 
 import './style.css';
 
-import { createIcons, Download, FileJson, Monitor, Moon, Sun } from 'lucide';
+import { createIcons, Monitor, Moon, Sun } from 'lucide';
 
 import { exportSettings, regenerate, setRenderer, state } from './state.js';
 import { getArchetype } from './archetypes/index.js';
@@ -57,23 +57,18 @@ function exportName() {
   return `landscape-${label.toLowerCase().replace(/\s+/g, '-')}-${state.seed}`;
 }
 
-document.querySelector('#download-svg').addEventListener('click', () => {
-  downloadSVG(svg, `${exportName()}.svg`);
-});
-
-document.querySelector('#download-settings').addEventListener('click', () => {
-  downloadSettings(exportSettings(), `${exportName()}.json`);
-});
-
 createIcons({
-  icons: { Download, FileJson, Monitor, Moon, Sun },
+  icons: { Monitor, Moon, Sun },
   attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
 });
 
 initControls({
-  sceneContainer: document.querySelector('#panel-scene'),
-  canvasContainer: document.querySelector('#panel-canvas'),
-  lightingContainer: document.querySelector('#panel-lighting'),
+  leftContainer: document.querySelector('#panel-left'),
+  centreContainer: document.querySelector('#panel-centre'),
+  rightContainer: document.querySelector('#panel-right'),
+  onDownloadSVG: () => downloadSVG(svg, `${exportName()}.svg`),
+  onDownloadSettings: () =>
+    downloadSettings(exportSettings(), `${exportName()}.json`),
 });
 
 initTheme();

@@ -68,87 +68,15 @@
         </figcaption>
       </figure>
 
-      <!-- Controls sit below the canvas in three columns: parameters, Color
-           (reserved for Phase 5), Actions (CONTEXT.md section 5). A side panel
-           is unworkable once the canvas can be an X-Pan or LinkedIn strip. -->
-      <div class="mt-6 grid items-start gap-4 lg:grid-cols-3">
-        <section
-          id="controls-panel"
-          aria-labelledby="scene-heading"
-          class="rounded-md border border-border-token bg-surface-raised p-4 shadow-sm"
-        >
-          <h2
-            id="scene-heading"
-            class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted"
-          >
-            Scene
-          </h2>
-          <div id="panel-scene"></div>
-
-          <h3
-            class="mb-3 mt-4 text-xs font-semibold uppercase tracking-wider text-muted"
-          >
-            Canvas
-          </h3>
-          <div id="panel-canvas"></div>
-
-          <h3
-            class="mb-3 mt-4 text-xs font-semibold uppercase tracking-wider text-muted"
-          >
-            Lighting
-          </h3>
-          <div id="panel-lighting"></div>
-        </section>
-
-        <section
-          id="color-panel"
-          aria-labelledby="color-heading"
-          class="rounded-md border border-dashed border-border-token bg-surface-raised p-4"
-        >
-          <h2
-            id="color-heading"
-            class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted"
-          >
-            Color
-          </h2>
-          <p class="text-sm text-muted">
-            Theme presets, palette randomizer, colour depth and distance haze
-            arrive in a later phase.
-          </p>
-        </section>
-
-        <section
-          id="actions"
-          aria-labelledby="actions-heading"
-          class="rounded-md border border-border-token bg-surface-raised p-4 shadow-sm"
-        >
-          <h2
-            id="actions-heading"
-            class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted"
-          >
-            Actions
-          </h2>
-
-          <div class="flex flex-wrap gap-2">
-            <button
-              id="download-svg"
-              type="button"
-              class="inline-flex items-center gap-2 rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-accent-contrast transition-opacity hover:opacity-90"
-            >
-              <i data-lucide="download"></i>
-              Download SVG
-            </button>
-
-            <button
-              id="download-settings"
-              type="button"
-              class="inline-flex items-center gap-2 rounded-md border border-border-token bg-surface px-3.5 py-2 text-sm font-medium transition-colors hover:bg-surface-sunken"
-            >
-              <i data-lucide="file-json"></i>
-              Download settings
-            </button>
-          </div>
-        </section>
+      <!-- Controls sit below the canvas in three columns (CONTEXT.md section 5).
+           A side panel is unworkable once the canvas can be an X-Pan or
+           LinkedIn strip. Each column hosts one Tweakpane instance; the folder
+           titles inside are the accordion headings, so there is no separate
+           markup chrome to keep in sync with them. -->
+      <div id="control-columns" class="mt-6 grid items-start gap-4 lg:grid-cols-3">
+        <section id="panel-left" aria-label="Canvas and scene controls"></section>
+        <section id="panel-centre" aria-label="Lighting and colour controls"></section>
+        <section id="panel-right" aria-label="Actions"></section>
       </div>
     </main>
 

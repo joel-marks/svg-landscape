@@ -1,12 +1,16 @@
-// controls.js — Tweakpane parameter controls, grouped per CONTEXT.md section 5.
+// controls.js — Tweakpane panel, grouped folders.
+// Folder structure per CONTEXT.md section 5: Scene, Lighting, Color, Canvas,
+// Actions, Preferences.
 //
-// No folders anywhere: Tweakpane's Folder is an accordion, and section 5 calls
-// for flat, always-visible controls. Grouping instead comes from two title-less
-// Pane instances mounted under plain HTML headings — a Pane given a `title`
-// grows a collapsible root, so the panes deliberately have none.
+// One Pane per column, each holding collapsible folders. The panes themselves
+// are title-less so the only accordion headings are the folder titles.
 //
-// Actions lives outside this module entirely (an export action shouldn't sit
-// among tunable sliders), as does Color, which is reserved for Phase 5.
+//   left    Canvas, Scene
+//   centre  Lighting, Color (reserved for Phase 5)
+//   right   Actions
+//
+// Everything the user touches is a Tweakpane control, including the export
+// buttons — hence Actions living here rather than as separate markup.
 
 import { Pane } from 'tweakpane';
 
@@ -20,11 +24,17 @@ const ELEVATION_DEFERRED = new Set(['in-gorge']);
 const POV_LABEL = 'Point of view height';
 const POV_LABEL_DEFERRED = 'POV height (n/a for In gorge)';
 
-export function initControls({ sceneContainer, canvasContainer, lightingContainer }) {
-  const scene = new Pane({ container: sceneContainer });
-  const canvas = new Pane({ container: canvasContainer });
-  const lighting = new Pane({ container: lightingContainer });
-  const panes = [scene, canvas, lighting];
+export function initControls({
+  leftContainer,
+  centreContainer,
+  rightContainer,
+  onDownloadSVG,
+  onDownloadSettings,
+}) {
+  const left = new Pane({ container: leftContainer });
+  const centre = new Pane({ container: centreContainer });
+  const right = new Pane({ container: rightContainer });
+  const panes = [left, centre, right];
 
   const refresh = () => panes.forEach((pane) => pane.refresh());
 
@@ -39,6 +49,26 @@ export function initControls({ sceneContainer, canvasContainer, lightingContaine
     regenerate({ reseed: 'explicit' });
     refresh();
   };
+
+  // Lighting only ever repaints — geometry is untouched, and the seed lock does
+  // not cover this group (CONTEXT.md section 5).
+  const onLightingChange = () => repaint();
+
+  // --- left column ---------------------------------------------------------
+
+  const canvas = left.addFolder({ title: 'Canvas' });
+
+  canvas
+    .addBinding(state, 'aspect', {
+      label: 'Aspect ratio',
+      options: Object.fromEntries(ASPECTS.map((a) => [a.label, a.key])),
+    })
+    .on('change', (event) => {
+      setAspect(event.value);
+      onParamChange();
+    });
+
+  const scene = left.addFolder({ title: 'Scene' });
 
   const archetypeBinding = scene.addBinding(state, 'archetype', {
     label: 'Landscape type',
@@ -74,23 +104,12 @@ export function initControls({ sceneContainer, canvasContainer, lightingContaine
   });
 
   scene.addBinding(state, 'seedLocked', { label: 'Lock seed' });
-
   scene.addButton({ title: 'Randomize seed' }).on('click', onNewSeed);
   scene.addButton({ title: 'New View' }).on('click', onNewSeed);
 
-  canvas
-    .addBinding(state, 'aspect', {
-      label: 'Aspect ratio',
-      options: Object.fromEntries(ASPECTS.map((a) => [a.label, a.key])),
-    })
-    .on('change', (event) => {
-      setAspect(event.value);
-      onParamChange();
-    });
+  // --- centre column -------------------------------------------------------
 
-  // Lighting only ever repaints — geometry is untouched, and the seed lock does
-  // not cover this group (CONTEXT.md section 5).
-  const onLightingChange = () => repaint();
+  const lighting = centre.addFolder({ title: 'Lighting' });
 
   lighting
     .addBinding(state, 'hour', {
@@ -98,7 +117,10 @@ export function initControls({ sceneContainer, canvasContainer, lightingContaine
       min: 0,
       max: 24,
       step: 0.1,
-      format: (v) => `${String(Math.floor(v)).padStart(2, '0')}:${String(Math.round((v % 1) * 60)).padStart(2, '0')}`,
+      format: (v) =>
+        `${String(Math.floor(v)).padStart(2, '0')}:${String(
+          Math.round((v % 1) * 60),
+        ).padStart(2, '0')}`,
     })
     .on('change', onLightingChange);
 
@@ -126,6 +148,21 @@ export function initControls({ sceneContainer, canvasContainer, lightingContaine
     syncShadowAffordance();
     onLightingChange();
   });
+
+  const colour = centre.addFolder({ title: 'Color' });
+  // A readonly note rather than disabled controls: stubbing the real ones would
+  // imply they work. Theme preset, palette randomizer, colour depth and
+  // distance haze all arrive in Phase 5.
+  colour.addBinding({ status: 'Arrives in Phase 5' }, 'status', {
+    label: 'Status',
+    readonly: true,
+  });
+
+  // --- right column --------------------------------------------------------
+
+  const actions = right.addFolder({ title: 'Actions' });
+  actions.addButton({ title: 'Download SVG' }).on('click', onDownloadSVG);
+  actions.addButton({ title: 'Download settings' }).on('click', onDownloadSettings);
 
   function syncShadowAffordance() {
     angleBinding.disabled = !state.shadow;
