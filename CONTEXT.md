@@ -48,22 +48,35 @@ Open valley · Valley floor · V valley · Gorge · In gorge · Mountain top · 
 
 ## 5. Control panel — grouped logically
 
-Layout: all control panel groups render in one area **below** the canvas, not beside it — a side panel doesn't work once the canvas can be an X-Pan (2.71:1) or LinkedIn (4:1) strip. Below the canvas, panels arrange in three columns: **left** — Scene + Canvas parameter controls; **centre** — Color controls (reserved; populated in Phase 5); **right** — Actions (Download SVG, Download settings). No collapsible/accordion folder behavior anywhere in the parameter panel — controls render flat and always visible; use plain non-collapsible section labels for sub-grouping if needed. Header/nav side margins align with the canvas and control-panel side margins so edges line up at every breakpoint. The canvas frame has a max-height cap so a full-width 16:9 (or taller-relative) frame doesn't push the panels below the fold on common desktop viewport heights — the cap is a display constraint only; it does not change the logical viewBox width passed into `generate()`.
+Entirely Tweakpane — one title-less Pane instance per column; folder titles are the only headings, no separate HTML/Tailwind panel chrome. Renders below the canvas, not beside it (still required — X-Pan 2.71:1 and LinkedIn 4:1 rule out a side panel). Three columns:
+- **Left** — Canvas (Aspect ratio is the first control on the page), Scene
+- **Centre** — Lighting, Color
+- **Right** — Actions
+
+Folders are collapsible (accordion) — this was tried flat in one revision and deliberately reverted back to accordion for a tighter footprint, given window-size constraints on a desktop-first layout. Color's centre-column folder is a readonly Tweakpane note ("Arrives in Phase 5") until Phase 5 lands — not stubbed sliders, which would wrongly imply they work. Actions is a Tweakpane folder like the others, not a separate visual panel. Tweakpane buttons are text-only — Lucide icons are no longer used inside the panel, only in page chrome outside it (header, etc.).
+
+Header/nav side margins align with the canvas and panel-grid side margins.
+
+**Canvas fit/sizing model** (previously underspecified — this caused a regression once, don't let it happen again): the canvas container is full available width within the shell's gutters, height derived via CSS `aspect-ratio` matching the current viewBox ratio, capped by the max-height limit. Letterbox/pillarbox bars should appear **only** when the max-height cap is the actual binding constraint (a tall-relative aspect at large viewport widths) — every other aspect, including 16:9 and the wide presets, fills its container edge-to-edge with no bars. If bars appear on an aspect that isn't hitting the height cap, that's a bug, not expected behavior.
+
+**Canvas**
+- Aspect ratio (dropdown: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1)
+- Feature density auto-scales with canvas width (wider aspect → proportionally more ridge/spur features, never fewer)
 
 **Scene**
 - Landscape type (dropdown)
 - Complexity (slider — noise octave count / point sampling density only. Controls detail resolution — how fine or coarse the terrain silhouette is — not feature count. See Peak count below for that.)
 - Peak count (slider — number of peaks/spurs/ridges, independent of Complexity. Normalized 0–1 like Complexity/Elevation; each archetype maps it to its own sensible integer range. No-op on archetypes where a fixed count is the defining trait (Twin Peaks' 2, Stacked Ridges' band count) or where the concept doesn't apply.)
 - Peak sharpness (slider — blends the terrain profile between smooth/rolling and jagged/ridged. 0 = rounded hills, 1 = sharp ridgelines.)
-- Point of view height (slider, global — see section 6a. Active on all archetypes except In Gorge, which is a deferred edge case; disabled/labelled accordingly there.)
+- Point of view height (slider, global — see section 6a. Active on all archetypes except In Gorge, which is a deferred edge case; disabled/labelled accordingly there. Known bug open — see section 18.)
 - Seed value (display + randomize + lock). Lock only guards against *incidental* reseeding from other Scene/Canvas control changes (landscape type, complexity, peak count, sharpness, elevation, aspect ratio). Randomize and New View always draw a new seed regardless of lock state — a control whose entire purpose is to change the seed shouldn't be silently disabled by it.
 - Regenerate ("New View")
 
 **Lighting**
-- Time of day (continuous slider, 0–24) — replaces discrete day/dawn/night buttons; drives sky gradient, mist tint, and sun/moon position
+- Time of day (continuous slider, 0–24) — drives sky gradient, mist tint, sun/moon crossfade, star field opacity
 - Shadow / pseudo-3D toggle
-- Light source angle (slider, active when shadow on)
-- Shadow intensity (slider)
+- Light source angle (slider, active when shadow on — independent of time-of-day, see section 6)
+- Shadow intensity (slider, active when shadow on)
 
 **Color**
 - Theme preset (dropdown, curated palettes)
@@ -71,13 +84,9 @@ Layout: all control panel groups render in one area **below** the canvas, not be
 - Color depth (slider — controls contrast between near and far layers. Low = layers compressed toward the palette midpoint (flat, low depth cue). High = near/far pushed toward the ramp's extremes, exaggerating separation. Not a literal band/posterize count.)
 - Distance haze (slider — mist opacity/spread)
 
-**Canvas**
-- Aspect ratio (dropdown: 4:3, 16:9, Cine 2.39:1, X-Pan 2.71:1, LinkedIn 4:1)
-- Feature density auto-scales with canvas width (wider aspect → proportionally more ridge/spur features, never fewer)
-
 **Actions**
 - Download SVG
-- Download settings (JSON) — brought forward to Phase 3.6, ahead of the rest of Phase 6
+- Download settings (JSON)
 - Reset to defaults (still Phase 6)
 
 **Preferences**
@@ -85,10 +94,12 @@ Layout: all control panel groups render in one area **below** the canvas, not be
 - Tips: on/off
 - Help (opens modal)
 
-Pseudo-3D and lighting are UX-independent of the UI chrome theme (point 1 confirmed): in-scene Day/Dawn/Night lighting and light/dark interface skin are separate systems.
+Pseudo-3D and lighting are UX-independent of the UI chrome theme: in-scene Day/Dawn/Night lighting and light/dark interface skin are separate systems. Tweakpane's own panel chrome must follow the UI theme too, via its `--tp-*` CSS custom properties — this is a documented Tweakpane capability, not a limitation to design around.
 
 ## 6. Pseudo-3D / shadow model
-Each hill/peak polygon is split into a light-side and dark-side sub-path along an internal ridge boundary — distinct from the silhouette boundary against the sky. Boundary position and shadow-side is derived from the light source angle (tied to time-of-day). This is treated as its own build task, not a simple style toggle.
+Each hill/peak polygon is split into a light-side and dark-side sub-path along an internal ridge boundary — distinct from the silhouette boundary against the sky. Boundary position and shadow-side is derived from the light source angle. This is treated as its own build task, not a simple style toggle.
+
+Light source angle is directly user-controlled, not slaved to the time-of-day slider — the two are independent so shadow direction and sky mood don't fight each other. A sensible default angle may be derived from time-of-day on load, but the slider doesn't auto-follow it afterward.
 
 ## 6a. Point of view / elevation model
 A global `elevation` (0–1) parameter simulates viewer height, interpolating horizon position and how tightly nested features converge toward the viewer — low elevation reads as ground-level (features fan out, horizon low), high elevation reads as looking down into a landscape (horizon rises, features nest tighter, e.g. converging valley spurs). Meaningfully implemented across all nine archetypes except In Gorge, which is treated as a deferred edge case — its foreground-wall composition doesn't have an obvious viewer-height analog yet and needs separate design thought.
@@ -138,6 +149,13 @@ CC runs from repo root with standing permission to execute bash, git, and stack-
 3.5. Fixes/follow-ups from Phase 3 review: seed lock semantics, elevation fix/verification, Peak count + Peak sharpness sliders, Actions panel separated from parameter panel, layout moved below canvas, nav/canvas margin alignment
 3.6. Elevation extended to all archetypes except In Gorge (deferred edge case); 3-column below-canvas layout replacing the accordion panel; Download settings (JSON) brought forward; canvas max-height cap
 4. Lighting system: time-of-day slider, sky/mist gradients, shadow/pseudo-3D split
+4.5. UX reworked to entirely Tweakpane (deliberate reversal from the brief flat/Tailwind-panel experiment): accordion restored, columns regrouped to Canvas+Scene (left) / Lighting+Color (centre) / Actions (right), Aspect ratio moved to first control
+4.6. Bug-fix round: canvas fit/sizing (bars appearing where they shouldn't), Tweakpane panel following UI light/dark theme via `--tp-*` variables
 5. Palette system: curated themes + algorithmic generator, color depth/haze controls
 6. Persistence, settings export, help modal, tips toggle
 7. Accessibility, SEO, responsive pass, final polish
+
+## 18. Known issues (open)
+- Point of view height has a reported bug/unexpected behavior (nature not yet diagnosed). Deliberately deferred — not being worked in Phase 4.6.
+- Canvas fit/sizing bug (bars appearing on aspects that shouldn't have any) — being addressed in Phase 4.6, remove this line once confirmed fixed.
+- Tweakpane panel doesn't follow UI light/dark theme — being addressed in Phase 4.6, remove this line once confirmed fixed.

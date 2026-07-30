@@ -55,6 +55,74 @@
     max-width: 80rem;
     padding-inline: 1rem;
   }
+
+  /* Tweakpane theming. The panel is styled through its own --tp-* custom
+     properties rather than by overriding its class names, so it keeps its
+     native look and only changes palette.
+
+     Keyed off the same `dark` class on <html> that theme.js already toggles,
+     which means Light / Dark / System all resolve through one code path and the
+     panel needs no separate JS wiring. Light is the default here; the .dark
+     block below overrides it. */
+  #control-columns {
+    --tp-base-background-color: #ffffff;
+    --tp-base-shadow-color: rgb(15 23 32 / 0.08);
+
+    --tp-button-background-color: #d7dee6;
+    --tp-button-background-color-hover: #cbd4de;
+    --tp-button-background-color-focus: #c2ccd8;
+    --tp-button-background-color-active: #b7c3d1;
+    --tp-button-foreground-color: #16191d;
+
+    --tp-container-background-color: #eef1f5;
+    --tp-container-background-color-hover: #e6eaef;
+    --tp-container-background-color-focus: #dfe5eb;
+    --tp-container-background-color-active: #d8dfe7;
+    --tp-container-foreground-color: #16191d;
+
+    --tp-groove-foreground-color: #d9dfe6;
+
+    --tp-input-background-color: #f2f5f8;
+    --tp-input-background-color-hover: #eaeff4;
+    --tp-input-background-color-focus: #e3eaf1;
+    --tp-input-background-color-active: #dbe3ec;
+    --tp-input-foreground-color: #16191d;
+
+    --tp-label-foreground-color: #59636e;
+
+    --tp-monitor-background-color: #eef1f5;
+    --tp-monitor-foreground-color: #59636e;
+  }
+
+  .dark #control-columns {
+    --tp-base-background-color: #161d23;
+    --tp-base-shadow-color: rgb(0 0 0 / 0.3);
+
+    --tp-button-background-color: #38454f;
+    --tp-button-background-color-hover: #43515c;
+    --tp-button-background-color-focus: #4b5a66;
+    --tp-button-background-color-active: #54646f;
+    --tp-button-foreground-color: #e9eef3;
+
+    --tp-container-background-color: #1e262d;
+    --tp-container-background-color-hover: #232c34;
+    --tp-container-background-color-focus: #27313a;
+    --tp-container-background-color-active: #2c3740;
+    --tp-container-foreground-color: #e9eef3;
+
+    --tp-groove-foreground-color: #27323b;
+
+    --tp-input-background-color: #0e1317;
+    --tp-input-background-color-hover: #131a1f;
+    --tp-input-background-color-focus: #172026;
+    --tp-input-background-color-active: #1c262d;
+    --tp-input-foreground-color: #e9eef3;
+
+    --tp-label-foreground-color: #94a2af;
+
+    --tp-monitor-background-color: #0e1317;
+    --tp-monitor-foreground-color: #94a2af;
+  }
 }
 
 @layer base {
@@ -100,6 +168,18 @@
        the capped height, pulling its right edge off the shell gutter. A
        definite width makes the ratio derive height, which max-height clamps. */
     width: 100%;
-    max-height: min(58vh, 620px);
+
+    /* Sized so the cap binds only for a tall-relative aspect at large widths,
+       per CONTEXT.md section 5. The shell's widest content box is 78rem
+       (1248px), where 16:9 needs 702px of height — so anything at or above
+       ~710px leaves 16:9 and every wider preset bar-free at every viewport.
+       4:3 needs 936px there and is the one preset that still bars, which is
+       exactly the carve-out the fit model allows. 740px additionally lets 4:3
+       through at ~1024px-wide viewports.
+
+       Deliberately a fixed length, not a vh expression: a viewport-relative cap
+       reintroduces the bug on shorter screens, because 58vh resolved to 522px
+       on a 900px-tall viewport and pillarboxed the default 16:9 canvas. */
+    max-height: 740px;
   }
 }
