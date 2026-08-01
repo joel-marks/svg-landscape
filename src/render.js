@@ -9,13 +9,27 @@
 // everything deeper is occluded by the next layer forward — so shading it is
 // what reads as relief.
 
-import { shade } from './palette.js';
+import { mistTone, shade } from './palette.js';
+import { clamp01, lerp } from './utils.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export function render(svg, geometry, paint) {
   const { width, height, horizonY, layers, mistAfter = 1 } = geometry;
-  const { palette, lighting, shadow } = paint;
+  const {
+    palette,
+    lighting,
+    shadow,
+    haze = 0.5,
+    valleyMist = 0,
+    mistDistance = 0.5,
+    // CONTEXT.md section 5: these hide the drawn bodies and the star field
+    // only. Everything else time of day drives — sky gradient, mist tint, the
+    // shadow angle it can seed — is untouched by them.
+    showBodies = true,
+    showStars = true,
+  } = paint;
+  const mist = hazeBand(haze);
 
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   // `meet`, not `slice`: once the frame is height-capped its box is wider than
@@ -25,34 +39,75 @@ export function render(svg, geometry, paint) {
   svg.replaceChildren();
 
   const defs = el('defs');
-  defs.append(
-    skyGradient(lighting),
-    mistGradient(lighting),
-    bodyGlow('sun-glow', '#fff3d4'),
-    bodyGlow('moon-glow', '#dfe8f5'),
-  );
+  defs.append(skyGradient(lighting), mistGradient(lighting, mist.opacity));
+  // Only defined when something references them, so hiding the bodies leaves no
+  // orphan gradients in the downloaded file.
+  if (showBodies) {
+    defs.append(bodyGlow('sun-glow', '#fff3d4'), bodyGlow('moon-glow', '#dfe8f5'));
+  }
+
+  // Fills are resolved once, up front: the mist tone for a layer is derived
+  // from that layer's own fill, so the defs pass needs them before the paint
+  // loop reaches them.
+  const bases = layers.map((layer) => palette.terrainAt(layer.depth));
+  const mistPlan = valleyMistPlan(layers, bases, valleyMist, mistDistance);
+
+  // One gradient and one clip per misted layer, each spanning that layer's own
+  // pair of anchors. Defined up front; the clips forward-reference the base
+  // paths, which resolve by id regardless of document order.
+  const summits = layers.map(summitY);
+  mistPlan.forEach((plan, i) => {
+    if (!plan) return;
+    const [top, bottom] = mistAnchors(summits, i, height);
+    defs.append(
+      valleyMistGradient(`valley-mist-${i}`, top, bottom, plan),
+      valleyMistClip(`valley-clip-${i}`, `layer-${i}`),
+    );
+  });
+
   svg.append(defs);
 
   svg.append(el('rect', { x: 0, y: 0, width, height, fill: 'url(#sky-gradient)' }));
 
-  if (lighting.starOpacity > 0.01) svg.append(stars(lighting));
-  svg.append(...celestialBodies(lighting));
+  if (showStars && lighting.starOpacity > 0.01) svg.append(stars(lighting));
+  if (showBodies) svg.append(...celestialBodies(lighting));
 
   // The haze is painted over the farthest layers and under the nearer ones, so
   // distance reads as atmosphere rather than as a band floating in the sky gap.
   // Each archetype says where that break falls, since "how far back the
   // distance begins" differs between a wide valley and a narrow gorge.
   layers.forEach((layer, i) => {
-    if (i === mistAfter + 1) svg.append(mistBand(horizonY, width, height, lighting));
+    if (i === mistAfter + 1 && mist.visible) {
+      svg.append(mistBand(horizonY, width, height, mist.spread));
+    }
 
-    const base = palette.terrainAt(layer.depth);
-    svg.append(el('path', { d: polygonPath(layer.points), fill: base }));
+    const base = bases[i];
+    const shape = el('path', { d: polygonPath(layer.points), fill: base });
+    // Only identified when a clip is going to reference it, so an unmisted
+    // layer — and the whole default scene — keeps its markup unchanged.
+    if (mistPlan[i]) shape.setAttribute('id', `layer-${i}`);
+    svg.append(shape);
 
-    if (!shadow?.enabled) return;
+    if (shadow?.enabled) {
+      const dark = shade(base, shadow.intensity);
+      for (const band of shadowBands(layer, shadow.angle, width, height)) {
+        svg.append(el('path', { d: polygonPath(band), fill: dark }));
+      }
+    }
 
-    const dark = shade(base, shadow.intensity);
-    for (const band of shadowBands(layer, shadow.angle, width, height)) {
-      svg.append(el('path', { d: polygonPath(band), fill: dark }));
+    // Painted last, over the shadow split: mist sits in front of the terrain,
+    // so a misted slope lightens whether or not that facet is shaded.
+    if (mistPlan[i]) {
+      svg.append(
+        el('rect', {
+          x: 0,
+          y: 0,
+          width,
+          height,
+          fill: `url(#valley-mist-${i})`,
+          'clip-path': `url(#valley-clip-${i})`,
+        }),
+      );
     }
   });
 
@@ -181,6 +236,170 @@ function facesAway(line, i, span, light, wall, side) {
   return normal.x * light.x + normal.y * light.y <= 0;
 }
 
+// --- valley mist -------------------------------------------------------------
+
+// One soft vertical fade per depth layer (CONTEXT.md section 5): fully clear at
+// that layer's own highest crest point, building smoothly to a pale wash at its
+// own bottom anchor, painted over the layer's base fill and clipped to its
+// shape.
+//
+// Both anchors are per layer. The top one is its own summit, so a background
+// ridge and a foreground ridge each start fading from wherever they happen to
+// peak. The bottom one is the *next-nearer layer's summit* — not the canvas
+// floor, which is what 5.8/5.9 used and what this replaces.
+//
+// The canvas floor was wrong because almost none of that span is on screen. A
+// layer is only ever visible in the sliver above whatever is drawn in front of
+// it, so a distant layer's fade had barely left zero before the next layer
+// covered it — mist read as absent in the distance — while the nearest misted
+// layer, whose nominal span is short and largely visible, completed its fade in
+// full view and read as one flat strong band. Same mechanism, opposite
+// symptoms, one cause. Anchoring to the occluder's summit fixes both: that
+// occluder can never cover this layer *above its own peak*, at any x, so the
+// fade is guaranteed to complete within (or just past) the visible sliver
+// without anyone having to solve the real per-x occlusion boundary.
+//
+// This whole effect replaced a per-point crest-topology mechanism that measured
+// local dip depth. That version was self-consistent but wrong to look at: three
+// nested translucent bands read as steps rather than a fade, and hugging the
+// crest put the mist along the ridgelines instead of pooling below them.
+
+// Peak wash at the canvas bottom when the slider is at 1 and the layer takes
+// full distance weighting. Past roughly this a layer stops reading as terrain.
+const VALLEY_MIST_MAX = 0.5;
+
+// What the nearest *non-excluded* layer keeps at full Distance. Not zero: the
+// spec asks for "very little" mist there, not none, so the depth cue reads as
+// a gradient across the stack rather than as the front layer switching off.
+const VALLEY_MIST_NEAR_FLOOR = 0.08;
+
+// The response curve keeps the bottom of the slider under a perceptible alpha.
+// Emitting defs that paint nothing is just file size, so the effect stays off
+// until it can actually be seen.
+const VALLEY_MIST_MIN_STRENGTH = 0.01;
+
+// Decides, once per render, which layers take mist and how much (CONTEXT.md
+// section 5, Phase 5.9). Returns one entry per layer, null where none applies.
+//
+// Direction matters here and is easy to invert. `layer.depth` is 0 at the
+// *farthest* layer and 1 at the nearest — the same axis the palette's near/far
+// ramp reads — so distance from the viewer is `1 - depth`, and mist has to grow
+// as depth falls. Reading it the other way would put the heaviest mist on the
+// foreground, which is the inversion this control exists to avoid.
+function valleyMistPlan(layers, bases, strength, distance) {
+  if (strength < VALLEY_MIST_MIN_STRENGTH) return layers.map(() => null);
+
+  // The frontmost layer is excluded outright at every slider value. It is what
+  // the viewer is standing in; mist on it flattens the whole depth cue that the
+  // rest of this is building. Painting order is far-to-near, so it is the last.
+  const excluded = layers.length - 1;
+  const misted = layers.filter((_, i) => i !== excluded);
+  if (!misted.length) return layers.map(() => null);
+
+  const depths = misted.map((layer) => layer.depth);
+  const nearest = Math.max(...depths);
+  const farthest = Math.min(...depths);
+  const span = nearest - farthest;
+
+  return layers.map((layer, i) => {
+    if (i === excluded) return null;
+
+    // 0 at the nearest layer still taking mist, 1 at the farthest. A single
+    // misted layer has no spread to sit in, so it takes the full weight.
+    const remoteness = span > 0 ? (nearest - layer.depth) / span : 1;
+    // Distance 0 leaves every misted layer equal; 1 grades them fully. Linear
+    // between, per the spec — this one is not on a response curve.
+    const weight = lerp(1, lerp(VALLEY_MIST_NEAR_FLOOR, 1, remoteness), clamp01(distance));
+
+    return {
+      tone: mistTone(bases[i]),
+      maxOpacity: VALLEY_MIST_MAX * strength * weight,
+    };
+  });
+}
+
+// The layer's own summit: the smallest y anywhere on its silhouette. `line` is
+// the open crest where an archetype provides one; walls fall back to the closed
+// polygon, whose topmost point is the top of the wall.
+function summitY(layer) {
+  let top = Infinity;
+  for (const [, y] of layer.line ?? layer.points) {
+    if (y < top) top = y;
+  }
+  return top;
+}
+
+// Shortest fade a layer is allowed. Under this the three stops sit close enough
+// together to read as a hard tint edge rather than a gradient.
+const VALLEY_MIST_MIN_SPAN = 24;
+
+// This layer's fade anchors: its own summit down to its occluder's summit.
+// `summits[i + 1]` is the next-nearer layer because layers are ordered and
+// painted far-to-near; for the last misted layer that is the excluded
+// true-foreground layer, which is exactly the intent.
+//
+// Three degenerate cases, and they do not all want the same fallback.
+//
+// Inverted — the nearer layer peaks *above* this one, so there is no downward
+// span to fade across. Common, not exotic: any archetype whose near layers
+// sweep up the frame edges (Open valley, Gorge) has a foreground summit at the
+// very top of the canvas.
+//
+// Off-canvas — both summits sit above y=0, so the whole fade would resolve
+// before the first visible row and the layer would paint at full ceiling
+// everywhere on screen. A flat opaque wash is worse than a weak one.
+//
+// Both of those revert to the 5.8/5.9 canvas-floor anchor: too long, but never
+// broken. The third case is different in kind —
+//
+// Too tight — the span is positive and on-canvas but shorter than a gradient
+// can express. Clamping to the minimum keeps this continuous with the ordinary
+// case; sending it to the canvas floor instead would let a 1px difference in
+// summit height flip a layer between a fast fade and a nearly invisible one.
+function mistAnchors(summits, i, height) {
+  const top = summits[i];
+  const occluder = summits[i + 1];
+  const usable = occluder != null && occluder > top && occluder >= VALLEY_MIST_MIN_SPAN;
+  const bottom = usable ? occluder : height;
+  return [top, Math.max(bottom, top + VALLEY_MIST_MIN_SPAN)];
+}
+
+// userSpaceOnUse, not objectBoundingBox: the fade has to start at an absolute
+// scene coordinate (this layer's summit) and end at another (its occluder's).
+// Against a bounding box those anchors would drift with each shape's extent,
+// scaling the fade to each polygon rather than to the scene's depth structure.
+function valleyMistGradient(id, top, bottom, { tone, maxOpacity }) {
+  const gradient = el('linearGradient', {
+    id,
+    gradientUnits: 'userSpaceOnUse',
+    x1: 0,
+    y1: round(top),
+    x2: 0,
+    y2: round(bottom),
+  });
+
+  // Three stops. The middle one sits below a straight line between the ends,
+  // which eases the onset so the mist creeps in under the summit instead of
+  // starting at a visible rate the moment the crest drops.
+  gradient.append(
+    el('stop', { offset: 0, 'stop-color': tone, 'stop-opacity': 0 }),
+    el('stop', { offset: 0.55, 'stop-color': tone, 'stop-opacity': round(maxOpacity * 0.28, 3) }),
+    el('stop', { offset: 1, 'stop-color': tone, 'stop-opacity': round(maxOpacity, 3) }),
+  );
+
+  return gradient;
+}
+
+// The wash is a full-canvas rect clipped to the layer, and the clip reuses the
+// base path by reference rather than repeating its `d`. A layer's polygon runs
+// to a few thousand points; copying it per layer would roughly double the
+// downloaded file for geometry that is already in it.
+function valleyMistClip(id, layerId) {
+  const clip = el('clipPath', { id });
+  clip.append(el('use', { href: `#${layerId}` }));
+  return clip;
+}
+
 // --- sky, atmosphere and celestial bodies -----------------------------------
 
 function stars(lighting) {
@@ -231,8 +450,27 @@ function celestialBodies(lighting) {
   return nodes;
 }
 
-function mistBand(horizonY, width, height, lighting) {
-  const top = horizonY - height * 0.17;
+// Distance haze (CONTEXT.md section 5) — the Color group owns the mist's
+// opacity and spread; lighting.js still owns its tint, since Time of day is
+// what the spec makes responsible for that. The band's foot is always the
+// canvas bottom, so `spread` is how far up into the sky the haze reaches.
+//
+// The slider re-centres what used to be a pair of fixed constants (0.17 spread
+// / 0.7 peak opacity), so the midpoint is close to, but not identical with, the
+// Phase 4 default scene.
+function hazeBand(haze) {
+  const t = Math.min(1, Math.max(0, haze));
+  return {
+    // Below this the band is invisible anyway, and leaving it out keeps the
+    // exported SVG free of a no-op rect.
+    visible: t > 0.01,
+    opacity: 0.96 * t,
+    spread: 0.05 + 0.31 * t,
+  };
+}
+
+function mistBand(horizonY, width, height, spread) {
+  const top = horizonY - height * spread;
   return el('rect', {
     x: 0,
     y: top,
@@ -244,10 +482,11 @@ function mistBand(horizonY, width, height, lighting) {
 
 // Archetypes emit closed polygons in absolute coordinates — crest lines closed
 // to the bottom edge, or vertical wall silhouettes closed to a side.
-function polygonPath(points) {
+function polygonPath(points, decimals = 2) {
+  const at = (value) => round(value, decimals);
   const [first, ...rest] = points;
-  const head = `M ${round(first[0])} ${round(first[1])}`;
-  const body = rest.map(([x, y]) => `L ${round(x)} ${round(y)}`).join(' ');
+  const head = `M ${at(first[0])} ${at(first[1])}`;
+  const body = rest.map(([x, y]) => `L ${at(x)} ${at(y)}`).join(' ');
   return `${head} ${body} Z`;
 }
 
@@ -267,7 +506,7 @@ function skyGradient(lighting) {
   return gradient;
 }
 
-function mistGradient(lighting) {
+function mistGradient(lighting, peakOpacity) {
   const gradient = el('linearGradient', {
     id: 'mist-gradient',
     x1: 0,
@@ -278,7 +517,11 @@ function mistGradient(lighting) {
 
   gradient.append(
     el('stop', { offset: 0, 'stop-color': lighting.mist, 'stop-opacity': 0 }),
-    el('stop', { offset: 0.45, 'stop-color': lighting.mist, 'stop-opacity': 0.7 }),
+    el('stop', {
+      offset: 0.45,
+      'stop-color': lighting.mist,
+      'stop-opacity': round(peakOpacity),
+    }),
     el('stop', { offset: 1, 'stop-color': lighting.mist, 'stop-opacity': 0 }),
   );
 
@@ -303,6 +546,7 @@ function el(name, attributes = {}) {
   return node;
 }
 
-function round(value) {
-  return Math.round(value * 100) / 100;
+function round(value, decimals = 2) {
+  const scale = 10 ** decimals;
+  return Math.round(value * scale) / scale;
 }

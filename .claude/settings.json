@@ -1,80 +1,37 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git config *)",
-      "Bash(find /Users/joel/dev/vs-code -maxdepth 3 -iname \"CONTEXT*\" 2>/dev/null; echo \"---claude dir---\"; find /Users/joel/dev/vs-code/svg-landscape/.claude -type f | head -20; echo \"---git---\"; git status --short)",
-      "Read(//Users/joel/dev/vs-code/**)",
-      "Bash(rm -rf viteinit)",
-      "Bash(npm create *)",
-      "Bash(npm install *)",
-      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\(p.dependencies,null,2\\),JSON.stringify\\(p.devDependencies,null,2\\)\\)\")",
-      "Bash(npm run *)",
-      "Bash(curl -s --retry 10 --retry-all-errors --retry-delay 1 --retry-connrefused http://localhost:5173/svg-landscape/ -o /tmp/idx.html -w \"index: %{http_code}\\\\n\")",
-      "Bash(curl -s http://localhost:5173/svg-landscape/src/main.js -o /dev/null -w \"main.js: %{http_code}\\\\n\")",
-      "Bash(curl -s http://localhost:5173/svg-landscape/src/archetypes/index.js -o /dev/null -w \"archetypes/index.js: %{http_code}\\\\n\")",
-      "Bash(curl -s http://localhost:5173/svg-landscape/favicon.svg -o /dev/null -w \"favicon: %{http_code}\\\\n\")",
-      "Bash(lsof -nP -iTCP:5173 -iTCP:5174 -sTCP:LISTEN)",
-      "Bash(curl -s http://localhost:5174/svg-landscape/ -o /tmp/idx5174.html -w \"index: %{http_code}\\\\n\")",
-      "Bash(curl -s http://localhost:5174/svg-landscape/src/main.js -o /tmp/main5174.js -w \"main.js: %{http_code}\\\\n\")",
-      "Bash(curl -s http://localhost:5174/svg-landscape/src/archetypes/index.js -o /dev/null -w \"archetypes/index.js: %{http_code}\\\\n\")",
-      "Bash(curl -s http://localhost:5174/svg-landscape/favicon.svg -o /dev/null -w \"favicon: %{http_code}\\\\n\")",
-      "Bash(ps -p 79614 -o pid,command)",
-      "Bash(kill 79614)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\(p.dependencies,null,2\\)\\)\")",
-      "Bash(node -e \"const s=require\\('simplex-noise'\\);console.log\\('simplex exports:',Object.keys\\(s\\)\\)\")",
-      "Bash(node -e \"import\\('simplex-noise'\\).then\\(s=>console.log\\(Object.keys\\(s\\)\\)\\)\")",
-      "Bash(node -e \"import\\('lucide'\\).then\\(l=>console.log\\(['createIcons','Download','Sun','Moon','Monitor','RefreshCw','Mountain'].map\\(k=>k+':'+typeof l[k]\\).join\\(' '\\)\\)\\)\")",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/render-check.mjs 12345 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out.svg)",
-      "Bash(rsvg-convert -w 800 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out.png)",
-      "Bash(perl -pi -e 's{'\\\\''\\\\.\\\\./\\\\.\\\\./\\\\.\\\\./\\\\.\\\\./\\\\.\\\\./Users/joel/dev/vs-code/svg-landscape/src/}{'\\\\''file:///Users/joel/dev/vs-code/svg-landscape/src/}g' /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/render-check.mjs)",
-      "Bash(rsvg-convert -w 900 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out.png)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/render-check.mjs 777 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out2.svg)",
-      "Bash(rsvg-convert -w 900 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out2.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/out2.png)",
-      "Bash(SP=/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad *)",
-      "Read(//private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/tasks/**)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/page-check.mjs http://localhost:5174/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/theme-check.mjs http://localhost:5174/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad)",
-      "Bash(pkill -f \"remote-debugging-port=9222\")",
-      "Bash(rsvg-convert -w 600 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/s4242.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/s4242.png)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/all-check.mjs /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad '{}')",
-      "Bash(node -e ' *)",
-      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --disable-gpu --hide-scrollbars --window-size=1500,1160 --screenshot=/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.png file:///private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.html)",
-      "Bash(chmod +x /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh)",
-      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh sheet *)",
-      "Bash(rsvg-convert -w 700 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/a-gorge.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/gorge-only.png)",
-      "Bash(chmod +x /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/chrome.sh)",
-      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/chrome.sh)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/phase3-check.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/probe.mjs http://localhost:5173/svg-landscape/)",
-      "Bash(python3 - /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/phase3-check.mjs)",
-      "Bash(perl -pi -e 's/\\\\$\\\\{'\\\\''\\\\$\\\\{checked\\\\}'\\\\''\\\\}/\\\\$\\\\{checked\\\\}/' /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/phase3-check.mjs)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'V valley' 16:9 page-panel)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'Stacked ridges' 'LinkedIn 4:1' page-wide)",
-      "Bash(rm -f /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/a-*.svg)",
-      "Bash(/private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/sheet.sh final *)",
-      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.85,/ridgeWeight: ridgeWeightFor\\(0.85, sharpness\\),/; s/ridgeWeight: 0\\\\.45,/ridgeWeight: ridgeWeightFor\\(0.45, sharpness\\),/\" src/archetypes/v-valley.js)",
-      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.9,/ridgeWeight: ridgeWeightFor\\(0.9, sharpness\\),/; s/ridgeWeight: 0\\\\.25,/ridgeWeight: ridgeWeightFor\\(0.25, sharpness\\),/\" src/archetypes/gorge.js)",
-      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.9,/ridgeWeight: ridgeWeightFor\\(0.9, sharpness\\),/; s/ridgeWeight: 0\\\\.2,/ridgeWeight: ridgeWeightFor\\(0.2, sharpness\\),/\" src/archetypes/in-gorge.js)",
-      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.9,/ridgeWeight: ridgeWeightFor\\(0.9, sharpness\\),/g; s/ridgeWeight: 0\\\\.2,/ridgeWeight: ridgeWeightFor\\(0.2, sharpness\\),/g\" src/archetypes/valley-floor.js)",
-      "Bash(perl -0pi -e \"s/sharpness: 1\\\\.35 \\\\+ p \\\\* 0\\\\.8,/sharpness: peakExponent\\(sharpness, p * 0.5\\),/; s/ridgeWeight: 0\\\\.85 - p \\\\* 0\\\\.4,/ridgeWeight: ridgeWeightFor\\(0.85 - p * 0.4, sharpness\\),/; s/ridgeWeight: 0\\\\.1,/ridgeWeight: ridgeWeightFor\\(0.1, sharpness\\),/\" src/archetypes/mountain-top.js)",
-      "Bash(perl -0pi -e \"s/ridgeWeight: 0\\\\.7 - p \\\\* 0\\\\.35,/ridgeWeight: ridgeWeightFor\\(0.7 - p * 0.35, sharpness\\),/\" src/archetypes/stacked-ridges.js)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/margins.mjs http://localhost:5173/svg-landscape/)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad Gorge 16:9 p35-gorge-pov)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot-panel.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad Gorge panel-gorge)",
-      "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/shot-panel.mjs http://localhost:5173/svg-landscape/ /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad 'V valley' panel-vvalley)",
-      "Bash(rsvg-convert -w 1200 /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/a-v-valley.e1.svg -o /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/939fdd59-68be-462e-9474-b44a6765bc8b/scratchpad/vv1.png)",
-      "Bash(perl -0pi -e \"s/^Every archetype exports\\\\n\\\\`generate\\\\\\(\\\\{ seed, elevation, complexity, width, height \\\\}\\\\\\)\\\\` and returns/Every archetype exports\\\\n\\\\`generate\\({ seed, elevation, complexity, peakCount, sharpness, width, height }\\)\\\\`\\\\nand returns/m\" README.md)",
-      "Bash(pkill -f \"headless=new\")",
-      "Bash(sed -n '/^## 5\\\\./,/^## 6\\\\. Pseudo/p' CONTEXT.md)",
-      "Bash(sed -n '/^## 6a\\\\./,/^## 7\\\\./p' CONTEXT.md)",
-      "Bash(sed -n '/^## 8\\\\./,/^## 9\\\\./p' CONTEXT.md)",
-      "Bash(perl -0pi -e \"s/    const base = horizonY \\\\+ height \\\\* 0\\\\.05 \\\\+ p \\\\* height \\\\* 0\\\\.24;/    const base = horizonY + height * 0.05 + p * height * 0.24 * nesting;/\" src/archetypes/valley-floor.js)",
-      "Bash(perl -0pi -e \"s/    const base = height \\\\* \\\\\\(0\\\\.66 \\\\+ k \\\\* 0\\\\.12\\\\\\);/    const base = horizonY + height * \\(0.36 + k * 0.12\\) * nesting;/\" src/archetypes/valley-floor.js)",
-      "Bash(perl -0pi -e \"s/  const gap = 0\\\\.07;/  \\\\/\\\\/ The framing spurs pull in toward the split as the viewer climbs.\\\\n  const gap = 0.07 * nesting;/\" src/archetypes/valley-floor.js)",
-      "Bash(perl -0pi -e \"s|      t: summitT \\\\+ \\\\\\(side \\\\* \\\\\\(0\\\\.17 \\\\+ rank \\\\* 0\\\\.13\\\\\\)\\\\\\) / scale,|      t: summitT + \\(side * \\(0.17 + rank * 0.13\\) * nesting\\) / scale,|\" src/archetypes/dominant-peak.js)",
-      "Bash(perl -0pi -e \"s|          height \\\\* spec\\\\.base -\\\\n          height \\\\*\\\\n            spec\\\\.amplitude \\\\*|          horizonY + height * \\(spec.base - 0.46\\) * groundNesting -\\\\n          height *\\\\n            spec.amplitude *|\" src/archetypes/dominant-peak.js)"
+      "Bash",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Read(**/.env*)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)"
+    ]
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          { "type": "command", "command": "afplay /System/Library/Sounds/Pop.aiff &" }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          { "type": "command", "command": "afplay /System/Library/Sounds/Glass.aiff &" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "afplay /System/Library/Sounds/Hero.aiff &" }
+        ]
+      }
     ]
   }
 }

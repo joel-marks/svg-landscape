@@ -1,0 +1,9 @@
+Preset files live here: drop an exported settings JSON (Downloads tab ->
+Download JSON) into this folder and it appears in the Presets dropdown on the
+next load. No manifest, no code change — src/presets.js globs *.json at build
+time (CONTEXT.md section 5).
+
+The dropdown label comes from the file's `presetName` field, falling back to a
+label derived from the filename when it has none.
+
+This placeholder only exists to keep the folder in git while it is empty.

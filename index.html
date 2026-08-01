@@ -6,14 +6,14 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!-- PLACEHOLDER copy — final title/description/OG values land in the SEO pass (CONTEXT.md section 11). -->
-    <title>Landscape SVG Generator</title>
+    <title>SVG Landscape Generator</title>
     <meta
       name="description"
       content="PLACEHOLDER — Generate procedural 2D landscape SVGs in the browser and download them. No backend, no accounts."
     />
 
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Landscape SVG Generator" />
+    <meta property="og:title" content="SVG Landscape Generator" />
     <meta
       property="og:description"
       content="PLACEHOLDER — Generate procedural 2D landscape SVGs in the browser and download them."
@@ -31,7 +31,7 @@
            resolves to the same computed value (CONTEXT.md section 5). -->
       <div class="shell flex items-center gap-4 py-3">
         <h1 class="text-base font-semibold tracking-tight">
-          Landscape SVG Generator
+          SVG Landscape Generator
         </h1>
 
         <button
@@ -52,7 +52,7 @@
       <figure class="m-0">
         <div
           id="canvas-frame"
-          class="aspect-video overflow-hidden rounded-lg border border-border-token bg-surface-sunken shadow-sm"
+          class="aspect-video overflow-hidden rounded-lg bg-surface-sunken shadow-sm"
         >
           <svg
             id="landscape"
@@ -73,8 +73,17 @@
            LinkedIn strip. Each column hosts one Tweakpane instance; the folder
            titles inside are the accordion headings, so there is no separate
            markup chrome to keep in sync with them. -->
-      <div id="control-columns" class="mt-6 grid items-start gap-4 lg:grid-cols-3">
-        <section id="panel-left" aria-label="Canvas and scene controls"></section>
+      <div
+        id="control-columns"
+        class="tweakpane-scope mt-6 grid items-start gap-4 lg:grid-cols-3"
+      >
+        <!-- The left column stacks two panes: Presets on top as its own panel,
+             then Canvas/Scene. The inner gap matches the grid's own gutter so
+             the stack reads on the same rhythm as the columns beside it. -->
+        <div class="flex flex-col gap-4">
+          <section id="panel-presets" aria-label="Presets"></section>
+          <section id="panel-left" aria-label="Canvas and scene controls"></section>
+        </div>
         <section id="panel-centre" aria-label="Lighting and colour controls"></section>
         <section id="panel-right" aria-label="Actions"></section>
       </div>

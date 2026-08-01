@@ -63,8 +63,11 @@
      Keyed off the same `dark` class on <html> that theme.js already toggles,
      which means Light / Dark / System all resolve through one code path and the
      panel needs no separate JS wiring. Light is the default here; the .dark
-     block below overrides it. */
-  #control-columns {
+     block below overrides it.
+
+     Applied by class rather than by id so any container hosting a Pane picks
+     the tokens up. */
+  .tweakpane-scope {
     --tp-base-background-color: #ffffff;
     --tp-base-shadow-color: rgb(15 23 32 / 0.08);
 
@@ -94,7 +97,7 @@
     --tp-monitor-foreground-color: #59636e;
   }
 
-  .dark #control-columns {
+  .dark .tweakpane-scope {
     --tp-base-background-color: #161d23;
     --tp-base-shadow-color: rgb(0 0 0 / 0.3);
 
@@ -152,8 +155,8 @@
   }
 
   /* Tweakpane keeps its native styling (CONTEXT.md section 2); it only needs
-     to fill the column it is given rather than its default fixed width. */
-  #control-columns .tp-rotv {
+     to fill the container it is given rather than its default fixed width. */
+  .tweakpane-scope .tp-rotv {
     width: 100%;
   }
 
@@ -163,6 +166,17 @@
      uses preserveAspectRatio="meet", so a capped frame pillarboxes rather than
      cropping: the preview keeps matching the file you download. */
   #canvas-frame {
+    /* The frame's edge is an *inset ring* rather than a `border`, because a
+       border is what put a visible gap around the image (CONTEXT.md section 5,
+       and the section 18 entry this closes). A border insets the content box,
+       so the SVG lost a pixel on every side; worse, the frame's `aspect-ratio`
+       resolves against the border box, so the content box came out at a
+       slightly different ratio than the viewBox and `preserveAspectRatio=meet`
+       added a sub-pixel bar on top of that. A ring paints over the image
+       instead of displacing it, leaving content box == border box == the
+       viewBox ratio, so the SVG lands flush on all four edges. */
+    box-shadow: inset 0 0 0 1px var(--border);
+
     /* The explicit width matters: with only `aspect-ratio` and `max-height`,
        the ratio resolves the other way and shrinks the frame's *width* to match
        the capped height, pulling its right edge off the shell gutter. A
@@ -181,5 +195,13 @@
        reintroduces the bug on shorter screens, because 58vh resolved to 522px
        on a 900px-tall viewport and pillarboxed the default 16:9 canvas. */
     max-height: 740px;
+  }
+
+  /* Corner clipping stated on the image itself, not left to the frame's
+     `overflow: hidden` alone — the SVG is the thing that has to read as
+     rounded, and an explicit radius survives any future change to how the
+     frame stacks or transforms. */
+  #landscape {
+    border-radius: inherit;
   }
 }

@@ -24,6 +24,37 @@ export function smoothstep(t) {
   return x * x * (3 - 2 * x);
 }
 
+// Non-linear slider response (CONTEXT.md section 6b). The slider the user drags
+// stays a plain linear 0–1 control; this maps that position to the value
+// actually rendered, so a parameter whose interesting range is bunched into one
+// end of its travel gets that range spread across the whole slider.
+//
+// One shared mapping, parameterised — not a bespoke curve per control.
+// `exponent` > 1 pushes output toward 0, which is what "more resolution at the
+// low end" means: the higher the exponent, the further up the slider you have
+// to drag before the value climbs. Both current callers want that shape and
+// differ only in how hard: Shadow intensity mildly, Valley mist strongly.
+export function responseCurve(exponent) {
+  return (position) => clamp01(position) ** exponent;
+}
+
+export function normalizeAngle(degrees) {
+  return ((degrees % 360) + 360) % 360;
+}
+
+// Reduces a free-text name to a safe, stable slug. Shared by the preset ids
+// (presets.js) and the download filenames (main.js) so a preset called from
+// the panel and a file saved from it end up with the same spelling. Length is
+// capped because the name is user-typed and ends up in a filename.
+export function slugify(value, { maxLength = 48 } = {}) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, maxLength)
+    .replace(/-+$/, '');
+}
+
 // Never below 1 — a 4:3 canvas keeps 16:9 density rather than losing features.
 export function widthScale(width) {
   return Math.max(1, width / BASE_WIDTH);

@@ -1,0 +1,23 @@
+{
+  "app": "svg-landscape",
+  "presetName": "Rocky sunset blues",
+  "archetype": "open-valley",
+  "seed": 4188676866,
+  "complexity": 1,
+  "peakCount": 0.46,
+  "sharpness": 0.56,
+  "elevation": 0.65,
+  "aspect": "cine",
+  "hour": 16.299999999999997,
+  "showBodies": true,
+  "showStars": true,
+  "shadow": true,
+  "lightAngle": 307,
+  "lockAngle": false,
+  "shadowIntensity": 0.51,
+  "palette": "alpine-dusk",
+  "colorDepth": 0.85,
+  "haze": 0.26,
+  "valleyMist": 0.45,
+  "mistDistance": 1
+}

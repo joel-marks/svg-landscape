@@ -13,6 +13,7 @@ import { render } from './render.js';
 import { initControls } from './controls.js';
 import { downloadSettings, downloadSVG } from './download.js';
 import { cycleThemeMode, getThemeMode, initTheme, onThemeChange } from './theme.js';
+import { slugify } from './utils.js';
 
 const svg = document.querySelector('#landscape');
 const frame = document.querySelector('#canvas-frame');
@@ -54,7 +55,16 @@ onThemeChange(syncThemeButton);
 
 function exportName() {
   const { label } = getArchetype(state.archetype);
-  return `landscape-${label.toLowerCase().replace(/\s+/g, '-')}-${state.seed}`;
+  return `landscape-${slugify(label)}-${state.seed}`;
+}
+
+// A named settings export is easier to find on disk by the name the user gave
+// it than by the archetype it happens to use, so the name takes the
+// archetype's place when one is set. Blank — or a name that sanitizes away to
+// nothing — falls back to the unnamed form.
+function settingsName() {
+  const named = slugify(state.presetName);
+  return named ? `landscape-${named}-${state.seed}` : exportName();
 }
 
 createIcons({
@@ -63,12 +73,13 @@ createIcons({
 });
 
 initControls({
+  presetsContainer: document.querySelector('#panel-presets'),
   leftContainer: document.querySelector('#panel-left'),
   centreContainer: document.querySelector('#panel-centre'),
   rightContainer: document.querySelector('#panel-right'),
   onDownloadSVG: () => downloadSVG(svg, `${exportName()}.svg`),
   onDownloadSettings: () =>
-    downloadSettings(exportSettings(), `${exportName()}.json`),
+    downloadSettings(exportSettings(), `${settingsName()}.json`),
 });
 
 initTheme();
