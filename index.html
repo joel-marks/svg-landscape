@@ -29,22 +29,13 @@
     <header class="border-b border-border-token bg-surface-raised">
       <!-- `shell` is shared by header, main and footer so every side margin
            resolves to the same computed value (CONTEXT.md section 5). -->
+      <!-- The theme toggle that used to sit here moved into the panel's
+           Preferences folder in Phase 6 (CONTEXT.md section 5) — it is not
+           duplicated here. -->
       <div class="shell flex items-center gap-4 py-3">
         <h1 class="text-base font-semibold tracking-tight">
           SVG Landscape Generator
         </h1>
-
-        <button
-          id="theme-toggle"
-          type="button"
-          class="ml-auto inline-flex items-center gap-2 rounded-md border border-border-token bg-surface px-2.5 py-1.5 text-sm text-muted transition-colors hover:text-text"
-          aria-label="Theme: system"
-        >
-          <span data-theme-icon="system"><i data-lucide="monitor"></i></span>
-          <span data-theme-icon="light" hidden><i data-lucide="sun"></i></span>
-          <span data-theme-icon="dark" hidden><i data-lucide="moon"></i></span>
-          <span id="theme-label" class="hidden sm:inline">System</span>
-        </button>
       </div>
     </header>
 
@@ -85,7 +76,7 @@
           <section id="panel-left" aria-label="Canvas and scene controls"></section>
         </div>
         <section id="panel-centre" aria-label="Lighting and colour controls"></section>
-        <section id="panel-right" aria-label="Actions"></section>
+        <section id="panel-right" aria-label="Actions and preferences"></section>
       </div>
     </main>
 

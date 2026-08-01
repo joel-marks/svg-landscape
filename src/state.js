@@ -1,11 +1,9 @@
 // state.js — central state object + localStorage load/save.
 // Owns all control values (scene, lighting, color, canvas) plus the numeric
-// seed, and persists UI theme, tips toggle, and last-used control values
-// (CONTEXT.md section 7). localStorage is the only persistence mechanism.
-//
-// Phase 3 scope: scene and canvas values, plus the single regenerate() entry
-// point every control binding calls. load/save are still stubs — full
-// persistence is Phase 6. (theme.js persists the UI theme on its own.)
+// seed, and persists the tips toggle and last-used control values (CONTEXT.md
+// section 7). localStorage is the only persistence mechanism. The UI theme is
+// the one preference persisted elsewhere — theme.js has owned its own key
+// since Phase 2 and keeps it.
 
 import { getArchetype } from './archetypes/index.js';
 import { computeLighting, suggestedAngle } from './lighting.js';
@@ -104,7 +102,23 @@ export const state = {
   // and `presetName` is a label the user types for an export.
   preset: CUSTOM_PRESET_ID,
   presetName: '',
+
+  // Preferences (CONTEXT.md section 5). One-line captions under the folder
+  // headings; on by default so a first-time visitor gets the explanation
+  // without having to find the switch that turns it on.
+  tips: true,
 };
+
+// The factory defaults Reset to defaults restores (CONTEXT.md section 5,
+// Actions). Snapshotted from the literal above at module load, before anything
+// — a restored localStorage blob included — has had a chance to write to it, so
+// "default" here means the spec's value and not the last-used one.
+//
+// The seed is the deliberate exception: its factory value is a *fresh draw*
+// (that is what a first-ever visitor gets), not whichever number this page load
+// happened to start with, so resetToDefaults() redraws it rather than restoring
+// the snapshot's.
+const FACTORY_DEFAULTS = Object.freeze(structuredClone(state));
 
 // The control values a settings object carries — audited against CONTEXT.md
 // section 5 control by control in Phase 5.12, after the list had twice drifted
@@ -323,8 +337,18 @@ function exportsCustomPalette() {
 // state and redraws. `reseed` is left at 'none': the settings carry their own
 // seed, and drawing a new one would mean a preset never reproduced its scene.
 export function applySettings(settings) {
+  assignSettings(settings);
+  return regenerate();
+}
+
+// The write half of applySettings, without the redraw. Split out for
+// loadState(), which runs before the first render — there is no scene to
+// regenerate at that point, and the render main.js triggers afterwards is the
+// first one either way.
+function assignSettings(settings) {
   for (const key of SETTINGS_KEYS) {
     if (settings[key] === undefined) continue;
+    if (!plausible(key, settings[key])) continue;
     state[key] = settings[key];
   }
 
@@ -337,8 +361,18 @@ export function applySettings(settings) {
   // it here is what makes tracking resume from the loaded position instead of
   // whatever phase the previous scene happened to be locked at.
   if (state.lockAngle) captureAngleOffset();
+}
 
-  return regenerate();
+// A coarse type guard, not a schema. localStorage and the preset files are both
+// hand-editable, and a string where a number belongs would otherwise reach the
+// generators as NaN geometry. Unknown *values* of the right type are already
+// safe — getArchetype, getTheme and aspectWidth each fall back on their own —
+// so matching the factory default's type is all this needs to catch.
+function plausible(key, value) {
+  const expected = FACTORY_DEFAULTS[key];
+  // customPalette: null when curated, an array of colours when generated.
+  if (expected === null) return value === null || Array.isArray(value);
+  return typeof value === typeof expected;
 }
 
 // Which preset, if any, the live scene currently is. Called after every change,
@@ -371,10 +405,87 @@ function sameValue(a, b) {
   return a === b;
 }
 
-export function loadState() {
-  // Phase 6 — restore last-used control values from localStorage.
+// --- persistence (CONTEXT.md section 7) --------------------------------------
+
+const STORAGE_KEY = 'svg-landscape:state';
+
+// Panel values a returning visitor expects to find as they left them, but which
+// are deliberately not scene parameters and so are not in SETTINGS_KEYS: the
+// seed lock is a guard on how the seed changes, `presetName` labels an export,
+// and `tips` is a preference. The saved blob is therefore a *superset* of a
+// settings export, not a second format — everything in it that a preset file
+// also carries sits under the same key, in the same shape.
+const EXTRA_PERSISTED_KEYS = ['seedLocked', 'presetName', 'tips'];
+
+// Called on every control change, from the same refresh() the panel already
+// runs after one (see controls.js) — so "saved" and "what the panel is showing"
+// can't come apart. Storage being unavailable (private mode, blocked) costs the
+// restore, not the session, so it fails quietly.
+export function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedState()));
+  } catch {
+    // Nothing to do — the app runs unpersisted for this session.
+  }
 }
 
-export function saveState() {
-  // Phase 6 — persist last-used control values to localStorage.
+// Restores the last-used state, seed included, before the first render. Returns
+// whether anything was restored; false is a first-ever visit, where the factory
+// defaults the state literal already holds are exactly what should render.
+export function loadState() {
+  let saved;
+  try {
+    saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
+  } catch {
+    // Unreadable or corrupt: fall through to factory defaults rather than
+    // leaving the app on a blank canvas.
+    saved = null;
+  }
+
+  if (!saved || typeof saved !== 'object') return false;
+
+  assignSettings(saved);
+
+  for (const key of EXTRA_PERSISTED_KEYS) {
+    if (saved[key] === undefined) continue;
+    if (!plausible(key, saved[key])) continue;
+    state[key] = saved[key];
+  }
+
+  return true;
+}
+
+function persistedState() {
+  const saved = exportSettings();
+  for (const key of EXTRA_PERSISTED_KEYS) saved[key] = state[key];
+  return saved;
+}
+
+// Preferences are about the interface, not the artwork, so Reset — a button on
+// the Actions tab — leaves them where the user put them. The UI theme is
+// excluded by construction (theme.js owns it, not this object); `tips` has to
+// be excluded explicitly, because resetting one Preference and not the other
+// would be the incoherent outcome. Reset means "reset the scene and the panel
+// that builds it", not "undo my interface settings".
+const RESET_EXEMPT = new Set(['tips']);
+
+// Reset to defaults (CONTEXT.md section 5, Actions tab 1). Restores the spec's
+// values, *not* the last-used ones — which is the whole point of the control,
+// and why it reads from the FACTORY_DEFAULTS snapshot rather than from storage.
+//
+// It does not save: the caller refreshes the panel afterwards like any other
+// change, and that is what persists it, through the one save path rather than a
+// second one that could drift.
+export function resetToDefaults() {
+  for (const [key, value] of Object.entries(FACTORY_DEFAULTS)) {
+    if (RESET_EXEMPT.has(key)) continue;
+    state[key] = Array.isArray(value) ? [...value] : value;
+  }
+
+  // See FACTORY_DEFAULTS: the seed's default is a new draw, not the one this
+  // page load opened with.
+  state.seed = randomSeed();
+  setAspect(state.aspect);
+
+  return regenerate();
 }

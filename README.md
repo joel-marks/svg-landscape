@@ -11,7 +11,7 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 5.12. All nine landscape archetypes generate and are
+> **Status:** Phase 6. All nine landscape archetypes generate and are
 > selectable from the control panel, with complexity, peak count, peak
 > sharpness, viewpoint height, seed lock, aspect ratio, a continuous
 > time-of-day lighting system with sun/moon and star visibility toggles, an
@@ -22,8 +22,10 @@ deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 > Both the SVG and its settings JSON export, the latter with an optional preset
 > name and a live preview, and now carrying every control that affects the
 > render. Presets load from `src/presets/*.json`, auto-discovered at build time,
-> with one preset shipped. Persistence, reset and help (Phase 6) are still to
-> come.
+> with one preset shipped. The whole panel state, seed included, is remembered
+> between visits; a Preferences folder carries the UI theme, the folder tips and
+> the help modal, and Reset to defaults puts everything back. Accessibility,
+> SEO and the responsive pass (Phase 7) are still to come.
 
 ## Landscape types
 
@@ -59,11 +61,20 @@ point-of-view height, seed (display + lock), New View.
 shadow toggle, light source angle, the angle tidelock and shadow intensity; then
 theme preset with its Previous / Randomise / Next row, colour depth, distance
 haze, valley mist and its distance grading.
-**Right — Actions.** Two tabs: **SVG** (Download SVG) and **JSON** (preset name,
-Download JSON, and a live preview of the file that button writes).
+**Right — Actions, Preferences.** Actions has two tabs: **SVG** (Download SVG,
+Reset to defaults) and **JSON** (preset name, Download JSON, and a live preview
+of the file that button writes). Preferences holds the UI theme, the Tips
+switch and Help.
 
 The left column stacks two panes rather than one: the **Presets** dropdown sits
 on top in a panel of its own, with Canvas and Scene in the panel beneath it.
+
+**Reset to defaults** sits beside Download SVG rather than on the JSON tab —
+it is a general app action, not part of naming and exporting a preset. It
+restores the spec's factory values rather than the last-used ones, draws a
+fresh seed, and saves that as the new last-used state, so a reload afterwards
+comes back reset. Your UI theme and Tips setting are interface preferences and
+are deliberately left alone.
 
 | Slider | What it does |
 | --- | --- |
@@ -357,6 +368,55 @@ change rather than tracked with a dirty flag, so it can't go stale.
 There is no in-app "save current as preset" yet — the folder drop above is the
 authoring path.
 
+## Persistence
+
+Everything is kept in **localStorage** — there is no backend and no other
+storage mechanism. Two keys:
+
+| Key | Holds |
+| --- | --- |
+| `svg-landscape:state` | The whole panel state: every settings-export key plus the seed lock, preset name and Tips switch |
+| `svg-landscape:theme` | The UI theme mode — `system`, `light` or `dark` |
+
+The scene blob is written on **every control change**, from the same panel
+refresh that already runs after one, so what is saved and what the panel is
+showing cannot come apart. It reuses `SETTINGS_KEYS` — the same list the export
+and the preset loader are built from — rather than inventing a second shape, so
+it is a settings export plus the three panel values that deliberately are not
+scene parameters.
+
+It is restored **before the first render**, seed included: come back later and
+you get the exact scene you left, not the same slider positions with a new
+random landscape. Loading a preset saves like any other change, so the preset
+you loaded is what you come back to — and the Preset dropdown, being recomputed
+from the state rather than stored, still reads as that preset after a reload.
+
+A first-ever visit restores nothing and renders the factory defaults.
+Unreadable, corrupt or hand-edited storage falls back the same way rather than
+erroring, and individual values that are the wrong type are skipped rather than
+handed to the generators — the app has to survive a bad blob, since anyone can
+edit one.
+
+The theme keeps its own key. It is an interface preference rather than part of
+the scene, and it has to be readable before any of the scene state is loaded.
+
+## Help and tips
+
+**Tips**, in Preferences, puts a one-line caption under each of the Scene,
+Canvas, Lighting, Color and Actions folder headings saying what that group is
+for. Switching it off removes the captions from the page entirely rather than
+dimming them. The setting persists with everything else.
+
+**Help** opens a single in-app modal — no separate route or page, this stays a
+one-pager. It explains the controls end-user-first, group by group in the same
+order as the panel, carries the seed/reproducibility caveat, and says where the
+Tips switch is. It is a native `<dialog>` opened with `showModal()`, so Escape
+closes it, focus moves in and returns to the Help button afterwards, and the
+page behind it goes inert — behaviours a hand-rolled overlay would have to
+reimplement, which is where keyboard traps come from. There are explicit Close
+controls at both ends of the dialog; click-outside also works, but never as the
+only way out, since it is unreachable from a keyboard.
+
 ## The seed lock
 
 **Lock seed is on by default.** It guards against *incidental* reseeding only:
@@ -448,10 +508,14 @@ palette ramp position.
 
 ## Theming
 
-The interface has three modes — Light, Dark, and System — cycled from the
-header button and remembered in localStorage. System follows
+The interface has three modes — Light, Dark, and System — chosen from **UI
+theme** in the Preferences folder and remembered in localStorage. System follows
 `prefers-color-scheme` live. All three resolve to a single `dark` class on
 `<html>`, which the tokens in `src/style.css` key off.
+
+The control lived in a header button that cycled the three modes until Phase 6,
+when it moved into the panel with the rest of the preferences. It is not
+duplicated in the header.
 
 This is interface chrome only. The in-scene time-of-day lighting that tints the
 sky and drives shadows, and the palette that colours the terrain, are separate

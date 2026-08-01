@@ -1,26 +1,18 @@
 // main.js — entry point: wires state, controls, render.
-// Phase 3 scope: the Tweakpane panel drives generation for all nine
-// archetypes. Lighting, palette controls, and persistence arrive in later
-// phases.
 
 import './style.css';
 
-import { createIcons, Monitor, Moon, Sun } from 'lucide';
-
-import { exportSettings, regenerate, setRenderer, state } from './state.js';
+import { exportSettings, loadState, regenerate, setRenderer, state } from './state.js';
 import { getArchetype } from './archetypes/index.js';
 import { render } from './render.js';
 import { initControls } from './controls.js';
 import { downloadSettings, downloadSVG } from './download.js';
-import { cycleThemeMode, getThemeMode, initTheme, onThemeChange } from './theme.js';
+import { initHelp } from './help.js';
+import { initTheme } from './theme.js';
 import { slugify } from './utils.js';
 
 const svg = document.querySelector('#landscape');
 const frame = document.querySelector('#canvas-frame');
-const themeToggle = document.querySelector('#theme-toggle');
-const themeLabel = document.querySelector('#theme-label');
-
-const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 
 setRenderer((geometry, paint, archetype) => {
   render(svg, geometry, paint);
@@ -33,25 +25,6 @@ setRenderer((geometry, paint, archetype) => {
     `Procedurally generated ${archetype.label} landscape, seed ${state.seed}`,
   );
 });
-
-function syncThemeButton() {
-  const mode = getThemeMode();
-  for (const icon of themeToggle.querySelectorAll('[data-theme-icon]')) {
-    icon.hidden = icon.dataset.themeIcon !== mode;
-  }
-  themeLabel.textContent = THEME_LABELS[mode];
-  themeToggle.setAttribute(
-    'aria-label',
-    `Theme: ${THEME_LABELS[mode].toLowerCase()}`,
-  );
-}
-
-themeToggle.addEventListener('click', () => {
-  cycleThemeMode();
-  syncThemeButton();
-});
-
-onThemeChange(syncThemeButton);
 
 function exportName() {
   const { label } = getArchetype(state.archetype);
@@ -67,10 +40,13 @@ function settingsName() {
   return named ? `landscape-${named}-${state.seed}` : exportName();
 }
 
-createIcons({
-  icons: { Monitor, Moon, Sun },
-  attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
-});
+const help = initHelp();
+
+// Before the panel is built and before the first render (CONTEXT.md section 7),
+// so the controls come up showing the restored values and the scene that draws
+// is the one the visitor left — same seed included. A first visit restores
+// nothing and the factory defaults in state.js are what render.
+loadState();
 
 initControls({
   presetsContainer: document.querySelector('#panel-presets'),
@@ -80,8 +56,8 @@ initControls({
   onDownloadSVG: () => downloadSVG(svg, `${exportName()}.svg`),
   onDownloadSettings: () =>
     downloadSettings(exportSettings(), `${settingsName()}.json`),
+  onHelp: help.open,
 });
 
 initTheme();
-syncThemeButton();
 regenerate();

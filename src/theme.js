@@ -5,12 +5,19 @@
 // Three modes per section 5: 'light' | 'dark' | 'system'. 'system' is the
 // default and follows prefers-color-scheme live. All three resolve down to a
 // single `dark` class on <html>, which is what style.css keys off.
+//
+// The mode is chosen from the Preferences folder in the control panel (Phase 6,
+// CONTEXT.md section 5); the header button that used to cycle it is gone. This
+// module keeps its own storage key rather than joining the settings blob in
+// state.js — the theme is an interface preference, not part of the scene, and
+// it has to be readable before any of that is loaded.
 
 const STORAGE_KEY = 'svg-landscape:theme';
-const MODES = ['system', 'light', 'dark'];
+
+// Dropdown order in the panel, and the list setThemeMode validates against.
+export const THEME_MODES = ['system', 'light', 'dark'];
 
 const query = window.matchMedia('(prefers-color-scheme: dark)');
-const listeners = new Set();
 
 let mode = readStoredMode();
 
@@ -32,7 +39,7 @@ export function getResolvedTheme() {
 }
 
 export function setThemeMode(next) {
-  mode = MODES.includes(next) ? next : 'system';
+  mode = THEME_MODES.includes(next) ? next : 'system';
   try {
     localStorage.setItem(STORAGE_KEY, mode);
   } catch {
@@ -42,26 +49,20 @@ export function setThemeMode(next) {
   return mode;
 }
 
-// System -> Light -> Dark -> System.
-export function cycleThemeMode() {
-  return setThemeMode(MODES[(MODES.indexOf(mode) + 1) % MODES.length]);
-}
-
-export function onThemeChange(listener) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
+// Went with the header button in Phase 6, along with the change-listener
+// registration that only existed to keep that button's icon and label in sync:
+// cycling was the button's affordance — one control standing in for three
+// states — and the Preferences dropdown that replaced it both selects a mode
+// outright and shows the current one without being told.
 
 function apply() {
-  const resolved = getResolvedTheme();
-  document.documentElement.classList.toggle('dark', resolved === 'dark');
-  for (const listener of listeners) listener({ mode, resolved });
+  document.documentElement.classList.toggle('dark', getResolvedTheme() === 'dark');
 }
 
 function readStoredMode() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return MODES.includes(stored) ? stored : 'system';
+    return THEME_MODES.includes(stored) ? stored : 'system';
   } catch {
     return 'system';
   }

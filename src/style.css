@@ -160,6 +160,36 @@
     width: 100%;
   }
 
+  /* Tips captions (CONTEXT.md section 5, Preferences). controls.js inserts one
+     as the first child of a folder's own container, so it reads as a note under
+     the heading rather than as a control. Styled off Tweakpane's own label
+     colour so it sits in the panel's palette in both themes, and matched to the
+     `.tp-fldv_c > *` selectors' specificity so the spacing here wins over the
+     inter-blade margin the pane would otherwise apply. */
+  .tweakpane-scope .tp-fldv_c > .tips-caption {
+    margin: 0 0 8px;
+    padding: 0 4px;
+    color: var(--tp-label-foreground-color);
+    font-size: 10px;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  /* Help modal (CONTEXT.md section 10). A native <dialog>, so most of its
+     behaviour is the browser's; these are the two things Tailwind's preflight
+     and the element's defaults leave to be stated. Preflight zeroes every
+     margin, which is what centres a modal dialog, so `margin: auto` comes
+     back explicitly. */
+  #help-dialog {
+    margin: auto;
+    width: min(44rem, calc(100vw - 2rem));
+    max-height: min(90dvh, calc(100dvh - 3rem));
+  }
+
+  #help-dialog::backdrop {
+    background-color: rgb(9 13 16 / 0.55);
+  }
+
   /* Display cap only — the logical viewBox passed to generate() is untouched
      (CONTEXT.md section 5). Without it a full-width 16:9 frame runs ~700px tall
      and pushes the control columns off a 900px-high desktop viewport. The SVG
