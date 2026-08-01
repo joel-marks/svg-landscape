@@ -3,7 +3,20 @@
     "allow": [
       "Bash",
       "Edit",
-      "Write"
+      "Write",
+      "Bash(git ls-remote *)",
+      "Bash(gh repo *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://api.github.com/repos/joel-marks/svg-landscape)",
+      "Bash(git symbolic-ref *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(git config *)",
+      "Bash(grep -E '^\\(dist/|node_modules/\\)|\\\\.log$')",
+      "Bash(git push *)",
+      "Bash(echo \"PUSH EXIT: $?\")",
+      "Bash(curl -s \"https://api.github.com/repos/joel-marks/svg-landscape/actions/runs?per_page=5\")",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s \"https://api.github.com/repos/joel-marks/svg-landscape/actions/runs/30698532366/jobs\")",
+      "Bash(curl -s \"https://api.github.com/repos/joel-marks/svg-landscape/pages\")"
     ],
     "deny": [
       "Read(**/.env*)",
@@ -16,20 +29,29 @@
       {
         "matcher": "permission_prompt",
         "hooks": [
-          { "type": "command", "command": "afplay /System/Library/Sounds/Pop.aiff &" }
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Pop.aiff &"
+          }
         ]
       },
       {
         "matcher": "idle_prompt",
         "hooks": [
-          { "type": "command", "command": "afplay /System/Library/Sounds/Glass.aiff &" }
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Glass.aiff &"
+          }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "afplay /System/Library/Sounds/Hero.aiff &" }
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Hero.aiff &"
+          }
         ]
       }
     ]
