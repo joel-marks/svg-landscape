@@ -11,7 +11,7 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 6. All nine landscape archetypes generate and are
+> **Status:** Phase 6.5. All nine landscape archetypes generate and are
 > selectable from the control panel, with complexity, peak count, peak
 > sharpness, viewpoint height, seed lock, aspect ratio, a continuous
 > time-of-day lighting system with sun/moon and star visibility toggles, an
@@ -115,6 +115,22 @@ Everything else time of day drives is untouched: the sky gradient, the mist
 tint, and the star *opacity* underneath the switch all keep tracking the hour.
 Turning stars off suppresses them at any hour, including the middle of the
 night when they would otherwise be at full strength.
+
+The star field is a **fixed backdrop**. Positions are generated once per scene
+seed against a reference frame no control can move — the canvas height by the
+widest aspect the app offers — and then clipped to whatever the current canvas
+actually is. Raising the horizon with point-of-view height reveals less of that
+same field, by ordinary draw order: the terrain is painted over the sky and
+hides what falls behind it. A wider aspect reveals further into the field, so
+the star count rises with width at constant density, but no star already on
+screen moves.
+
+This replaced a version that placed each star as a fraction of two moving
+references — `horizonY` vertically and `width` horizontally — which made the
+whole pattern squash as the horizon rose and stretch as the canvas widened. It
+was never per-star distortion: stars are `<circle>` elements and stayed circles
+throughout. See the Phase 6.5 entry in `CONTEXT.md` section 18 for the
+measurements.
 
 **Shadow / pseudo-3D** is off by default and adds a light/dark split to every
 layer. Each layer is divided along an internal boundary — distinct from its
@@ -365,6 +381,14 @@ scene stops matching a saved preset, which includes the first manual change
 after a preset is loaded. That is recomputed from the state itself after every
 change rather than tracked with a dirty flag, so it can't go stale.
 
+Numbers in that comparison are matched to a 1e-9 tolerance rather than exactly.
+Tweakpane's step constraint takes its origin from the value a slider was built
+with, so writing a value back through one that has since moved can land an ulp
+off — `0.5` arriving as `0.49999999999999994` — which under `===` would drop the
+dropdown to Custom immediately after loading the preset that set it. The
+tolerance sits far below the panel's finest step (0.01) and far above the ulp it
+absorbs, so it cannot merge two scenes anyone could tell apart.
+
 There is no in-app "save current as preset" yet — the folder drop above is the
 authoring path.
 
@@ -402,10 +426,23 @@ the scene, and it has to be readable before any of the scene state is loaded.
 
 ## Help and tips
 
-**Tips**, in Preferences, puts a one-line caption under each of the Scene,
-Canvas, Lighting, Color and Actions folder headings saying what that group is
-for. Switching it off removes the captions from the page entirely rather than
-dimming them. The setting persists with everything else.
+**Tips**, in Preferences, puts a small **?** beside each of the Scene, Canvas,
+Lighting, Color and Actions folder headings. Opening one shows a single line
+saying what that group is for — folder-level, not per-control.
+
+The trigger answers to **hover, click or tap, and keyboard focus**, not hover
+alone: a hover-only tooltip is invisible on touch and usually to keyboard users,
+and this app being desktop-first is no reason to ship a control a third of its
+users can't open. A tooltip opened by click or focus outlives the pointer
+moving away; Escape, a click elsewhere, or re-triggering all dismiss it. The
+trigger is a real button placed immediately after its heading, so Tab reaches it
+where you would expect.
+
+It arrived in Phase 6 as a permanent caption under each heading and became a
+tooltip in Phase 6.5, which gives the same explanation without the panel
+carrying five extra lines of text at all times. Switching Tips off removes the
+triggers from the page entirely rather than dimming them. The setting persists
+with everything else.
 
 **Help** opens a single in-app modal — no separate route or page, this stays a
 one-pager. It explains the controls end-user-first, group by group in the same
@@ -441,7 +478,6 @@ one behaviour.
 - [Tweakpane](https://tweakpane.github.io/docs/) — control panel UI
 - [@tweakpane/plugin-essentials](https://github.com/tweakpane/plugin-essentials) — buttongrid blade for the theme row
 - [Tailwind CSS v4](https://tailwindcss.com/) — page chrome and design tokens
-- [Lucide](https://lucide.dev/) — icons
 
 ## Local development
 
@@ -488,6 +524,7 @@ src/
   lighting.js        time-of-day -> sun/moon position, sky blend, shadow angle
   render.js          SVG paint: sky, mist, polygons, shadow split, stars/moon
   controls.js        Tweakpane panes — the three-column panel plus the presets bar
+  tips.js            "?" tooltip trigger + popover beside each folder heading
   download.js        SVG export + settings JSON export
   help.js            help modal content + open/close
   theme.js           UI light/dark theme, prefers-color-scheme, persistence

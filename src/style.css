@@ -160,18 +160,54 @@
     width: 100%;
   }
 
-  /* Tips captions (CONTEXT.md section 5, Preferences). controls.js inserts one
-     as the first child of a folder's own container, so it reads as a note under
-     the heading rather than as a control. Styled off Tweakpane's own label
-     colour so it sits in the panel's palette in both themes, and matched to the
-     `.tp-fldv_c > *` selectors' specificity so the spacing here wins over the
-     inter-blade margin the pane would otherwise apply. */
-  .tweakpane-scope .tp-fldv_c > .tips-caption {
-    margin: 0 0 8px;
-    padding: 0 4px;
-    color: var(--tp-label-foreground-color);
+  /* Tips trigger (CONTEXT.md section 5, Preferences). tips.js inserts one after
+     each folder's title bar. Absolutely positioned rather than in the flow
+     because the title bar is itself a <button> — a trigger nested inside it
+     would be invalid markup and would toggle the folder when clicked. It sits
+     left of Tweakpane's own collapse marker, inside the padding the title bar
+     already reserves on that side.
+
+     Styled off Tweakpane's own custom properties so it follows the panel in
+     both themes without a second set of tokens to keep in sync. */
+  .tweakpane-scope .tips-trigger {
+    position: absolute;
+    top: 0;
+    right: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: calc(var(--tp-container-unit-size, 20px) + 4px);
+    border: 0;
+    padding: 0;
+    background: none;
+    color: var(--tp-container-foreground-color);
+    cursor: help;
+    font: inherit;
     font-size: 10px;
+    line-height: 1;
+    opacity: 0.45;
+  }
+
+  .tweakpane-scope .tips-trigger:hover,
+  .tweakpane-scope .tips-trigger:focus-visible {
+    opacity: 1;
+  }
+
+  /* The popover lives on <body>, so it is outside `.tweakpane-scope` and uses
+     the page's own tokens. Fixed positioning is set inline by tips.js. */
+  #tips-tooltip {
+    position: fixed;
+    z-index: 50;
+    max-width: 15rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border);
+    background-color: var(--surface-raised);
+    box-shadow: 0 4px 12px rgb(9 13 16 / 0.18);
+    color: var(--text);
+    font-size: 0.75rem;
     line-height: 1.45;
+    padding: 0.5rem 0.625rem;
     text-wrap: pretty;
   }
 

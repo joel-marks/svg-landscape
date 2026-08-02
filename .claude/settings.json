@@ -32,7 +32,12 @@
       "Bash(node /private/tmp/claude-501/-Users-joel-dev-vs-code-svg-landscape/d3052431-70cc-4e76-94b7-aa7a36a1368e/scratchpad/verify6.mjs)",
       "Bash(pkill -f \"vite preview\")",
       "Bash(pkill -f \"vite\")",
-      "Bash(sed -i '' \"s|localhost:5174|localhost:5173|\" verify6.mjs)"
+      "Bash(sed -i '' \"s|localhost:5174|localhost:5173|\" verify6.mjs)",
+      "Bash(curl -s \"https://api.github.com/repos/joel-marks/svg-landscape/actions/runs?per_page=2\")",
+      "Bash(python3 -c \"import sys,json;d=json.load\\(sys.stdin\\);[print\\(r['head_sha'][:7], r['name'], r['status'], r['conclusion']\\) for r in d['workflow_runs']]\")",
+      "Bash(curl -s -L \"https://joel-marks.github.io/svg-landscape/\")",
+      "Bash(node stars.mjs)",
+      "Bash(node verify65.mjs)"
     ],
     "deny": [
       "Read(**/.env*)",

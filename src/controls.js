@@ -39,6 +39,7 @@ import {
   syncLockedAngle,
 } from './state.js';
 import { getThemeMode, setThemeMode, THEME_MODES } from './theme.js';
+import { createTips } from './tips.js';
 
 // Elevation is implemented everywhere except In gorge, which is a deferred edge
 // case rather than an oversight (CONTEXT.md section 6a). The control has to say
@@ -57,10 +58,11 @@ const ANGLE_LABEL_LOCKED = 'Light angle (tracking)';
 const THEME_ACTIONS = ['Previous', 'Randomise', 'Next'];
 
 // Tips (CONTEXT.md section 5, Preferences). One line per folder heading saying
-// what the group is for — deliberately not per-control tooltips, which is a far
-// larger build for little more than this gives. Preferences itself has no
-// caption: it is the folder holding the switch these come from.
-const TIP_CAPTIONS = {
+// what the group is for — still folder-level, not per-control: the Phase 6.5
+// change was to how the line is shown ("?" trigger rather than a permanent
+// caption), not to what it covers. Preferences itself has no trigger: it is the
+// folder holding the switch these come from.
+const TIP_TEXT = {
   Canvas: 'Sets the shape and proportions of the image you download.',
   Scene: 'Picks the landform and shapes its terrain — and draws new views of it.',
   Lighting: 'Time of day, sun and stars, and the shadows that give the scene depth.',
@@ -466,37 +468,19 @@ export function initControls({
 
   preferences.addButton({ title: 'Help' }).on('click', () => onHelp?.());
 
-  // Captions are DOM, not blades: Tweakpane has no label-only view, and a
-  // readonly binding would render as a field — which reads as a control you
-  // can't use rather than as a note. Inserted as the first child of the
-  // folder's own container so they sit directly under the heading and collapse
-  // with it (the folder measures that container, so its height stays right).
-  const captioned = [canvas, scene, lighting, colour, actions];
+  // Tooltips are DOM, not blades: Tweakpane has no label-only or trigger view,
+  // and a readonly binding would render as a field — which reads as a control
+  // you can't use rather than as a note. tips.js owns the trigger, the popover
+  // and the three ways of opening it; this only says which folders get one.
+  const tips = createTips(
+    [canvas, scene, lighting, colour, actions].map((folder) => ({
+      folder,
+      text: TIP_TEXT[folder.title],
+    })),
+  );
 
   function syncTips() {
-    for (const folder of captioned) setCaption(folder, TIP_CAPTIONS[folder.title]);
-  }
-
-  // Off removes the node outright rather than hiding it (CONTEXT.md section 5).
-  function setCaption(folder, text) {
-    const container = folder.element.querySelector(':scope > .tp-fldv_c');
-    if (!container) return;
-
-    const existing = container.querySelector(':scope > .tips-caption');
-    if (!state.tips || !text) {
-      existing?.remove();
-      return;
-    }
-
-    if (existing) {
-      existing.textContent = text;
-      return;
-    }
-
-    const caption = document.createElement('p');
-    caption.className = 'tips-caption';
-    caption.textContent = text;
-    container.prepend(caption);
+    tips.sync(state.tips);
   }
 
   function syncShadowAffordance() {

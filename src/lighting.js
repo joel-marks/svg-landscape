@@ -65,7 +65,9 @@ export function computeLighting({
     sky,
     mist,
     starOpacity: smoothstep((-sunAltitude - 0.02) / 0.3),
-    stars: starField(seed, width, horizonY),
+    // Deliberately not given horizonY: the field is a fixed backdrop and the
+    // terrain, drawn over it, is what decides how much of it shows.
+    stars: starField(seed, width, height),
     sun: {
       ...bodyPosition((h - SUNRISE) / 12, sunAltitude, width, horizonY, arc),
       r: bodyRadius,
@@ -127,22 +129,52 @@ function blendSky(hour) {
   return { sky, mist: chroma.mix(lower.mist, upper.mist, t, 'lab').hex() };
 }
 
-// Stable for a given scene seed, so stars don't wander when other controls
-// change. Confined to the sky above the horizon.
-function starField(seed, width, horizonY) {
+// A fixed backdrop for a given scene seed (CONTEXT.md section 5, Lighting).
+// Generated
+// once against a reference frame that no control can move, then clipped to the
+// canvas — so the pattern itself never rescales, and changing the scene only
+// changes how much of it you can see.
+//
+// This replaces a version that placed every star as a *fraction* of two moving
+// references: `y = random() * horizonY * 0.94` and `x = random() * width`. Both
+// were pattern redistribution, not per-star distortion — the stars stayed
+// circles throughout — but the effect was a field that squashed vertically as
+// Point of view height raised the horizon (measured: star #0 at y=438.8 with
+// elevation 0, y=193.6 at elevation 1) and stretched horizontally as a wider
+// aspect widened the canvas (the same star pinned to 92.93% of the width at
+// every aspect). See section 18.
+const FIELD_ASPECT = 4;
+// Density is calibrated to keep the default scene looking as it did before the
+// fix: 110 stars filled a 1600-wide canvas down to a horizon around y=440, and
+// the field now covers the full frame height instead of stopping at the
+// horizon, so the same *visible* density needs proportionally more of them.
+const STARS_PER_REFERENCE_FRAME = 239;
+
+function starField(seed, width, height) {
   const random = createRandom(seed ^ 0x5f3a1c);
-  const count = Math.round(110 * Math.max(1, width / 1600));
+
+  // The widest canvas any aspect can ask for. Generating the field at that size
+  // and clipping is what makes star positions absolute: a star at x=1115 is at
+  // x=1115 on every aspect, and a wider canvas reveals further into the same
+  // field rather than spreading the existing stars across more room.
+  const fieldWidth = height * FIELD_ASPECT;
+  const count = Math.round(STARS_PER_REFERENCE_FRAME * FIELD_ASPECT / (16 / 9));
+
   const stars = [];
 
   for (let i = 0; i < count; i += 1) {
-    const y = random() * horizonY * 0.94;
-    stars.push({
-      x: random() * width,
-      y,
-      r: 0.7 + random() * 1.5,
-      // Thinner near the horizon, as haze would leave them.
-      opacity: 0.35 + 0.65 * random() * (1 - (y / horizonY) * 0.45),
-    });
+    // All four values are drawn for every star, kept or not, so that clipping
+    // to a narrower canvas doesn't shift the random stream and move the stars
+    // that remain.
+    const x = random() * fieldWidth;
+    const y = random() * height;
+    const r = 0.7 + random() * 1.5;
+    // Thinner toward the bottom of the frame, as haze would leave them. Keyed
+    // to the frame rather than to the horizon, which is the coupling this
+    // function exists to be rid of.
+    const opacity = 0.35 + 0.65 * random() * (1 - (y / height) * 0.45);
+
+    if (x <= width) stars.push({ x, y, r, opacity });
   }
 
   return stars;

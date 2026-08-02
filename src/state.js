@@ -391,6 +391,20 @@ function sameSettings(a, b) {
   return SETTINGS_KEYS.every((key) => sameValue(a[key], b[key]));
 }
 
+// Numbers compare to a tolerance rather than exactly (Phase 6.5). Tweakpane's
+// step constraint is `origin % step + round((value - origin) / step) * step`
+// with origin fixed at the value the pane was *constructed* with, so a value
+// written back through a slider that has since moved can land an ulp off what
+// the preset file holds — 0.5 arriving as 0.49999999999999994. Under `===` that
+// reads as a different scene and drops the dropdown to "Custom" immediately
+// after loading the preset that set it.
+//
+// 1e-9 is far below the resolution of every control it guards (the finest step
+// in the panel is 0.01) and far above the ulp being absorbed (~1e-16), so it
+// can't merge two values a user could actually distinguish. It is safe for the
+// seed too: seeds are integers, so the nearest distinct pair differs by 1.
+const EPSILON = 1e-9;
+
 // customPalette is the one array-valued setting, so equality has to reach one
 // level in rather than comparing references.
 function sameValue(a, b) {
@@ -399,8 +413,11 @@ function sameValue(a, b) {
       Array.isArray(a) &&
       Array.isArray(b) &&
       a.length === b.length &&
-      a.every((value, index) => value === b[index])
+      a.every((value, index) => sameValue(value, b[index]))
     );
+  }
+  if (typeof a === 'number' && typeof b === 'number') {
+    return Math.abs(a - b) <= EPSILON;
   }
   return a === b;
 }
