@@ -11,7 +11,7 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 6.7. All nine landscape archetypes generate and are
+> **Status:** Phase 6.8. All nine landscape archetypes generate and are
 > selectable from the control panel, with complexity, peak count, peak
 > sharpness, viewpoint height, seed lock, aspect ratio, a continuous
 > time-of-day lighting system with sun/moon and star visibility toggles, an
@@ -441,9 +441,15 @@ the scene, and it has to be readable before any of the scene state is loaded.
 
 ## Help and tips
 
-**Tips**, in Preferences, puts a small **?** beside each of the Scene, Canvas,
-Lighting, Color and Actions folder headings. Opening one shows a single line
-saying what that group is for — folder-level, not per-control.
+**Tips**, in Preferences, puts a small **?** beside each of the Presets, Canvas,
+Scene, Lighting, Color and Actions folder headings. Opening one shows a single
+line saying what that group is for — folder-level, not per-control.
+
+Preferences itself is the one folder without one, deliberately: it is where the
+Tips switch lives, and explaining "this folder explains things" through the
+mechanism doing the explaining adds nothing. Presets went without one until
+Phase 6.8, which was an oversight rather than a decision — it became a titled
+folder with real controls in 6.6 and should have been covered then.
 
 The trigger answers to **hover, click or tap, and keyboard focus**, not hover
 alone: a hover-only tooltip is invisible on touch and usually to keyboard users,

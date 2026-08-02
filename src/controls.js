@@ -76,14 +76,21 @@ const SCENE_ACTIONS = ['New View', 'Random all', 'Random scene'];
 // Tips (CONTEXT.md section 5, Preferences). One line per folder heading saying
 // what the group is for — still folder-level, not per-control: the Phase 6.5
 // change was to how the line is shown ("?" trigger rather than a permanent
-// caption), not to what it covers. Preferences itself has no trigger: it is the
-// folder holding the switch these come from.
+// caption), not to what it covers. Presets joined the list in Phase 6.8, having
+// been left out when it became a titled folder with real controls in 6.6.
+//
+// Preferences is the one deliberate omission, and stays that way: it is the
+// folder the Tips switch itself lives in, so explaining "this folder explains
+// things" through the mechanism doing the explaining adds nothing.
 const TIP_TEXT = {
+  Presets: 'Loads a whole saved scene at once, or puts every control back to its default.',
   Canvas: 'Sets the shape and proportions of the image you download.',
   Scene: 'Picks the landform and shapes its terrain — and draws new views of it.',
   Lighting: 'Time of day, sun and stars, and the shadows that give the scene depth.',
   Color: 'The terrain palette, its near-to-far contrast, and the mist between layers.',
-  Actions: 'Download the artwork or its settings, or start over from the defaults.',
+  // No longer mentions starting over: Reset to defaults moved to Presets in
+  // Phase 6.6 and this line kept describing it until 6.8.
+  Actions: 'Downloads the finished artwork, or the settings that produced it.',
 };
 
 // UI theme, relocated from the header button (CONTEXT.md section 5). theme.js
@@ -550,7 +557,7 @@ export function initControls({
   // you can't use rather than as a note. tips.js owns the trigger, the popover
   // and the three ways of opening it; this only says which folders get one.
   const tips = createTips(
-    [canvas, scene, lighting, colour, actions].map((folder) => ({
+    [presetsFolder, canvas, scene, lighting, colour, actions].map((folder) => ({
       folder,
       text: TIP_TEXT[folder.title],
     })),

@@ -1,0 +1,23 @@
+{
+  "app": "svg-landscape",
+  "presetName": "Rocky planet",
+  "archetype": "dominant-peak",
+  "seed": 181514680,
+  "complexity": 0.72,
+  "peakCount": 0.18000000000000002,
+  "sharpness": 0.8200000000000001,
+  "elevation": 0.76,
+  "aspect": "cine",
+  "hour": 8.7,
+  "showBodies": true,
+  "showStars": true,
+  "shadow": true,
+  "lightAngle": 173,
+  "lockAngle": false,
+  "shadowIntensity": 1,
+  "palette": "volcanic-ash",
+  "colorDepth": 0.74,
+  "haze": 0.31,
+  "valleyMist": 0.71,
+  "mistDistance": 0.5099999999999999
+}
