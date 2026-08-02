@@ -42,7 +42,10 @@
       "Bash(python3 -c \"import sys,json;r=json.load\\(sys.stdin\\)['workflow_runs'][0];print\\(r['head_sha'][:7], r['status'], r['conclusion']\\)\")",
       "Bash(node verify66.mjs)",
       "Bash(echo \"--- exit: $?\")",
-      "Bash(grep -E \"^FAIL|passed$\")"
+      "Bash(grep -E \"^FAIL|passed$\")",
+      "Bash(node verify67.mjs)",
+      "Bash(sed -n '/New View | Random all | Random scene/,/^$/p' CONTEXT.md)",
+      "Bash(sed -n '/^## 16\\\\./,/^## 17\\\\./p' CONTEXT.md)"
     ],
     "deny": [
       "Read(**/.env*)",

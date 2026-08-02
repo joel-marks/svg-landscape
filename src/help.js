@@ -52,8 +52,7 @@ const SECTIONS = [
       ['Peak sharpness', 'Blends the profile between rounded hills at 0 and sharp ridgelines at 1.'],
       ['Point of view height', 'How high up you are standing. Low reads as ground level; high raises the horizon and nests the features tighter, as if looking down into the landscape. Not available on In gorge, where it is greyed out.'],
       ['Seed / Lock seed', 'The number the terrain is generated from. The lock is on by default so that adjusting the sliders refines the view in front of you instead of redrawing a different one.'],
-      ['New View', 'Draws a fresh seed and regenerates, keeping every setting as it is. This is the only control that changes the seed, and the lock never blocks it.'],
-      ['Random scene', 'The opposite of New View: keeps the seed and rolls new values for Complexity, Peak count, Peak sharpness and Point of view height. It leaves the landscape type alone, so you stay on the composition you picked.'],
+      ['New View | Random all | Random scene', 'Three ways to draw something new, left to right by how much they change. New View draws a fresh seed and keeps every setting. Random scene is the opposite: it keeps the seed and rolls new values for Complexity, Peak count, Peak sharpness and Point of view height. Random all does both in one press. None of them touches the landscape type, so you stay on the composition you picked, and the seed lock does not block any of them.'],
     ],
   },
   {

@@ -13,12 +13,10 @@
 // not a control inside the Canvas/Scene pane: it sets a whole parameter set
 // rather than adjusting one, so it reads as its own panel. Phase 6.6 followed
 // that precedent in the right column, splitting Actions and Preferences into a
-// pane each.
-//
-// (CONTEXT.md section 5 still describes the Presets panel as sitting between
-// the header and the canvas frame, which is where Phase 5.7 specified it and
-// not where it has ever actually been built. Left as-is here — moving it is a
-// layout decision, not a comment fix. See section 18.)
+// pane each. (Section 5 described this panel as sitting between the header and
+// the canvas frame until Phase 6.7, which is where 5.7 specified it and not
+// where it was ever built; the spec was corrected to match the working UI
+// rather than the panel moved.)
 //
 // Everything the user touches is a Tweakpane control, including the export
 // buttons — hence Actions living here rather than as separate markup.
@@ -35,6 +33,7 @@ import {
   captureAngleOffset,
   currentPresetId,
   exportSettings,
+  randomizeAll,
   randomizePalette,
   randomizeScene,
   regenerate,
@@ -68,6 +67,11 @@ const THEME_ACTIONS = ['Previous', 'Randomise', 'Next'];
 // Preferences' information row, left to right (CONTEXT.md section 5). Help
 // first: it is the one that explains the controls you are standing in front of.
 const INFO_ACTIONS = ['Help', 'Read Me', 'About'];
+
+// Scene's regenerate row, left to right (CONTEXT.md section 5). Ordered by what
+// each one changes — seed only, both, parameters only — so the combination sits
+// between the two halves it is made of.
+const SCENE_ACTIONS = ['New View', 'Random all', 'Random scene'];
 
 // Tips (CONTEXT.md section 5, Preferences). One line per folder heading saying
 // what the group is for — still folder-level, not per-control: the Phase 6.5
@@ -109,7 +113,9 @@ export function initControls({
   const panes = [presetsPane, left, centre, actionsPane, preferencesPane];
 
   // Registered before any blade is added, on each pane that hosts a blade from
-  // it: Color's theme row and Preferences' Help/Read Me/About row.
+  // it: Scene's regenerate row, Color's theme row, and Preferences'
+  // Help/Read Me/About row.
+  left.registerPlugin(EssentialsPlugin);
   centre.registerPlugin(EssentialsPlugin);
   preferencesPane.registerPlugin(EssentialsPlugin);
 
@@ -213,6 +219,13 @@ export function initControls({
     }),
   );
 
+  // Tweakpane's own separator blade, not a CSS margin dressed up as one: the
+  // gap belongs to the panel's own vocabulary, and a margin would sit outside
+  // everything the pane knows about its own layout. The two controls belong in
+  // one panel but are not the same gesture — one loads a saved scene, the other
+  // discards the current one — and the rule says so.
+  presetsFolder.addBlade({ view: 'separator' });
+
   // Relocated here from the Actions panel in Phase 6.6, directly beneath Load
   // preset: both answer "what should the whole panel be set to", so they belong
   // together. Behaviour is untouched — factory defaults, a fresh seed draw, and
@@ -279,20 +292,33 @@ export function initControls({
 
   scene.addBinding(state, 'seedLocked', { label: 'Lock seed' });
 
-  // The sole reseed action (CONTEXT.md section 5). "Randomize seed" sat
-  // directly above this until Phase 5.12 and did exactly the same thing —
-  // same handler, same disregard for the lock — so it went rather than staying
-  // as a second button for one behaviour.
-  scene.addButton({ title: 'New View' }).on('click', onNewSeed);
-
-  // Its mirror image, beside it (Phase 6.6): New View keeps the parameters and
-  // changes the seed, Random scene keeps the seed and changes the parameters.
-  // Neither touches Landscape type. The seed lock has no bearing on this one —
-  // it never reseeds, so there is nothing for the lock to suppress.
-  scene.addButton({ title: 'Random scene' }).on('click', () => {
-    randomizeScene();
-    refresh();
+  // One row of three (Phase 6.7), by the same buttongrid blade the Color theme
+  // row uses. They were separate stacked buttons through 6.6; as a set of three
+  // variations on "draw me something new" they read better as one row, and the
+  // middle cell is the combination of the two either side of it.
+  //
+  // Left to right: seed only, both, parameters only. New View and Random all
+  // reseed explicitly, so the lock does not apply to either; Random scene never
+  // reseeds, so there is nothing for the lock to suppress there (section 5).
+  const sceneRow = scene.addBlade({
+    view: 'buttongrid',
+    size: [SCENE_ACTIONS.length, 1],
+    cells: (x) => ({ title: SCENE_ACTIONS[x] }),
   });
+
+  const sceneHandlers = [
+    onNewSeed,
+    () => {
+      randomizeAll();
+      refresh();
+    },
+    () => {
+      randomizeScene();
+      refresh();
+    },
+  ];
+
+  sceneRow.on('click', ({ index: [x] }) => sceneHandlers[x]?.());
 
   // --- centre column -------------------------------------------------------
 

@@ -11,7 +11,7 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 6.6. All nine landscape archetypes generate and are
+> **Status:** Phase 6.7. All nine landscape archetypes generate and are
 > selectable from the control panel, with complexity, peak count, peak
 > sharpness, viewpoint height, seed lock, aspect ratio, a continuous
 > time-of-day lighting system with sun/moon and star visibility toggles, an
@@ -71,19 +71,25 @@ panel sits on top, with Canvas and Scene beneath it; on the right Actions and
 Preferences are a pane each — they shared one through Phase 6, which read as a
 single panel with two sections rather than the two separate things they are.
 
-**Reset to defaults** lives in the Presets panel, directly beneath Load preset:
-both answer "what should the whole panel be set to". It restores the spec's
+**Reset to defaults** lives in the Presets panel below Load preset, with a
+separator rule between them: both answer "what should the whole panel be set
+to", but one loads a saved scene and the other discards the current one. It restores the spec's
 factory values rather than the last-used ones, draws a fresh seed, and saves
 that as the new last-used state, so a reload afterwards comes back reset. Your
 UI theme and Tips setting are interface preferences and are deliberately left
 alone. (It sat on the Actions SVG tab through Phase 6 and moved here in 6.6.)
 
-**New View** and **Random scene** sit together at the foot of Scene as mirror
-images: New View keeps every parameter and draws a new seed, Random scene keeps
-the seed and redraws Complexity, Peak count, Peak sharpness and Point of view
-height. Neither touches Landscape type — that is the one Scene choice you have
-usually already made deliberately. The seed lock has no bearing on Random
-scene, which never reseeds.
+**New View | Random all | Random scene** is one row at the foot of Scene,
+ordered by how much each changes. New View keeps every parameter and draws a new
+seed; Random scene is its mirror, keeping the seed and redrawing Complexity,
+Peak count, Peak sharpness and Point of view height; **Random all** does both in
+a single press — the same two pieces of logic combined, not a third
+implementation. None of them touches Landscape type, that being the one Scene
+choice you have usually already made deliberately.
+
+The seed lock blocks none of the three. Random scene never reseeds, so there is
+nothing to suppress; New View and Random all reseed deliberately, and the lock
+only guards against *incidental* reseeding.
 
 | Slider | What it does |
 | --- | --- |

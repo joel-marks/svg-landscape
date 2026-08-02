@@ -249,27 +249,44 @@ function paint(archetype) {
   );
 }
 
-// The Scene sliders "Random scene" redraws (CONTEXT.md section 5). Landscape
-// type is deliberately not among them: rerolling that too would make the button
-// a "surprise me" for the whole panel, and the archetype is the one Scene choice
-// a user has usually already made on purpose.
+// The Scene sliders the two randomizing buttons redraw (CONTEXT.md section 5).
+// Landscape type is deliberately not among them: rerolling that too would make
+// them "surprise me" for the whole panel, and the archetype is the one Scene
+// choice a user has usually already made on purpose.
 const RANDOM_SCENE_KEYS = ['complexity', 'peakCount', 'sharpness', 'elevation'];
 
-// Random scene (CONTEXT.md section 5). Distinct from New View, which keeps every
-// parameter and changes only the seed — this is its mirror image: new parameters
-// over the same seed.
-//
-// `reseed: 'none'`, so the seed lock has nothing to suppress here. The lock
-// guards against *incidental* reseeding, and this never reseeds at all — leaving
-// it out of the lock's remit rather than special-casing it.
-export function randomizeScene() {
+function rollSceneParams() {
   for (const key of RANDOM_SCENE_KEYS) {
     // Quantized to the sliders' own 0.01 step, so the value the panel shows is
     // exactly the value the render used.
     state[key] = Math.round(Math.random() * 100) / 100;
   }
+}
 
+// Random scene (CONTEXT.md section 5). The mirror image of New View, which keeps
+// every parameter and changes only the seed — this is new parameters over the
+// same seed.
+//
+// `reseed: 'none'`, so the seed lock has nothing to suppress here. The lock
+// guards against *incidental* reseeding, and this never reseeds at all — leaving
+// it out of the lock's remit rather than special-casing it.
+export function randomizeScene() {
+  rollSceneParams();
   return regenerate();
+}
+
+// Random all (Phase 6.7) — the third cell of Scene's button row, and literally
+// the other two combined: the same parameter roll Random scene does, through the
+// same explicit reseed New View asks for. One press, both effects; no third
+// implementation of either half.
+//
+// `reseed: 'explicit'`, so the lock does not block it — same as New View, and
+// for the same reason (CONTEXT.md section 5): a control whose stated purpose
+// includes drawing a new seed shouldn't be silently disabled by the guard
+// against *incidental* reseeding.
+export function randomizeAll() {
+  rollSceneParams();
+  return regenerate({ reseed: 'explicit' });
 }
 
 // Draws a fresh algorithmic palette and switches the scene onto it
