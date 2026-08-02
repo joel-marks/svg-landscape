@@ -1,18 +1,18 @@
-// help.js — help modal content + open/close.
-// Single in-app modal, no separate route, to keep this a true one-pager.
-// Covers control explanations, the seed/reproducibility caveat, and where the
-// tips toggle lives (CONTEXT.md section 10).
+// help.js — the app's informational modals: Help, Read Me and About.
+// All three are in-page dialogs, no separate route, to keep this a true
+// one-pager (CONTEXT.md section 10). They share one <dialog> implementation
+// from modal.js rather than each carrying its own.
 //
-// Built as a native <dialog> opened with showModal(), rather than a hand-rolled
-// overlay: Escape-to-close, focus moving into the dialog and returning to
-// whatever opened it, and the rest of the page going inert are all behaviours
-// the element already has correctly. A custom div would mean reimplementing
-// each of them, which is where keyboard traps come from. There is an explicit
-// Close control at both ends of the dialog as well — click-outside on its own
-// is unreachable from the keyboard (CONTEXT.md section 11).
-//
-// The copy here is written for someone using the app, not for someone building
-// it: it is a condensed pass over CONTEXT.md section 5, not a dump of it.
+// Help covers control explanations, the seed/reproducibility caveat, and where
+// the tips toggle lives. Its copy is written for someone using the app, not for
+// someone building it: a condensed pass over CONTEXT.md section 5, not a dump
+// of it. Read Me shows the repo's own README verbatim. About's copy is a
+// placeholder awaiting the one thing that has to be written by hand.
+
+import readme from '../README.md?raw';
+
+import { ABOUT_HTML } from './about-content.js';
+import { createModal, modalBody } from './modal.js';
 
 // Grouped in the panel's own reading order — Canvas first, because Aspect ratio
 // is the first control on the page — so a reader can follow the modal down the
@@ -20,11 +20,15 @@
 const SECTIONS = [
   {
     title: 'Presets',
-    lead: 'Above the canvas. Loads a whole saved scene in one step.',
+    lead: 'Top of the left column. Sets the whole panel in one step.',
     items: [
       [
-        'Preset',
+        'Load preset',
         'Pick a saved look to load every control at once. The dropdown falls back to “Custom” as soon as you change anything, which just means the scene on screen is now yours rather than one of the saved ones.',
+      ],
+      [
+        'Reset to defaults',
+        'Puts every control back to its original value and draws a new seed. Your interface theme and the Tips setting are left alone.',
       ],
     ],
   },
@@ -48,7 +52,8 @@ const SECTIONS = [
       ['Peak sharpness', 'Blends the profile between rounded hills at 0 and sharp ridgelines at 1.'],
       ['Point of view height', 'How high up you are standing. Low reads as ground level; high raises the horizon and nests the features tighter, as if looking down into the landscape. Not available on In gorge, where it is greyed out.'],
       ['Seed / Lock seed', 'The number the terrain is generated from. The lock is on by default so that adjusting the sliders refines the view in front of you instead of redrawing a different one.'],
-      ['New View', 'Draws a fresh seed and regenerates. This is the only control that changes the seed, and the lock never blocks it.'],
+      ['New View', 'Draws a fresh seed and regenerates, keeping every setting as it is. This is the only control that changes the seed, and the lock never blocks it.'],
+      ['Random scene', 'The opposite of New View: keeps the seed and rolls new values for Complexity, Peak count, Peak sharpness and Point of view height. It leaves the landscape type alone, so you stay on the composition you picked.'],
     ],
   },
   {
@@ -80,7 +85,6 @@ const SECTIONS = [
     lead: 'Getting the image, and the scene that made it, out of the app.',
     items: [
       ['Download SVG', 'Saves the artwork as a vector file, exactly as shown.'],
-      ['Reset to defaults', 'Puts every control back to its original value and draws a new seed. Your interface theme and this Tips setting are left alone.'],
       ['Preset name', 'Optional label. Fill it in and it goes into the JSON file and its filename.'],
       ['Download JSON', 'Saves every control value, including the seed, as a settings file. The panel beneath the button previews exactly what will be written.'],
     ],
@@ -97,77 +101,78 @@ const NOTES = [
   {
     title: 'Turning these tips off',
     body:
-      'The one-line captions under each panel heading are controlled by the Tips switch, in the Preferences folder in the right-hand column — the same folder this Help button is in. Switching it off removes the captions entirely.',
+      'The small ? beside each panel heading is controlled by the Tips switch, in the Preferences panel in the right-hand column — the same panel this Help button is in. Switching it off removes those markers entirely.',
   },
 ];
 
-let dialog = null;
+let modals = null;
 
+// All three are built once, on first call, and share modal.js's dialog — Read Me
+// and About arriving in Phase 6.6 is what made that shared mechanism worth
+// extracting rather than copied twice more.
 export function initHelp() {
-  dialog ??= build();
-  return { open: openHelp, close: closeHelp, element: dialog };
+  modals ??= {
+    help: buildHelp(),
+    readme: buildReadme(),
+    about: buildAbout(),
+  };
+
+  return {
+    open: modals.help.open,
+    openHelp: modals.help.open,
+    openReadme: modals.readme.open,
+    openAbout: modals.about.open,
+  };
 }
 
-export function openHelp() {
-  dialog ??= build();
-  if (!dialog.open) dialog.showModal();
-}
-
-export function closeHelp() {
-  dialog?.close();
-}
-
-function build() {
-  const element = document.createElement('dialog');
-  element.id = 'help-dialog';
-  element.setAttribute('aria-labelledby', 'help-title');
-  element.className = 'rounded-lg border border-border-token bg-surface-raised p-0 text-text shadow-lg';
-
-  element.innerHTML = `
-    <div class="flex items-center gap-4 border-b border-border-token px-5 py-3">
-      <h2 id="help-title" class="m-0 text-base font-semibold tracking-tight">
-        Using the landscape generator
-      </h2>
-      <button
-        type="button"
-        data-help-close
-        class="ml-auto rounded-md border border-border-token bg-surface px-2 py-1 text-sm text-muted transition-colors hover:text-text"
-        aria-label="Close help"
-      >&#10005;</button>
-    </div>
-
-    <div class="max-h-[70dvh] overflow-y-auto px-5 py-4 text-sm leading-relaxed">
-      <p class="mt-0 text-muted">
-        Everything is generated in your browser — nothing is uploaded, and no
-        two views are alike unless you keep the seed. The panel below the canvas
-        is grouped the same way this page is.
-      </p>
-      ${SECTIONS.map(section).join('')}
-      ${NOTES.map(note).join('')}
-    </div>
-
-    <div class="border-t border-border-token px-5 py-3 text-right">
-      <button
-        type="button"
-        data-help-close
-        class="rounded-md border border-border-token bg-surface px-3 py-1.5 text-sm transition-colors hover:text-text"
-      >Close</button>
-    </div>
+function buildHelp() {
+  const body = modalBody();
+  body.innerHTML = `
+    <p class="mt-0 text-muted">
+      Everything is generated in your browser — nothing is uploaded, and no
+      two views are alike unless you keep the seed. The panel below the canvas
+      is grouped the same way this page is.
+    </p>
+    ${SECTIONS.map(section).join('')}
+    ${NOTES.map(note).join('')}
   `;
 
-  for (const button of element.querySelectorAll('[data-help-close]')) {
-    button.addEventListener('click', closeHelp);
-  }
-
-  // Click-outside as well, not instead: the backdrop is the dialog's own
-  // element in the hit test, so a click landing on it and not on the content
-  // means the user clicked past the dialog.
-  element.addEventListener('click', (event) => {
-    if (event.target === element) closeHelp();
+  return createModal({
+    id: 'help-dialog',
+    title: 'Using the landscape generator',
+    body,
   });
+}
 
-  document.body.append(element);
-  return element;
+// The project's own README, imported at build time with Vite's `?raw` suffix —
+// the file itself, not a copy of it, so it cannot go stale as the README is
+// maintained (CONTEXT.md section 15).
+//
+// Rendered as readonly scrollable text rather than parsed: a markdown renderer
+// is a dependency this project has no other use for, and the raw source is
+// perfectly legible. Same treatment as the Downloads tab's JSON preview.
+// `tabindex` makes the scroll region reachable — a plain <pre> can be scrolled
+// with a wheel but not with a keyboard.
+function buildReadme() {
+  const body = modalBody('p-0');
+
+  const pre = document.createElement('pre');
+  pre.className =
+    'm-0 max-h-[70dvh] overflow-auto px-5 py-4 font-mono text-xs leading-relaxed whitespace-pre-wrap';
+  pre.tabIndex = 0;
+  pre.setAttribute('role', 'document');
+  pre.setAttribute('aria-label', 'README file contents');
+  pre.textContent = readme;
+
+  body.append(pre);
+
+  return createModal({ id: 'readme-dialog', title: 'Read Me', body });
+}
+
+function buildAbout() {
+  const body = modalBody();
+  body.innerHTML = ABOUT_HTML;
+  return createModal({ id: 'about-dialog', title: 'About', body });
 }
 
 // The group heading is set apart from the control names beneath it — same

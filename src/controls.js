@@ -7,11 +7,18 @@
 //
 //   left    Presets (its own pane), then Canvas, Scene
 //   centre  Lighting, Color
-//   right   Actions, Preferences
+//   right   Actions, then Preferences — one pane each
 //
 // Presets is a separate Pane instance stacked at the top of the left column,
-// not a control inside the Canvas/Scene pane: it loads a whole parameter set
-// rather than adjusting one, so it reads as its own panel.
+// not a control inside the Canvas/Scene pane: it sets a whole parameter set
+// rather than adjusting one, so it reads as its own panel. Phase 6.6 followed
+// that precedent in the right column, splitting Actions and Preferences into a
+// pane each.
+//
+// (CONTEXT.md section 5 still describes the Presets panel as sitting between
+// the header and the canvas frame, which is where Phase 5.7 specified it and
+// not where it has ever actually been built. Left as-is here — moving it is a
+// layout decision, not a comment fix. See section 18.)
 //
 // Everything the user touches is a Tweakpane control, including the export
 // buttons — hence Actions living here rather than as separate markup.
@@ -29,6 +36,7 @@ import {
   currentPresetId,
   exportSettings,
   randomizePalette,
+  randomizeScene,
   regenerate,
   repaint,
   resetToDefaults,
@@ -57,6 +65,10 @@ const ANGLE_LABEL_LOCKED = 'Light angle (tracking)';
 // The theme row, left to right (CONTEXT.md section 5).
 const THEME_ACTIONS = ['Previous', 'Randomise', 'Next'];
 
+// Preferences' information row, left to right (CONTEXT.md section 5). Help
+// first: it is the one that explains the controls you are standing in front of.
+const INFO_ACTIONS = ['Help', 'Read Me', 'About'];
+
 // Tips (CONTEXT.md section 5, Preferences). One line per folder heading saying
 // what the group is for — still folder-level, not per-control: the Phase 6.5
 // change was to how the line is shown ("?" trigger rather than a permanent
@@ -78,20 +90,28 @@ export function initControls({
   presetsContainer,
   leftContainer,
   centreContainer,
-  rightContainer,
+  actionsContainer,
+  preferencesContainer,
   onDownloadSVG,
   onDownloadSettings,
   onHelp,
+  onReadme,
+  onAbout,
 }) {
   const presetsPane = new Pane({ container: presetsContainer });
   const left = new Pane({ container: leftContainer });
   const centre = new Pane({ container: centreContainer });
-  const right = new Pane({ container: rightContainer });
-  const panes = [presetsPane, left, centre, right];
+  // Two instances, not two folders in one (Phase 6.6). Actions is what you do
+  // to the scene and Preferences is how the app behaves — separate panels say
+  // that, the way the Presets panel already stands apart from the main grid.
+  const actionsPane = new Pane({ container: actionsContainer });
+  const preferencesPane = new Pane({ container: preferencesContainer });
+  const panes = [presetsPane, left, centre, actionsPane, preferencesPane];
 
-  // Registered before any blade is added. Only Color's theme row needs it, so
-  // only the pane hosting that row carries the plugin.
+  // Registered before any blade is added, on each pane that hosts a blade from
+  // it: Color's theme row and Preferences' Help/Read Me/About row.
   centre.registerPlugin(EssentialsPlugin);
+  preferencesPane.registerPlugin(EssentialsPlugin);
 
   // The Download JSON preview is a monitor over this. It is refreshed with the
   // panes rather than polled on a timer — the JSON only changes when a control
@@ -165,10 +185,19 @@ export function initControls({
     refresh();
   };
 
-  // --- left column, presets pane --------------------------------------------
+  // --- presets pane ---------------------------------------------------------
 
-  const presetBinding = presetsPane.addBinding(state, 'preset', {
-    label: 'Preset',
+  // Titled from Phase 6.6. It had been the one unnamed panel on the page since
+  // Phase 5.7 — a heading here is a folder, like every other heading in the
+  // panel, rather than a Pane title, so it collapses the same way they do.
+  const presetsFolder = presetsPane.addFolder({ title: 'Presets' });
+
+  // "Load preset", not "Preset": the Downloads tab has a "Preset name" field
+  // that labels a scene on its way out, and two controls a few inches apart
+  // reading "Preset" and "Preset name" invite exactly the wrong guess about
+  // which one does what. Label only — the binding is unchanged.
+  const presetBinding = presetsFolder.addBinding(state, 'preset', {
+    label: 'Load preset',
     options: presetOptions(),
   });
 
@@ -183,6 +212,15 @@ export function initControls({
       refresh();
     }),
   );
+
+  // Relocated here from the Actions panel in Phase 6.6, directly beneath Load
+  // preset: both answer "what should the whole panel be set to", so they belong
+  // together. Behaviour is untouched — factory defaults, a fresh seed draw, and
+  // the two Preferences left alone (CONTEXT.md section 5).
+  presetsFolder.addButton({ title: 'Reset to defaults' }).on('click', () => {
+    resetToDefaults();
+    refresh();
+  });
 
   // --- left column, canvas and scene pane -----------------------------------
 
@@ -246,6 +284,15 @@ export function initControls({
   // same handler, same disregard for the lock — so it went rather than staying
   // as a second button for one behaviour.
   scene.addButton({ title: 'New View' }).on('click', onNewSeed);
+
+  // Its mirror image, beside it (Phase 6.6): New View keeps the parameters and
+  // changes the seed, Random scene keeps the seed and changes the parameters.
+  // Neither touches Landscape type. The seed lock has no bearing on this one —
+  // it never reseeds, so there is nothing for the lock to suppress.
+  scene.addButton({ title: 'Random scene' }).on('click', () => {
+    randomizeScene();
+    refresh();
+  });
 
   // --- centre column -------------------------------------------------------
 
@@ -395,13 +442,15 @@ export function initControls({
   });
   mistDistanceBinding.on('change', onUserChange(onPaintChange));
 
-  // --- right column --------------------------------------------------------
+  // --- right column, actions panel -----------------------------------------
 
   // Two tabs, one per export (CONTEXT.md section 5). Split because the JSON
   // side has grown a name field and a preview and would otherwise bury the SVG
-  // button — which is the one most sessions actually end on. Reset to defaults
-  // joined the SVG tab in Phase 6; see below for why it is not on the other one.
-  const actions = right.addFolder({ title: 'Actions' });
+  // button — which is the one most sessions actually end on. Actions is now
+  // purely "get this scene out of the app": Reset to defaults sat on the SVG
+  // tab through Phase 6 and moved to the Presets panel in 6.6, next to the
+  // other control that sets the whole panel at once.
+  const actions = actionsPane.addFolder({ title: 'Actions' });
   const [svgTab, jsonTab] = actions.addTab({
     pages: [{ title: 'SVG' }, { title: 'JSON' }],
   }).pages;
@@ -429,21 +478,12 @@ export function initControls({
     interval: 0,
   });
 
-  // Alongside Download SVG rather than on the JSON tab: resetting the panel is
-  // a general app action, not part of naming and exporting a preset
-  // (CONTEXT.md section 5). It persists through the same path as any other
-  // change — resetToDefaults() applies the factory values, refresh() saves them
-  // — so a reload afterwards comes back reset, not back to the old scene.
-  svgTab.addButton({ title: 'Reset to defaults' }).on('click', () => {
-    resetToDefaults();
-    refresh();
-  });
+  // --- right column, preferences panel --------------------------------------
 
-  // --- right column, preferences --------------------------------------------
-
-  // Its own folder beside Actions, closing the gap where Preferences had never
-  // been assigned a column (CONTEXT.md section 5).
-  const preferences = right.addFolder({ title: 'Preferences' });
+  // Its own Pane below Actions since Phase 6.6 — a folder in the same pane
+  // through Phase 6, which read as one panel with two sections rather than the
+  // two separate things they are (CONTEXT.md section 5).
+  const preferences = preferencesPane.addFolder({ title: 'Preferences' });
 
   preferences
     .addBinding(prefs, 'theme', {
@@ -466,7 +506,18 @@ export function initControls({
     .addBinding(state, 'tips', { label: 'Tips' })
     .on('change', onUserChange(refresh));
 
-  preferences.addButton({ title: 'Help' }).on('click', () => onHelp?.());
+  // One row of three (Phase 6.6), by the same buttongrid blade the Color theme
+  // row uses — a pane stacks its own controls vertically, so three separate
+  // buttons would be three stacked rows for what is one group of "tell me
+  // about this app" entries.
+  const infoRow = preferences.addBlade({
+    view: 'buttongrid',
+    size: [INFO_ACTIONS.length, 1],
+    cells: (x) => ({ title: INFO_ACTIONS[x] }),
+  });
+
+  const infoHandlers = [() => onHelp?.(), () => onReadme?.(), () => onAbout?.()];
+  infoRow.on('click', ({ index: [x] }) => infoHandlers[x]?.());
 
   // Tooltips are DOM, not blades: Tweakpane has no label-only or trigger view,
   // and a readonly binding would render as a field — which reads as a control

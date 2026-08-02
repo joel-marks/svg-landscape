@@ -211,18 +211,22 @@
     text-wrap: pretty;
   }
 
-  /* Help modal (CONTEXT.md section 10). A native <dialog>, so most of its
-     behaviour is the browser's; these are the two things Tailwind's preflight
-     and the element's defaults leave to be stated. Preflight zeroes every
-     margin, which is what centres a modal dialog, so `margin: auto` comes
-     back explicitly. */
-  #help-dialog {
+  /* The Help, Read Me and About modals (CONTEXT.md section 10). Native
+     <dialog>s, so most of their behaviour is the browser's; these are the two
+     things Tailwind's preflight and the element's defaults leave to be stated.
+     Preflight zeroes every margin, which is what centres a modal dialog, so
+     `margin: auto` comes back explicitly.
+
+     Keyed to the shared class rather than to `#help-dialog` as it was through
+     Phase 6.5 — there are three of these since 6.6 and they should not be able
+     to disagree about their own box. */
+  .app-modal {
     margin: auto;
     width: min(44rem, calc(100vw - 2rem));
     max-height: min(90dvh, calc(100dvh - 3rem));
   }
 
-  #help-dialog::backdrop {
+  .app-modal::backdrop {
     background-color: rgb(9 13 16 / 0.55);
   }
 

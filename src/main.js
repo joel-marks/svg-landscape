@@ -52,11 +52,14 @@ initControls({
   presetsContainer: document.querySelector('#panel-presets'),
   leftContainer: document.querySelector('#panel-left'),
   centreContainer: document.querySelector('#panel-centre'),
-  rightContainer: document.querySelector('#panel-right'),
+  actionsContainer: document.querySelector('#panel-actions'),
+  preferencesContainer: document.querySelector('#panel-preferences'),
   onDownloadSVG: () => downloadSVG(svg, `${exportName()}.svg`),
   onDownloadSettings: () =>
     downloadSettings(exportSettings(), `${settingsName()}.json`),
-  onHelp: help.open,
+  onHelp: help.openHelp,
+  onReadme: help.openReadme,
+  onAbout: help.openAbout,
 });
 
 initTheme();

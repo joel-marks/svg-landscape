@@ -11,7 +11,7 @@ served as a static site.
 **Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
 deployed (expected: https://joel-marks.github.io/svg-landscape/)._
 
-> **Status:** Phase 6.5. All nine landscape archetypes generate and are
+> **Status:** Phase 6.6. All nine landscape archetypes generate and are
 > selectable from the control panel, with complexity, peak count, peak
 > sharpness, viewpoint height, seed lock, aspect ratio, a continuous
 > time-of-day lighting system with sun/moon and star visibility toggles, an
@@ -61,20 +61,29 @@ point-of-view height, seed (display + lock), New View.
 shadow toggle, light source angle, the angle tidelock and shadow intensity; then
 theme preset with its Previous / Randomise / Next row, colour depth, distance
 haze, valley mist and its distance grading.
-**Right — Actions, Preferences.** Actions has two tabs: **SVG** (Download SVG,
-Reset to defaults) and **JSON** (preset name, Download JSON, and a live preview
-of the file that button writes). Preferences holds the UI theme, the Tips
-switch and Help.
+**Right — Actions, then Preferences.** Actions has two tabs: **SVG** (Download
+SVG) and **JSON** (preset name, Download JSON, and a live preview of the file
+that button writes). Preferences holds the UI theme, the Tips switch, and a
+Help | Read Me | About row.
 
-The left column stacks two panes rather than one: the **Presets** dropdown sits
-on top in a panel of its own, with Canvas and Scene in the panel beneath it.
+Both outer columns stack two panes rather than one. On the left the **Presets**
+panel sits on top, with Canvas and Scene beneath it; on the right Actions and
+Preferences are a pane each — they shared one through Phase 6, which read as a
+single panel with two sections rather than the two separate things they are.
 
-**Reset to defaults** sits beside Download SVG rather than on the JSON tab —
-it is a general app action, not part of naming and exporting a preset. It
-restores the spec's factory values rather than the last-used ones, draws a
-fresh seed, and saves that as the new last-used state, so a reload afterwards
-comes back reset. Your UI theme and Tips setting are interface preferences and
-are deliberately left alone.
+**Reset to defaults** lives in the Presets panel, directly beneath Load preset:
+both answer "what should the whole panel be set to". It restores the spec's
+factory values rather than the last-used ones, draws a fresh seed, and saves
+that as the new last-used state, so a reload afterwards comes back reset. Your
+UI theme and Tips setting are interface preferences and are deliberately left
+alone. (It sat on the Actions SVG tab through Phase 6 and moved here in 6.6.)
+
+**New View** and **Random scene** sit together at the foot of Scene as mirror
+images: New View keeps every parameter and draws a new seed, Random scene keeps
+the seed and redraws Complexity, Peak count, Peak sharpness and Point of view
+height. Neither touches Landscape type — that is the one Scene choice you have
+usually already made deliberately. The seed lock has no bearing on Random
+scene, which never reseeds.
 
 | Slider | What it does |
 | --- | --- |
@@ -444,13 +453,22 @@ carrying five extra lines of text at all times. Switching Tips off removes the
 triggers from the page entirely rather than dimming them. The setting persists
 with everything else.
 
-**Help** opens a single in-app modal — no separate route or page, this stays a
-one-pager. It explains the controls end-user-first, group by group in the same
-order as the panel, carries the seed/reproducibility caveat, and says where the
-Tips switch is. It is a native `<dialog>` opened with `showModal()`, so Escape
-closes it, focus moves in and returns to the Help button afterwards, and the
-page behind it goes inert — behaviours a hand-rolled overlay would have to
-reimplement, which is where keyboard traps come from. There are explicit Close
+**Help**, **Read Me** and **About** open in-app modals — no separate route or
+page, this stays a one-pager. Help explains the controls end-user-first, group
+by group in the same order as the panel, carries the seed/reproducibility
+caveat, and says where the Tips switch is. **Read Me** shows this file, imported
+at build time with Vite's `?raw` suffix — the file itself, not a copy, so it
+cannot go stale — rendered as readonly scrollable text rather than parsed,
+since a markdown renderer is a dependency the project has no other use for.
+**About** is wired up but its copy is a placeholder in `src/about-content.js`,
+marked as such on screen: what belongs there is a first-person account of why
+the project exists, which is written by hand rather than generated.
+
+All three share one implementation. Each is a native `<dialog>` opened with
+`showModal()`, so Escape closes it, focus moves in and returns to the button
+that opened it afterwards, and the page behind it goes inert — behaviours a
+hand-rolled overlay would have to reimplement, which is where keyboard traps
+come from. There are explicit Close
 controls at both ends of the dialog; click-outside also works, but never as the
 only way out, since it is unreachable from a keyboard.
 
@@ -525,8 +543,10 @@ src/
   render.js          SVG paint: sky, mist, polygons, shadow split, stars/moon
   controls.js        Tweakpane panes — the three-column panel plus the presets bar
   tips.js            "?" tooltip trigger + popover beside each folder heading
+  modal.js           shared <dialog> shell behind the informational modals
+  about-content.js   About copy — placeholder, to be written by hand
   download.js        SVG export + settings JSON export
-  help.js            help modal content + open/close
+  help.js            Help / Read Me / About modal content + open/close
   theme.js           UI light/dark theme, prefers-color-scheme, persistence
   utils.js           shared geometry helpers, width-scaling rules, slider response curve
   style.css          Tailwind entry + light/dark design tokens
