@@ -6,12 +6,17 @@
 // Help covers control explanations, the seed/reproducibility caveat, and where
 // the tips toggle lives. Its copy is written for someone using the app, not for
 // someone building it: a condensed pass over CONTEXT.md section 5, not a dump
-// of it. Read Me shows the repo's own README verbatim. About's copy is a
-// placeholder awaiting the one thing that has to be written by hand.
+// of it. Read Me shows the repo's own README. About's copy is a placeholder
+// awaiting the one thing that has to be written by hand.
+//
+// All three are markdown, rendered by markdown.js (Phase 6.9). Read Me and
+// About are `?raw` imports of real files; Help's copy is generated from the
+// structured list below, which is what keeps its groups in the panel's order.
 
 import readme from '../README.md?raw';
+import about from './about/about.md?raw';
 
-import { ABOUT_HTML } from './about-content.js';
+import { renderMarkdown } from './markdown.js';
 import { createModal, modalBody } from './modal.js';
 
 // Grouped in the panel's own reading order — Canvas first, because Aspect ratio
@@ -108,7 +113,8 @@ let modals = null;
 
 // All three are built once, on first call, and share modal.js's dialog — Read Me
 // and About arriving in Phase 6.6 is what made that shared mechanism worth
-// extracting rather than copied twice more.
+// extracting rather than copied twice more. Since Phase 6.9 all three also share
+// one renderer: their copy is markdown, converted by markdown.js.
 export function initHelp() {
   modals ??= {
     help: buildHelp(),
@@ -125,81 +131,69 @@ export function initHelp() {
 }
 
 function buildHelp() {
-  const body = modalBody();
-  body.innerHTML = `
-    <p class="mt-0 text-muted">
-      Everything is generated in your browser — nothing is uploaded, and no
-      two views are alike unless you keep the seed. The panel below the canvas
-      is grouped the same way this page is.
-    </p>
-    ${SECTIONS.map(section).join('')}
-    ${NOTES.map(note).join('')}
-  `;
-
   return createModal({
     id: 'help-dialog',
     title: 'Using the landscape generator',
-    body,
+    body: markdownBody(helpMarkdown(), 'Help contents'),
   });
 }
 
 // The project's own README, imported at build time with Vite's `?raw` suffix —
 // the file itself, not a copy of it, so it cannot go stale as the README is
 // maintained (CONTEXT.md section 15).
-//
-// Rendered as readonly scrollable text rather than parsed: a markdown renderer
-// is a dependency this project has no other use for, and the raw source is
-// perfectly legible. Same treatment as the Downloads tab's JSON preview.
-// `tabindex` makes the scroll region reachable — a plain <pre> can be scrolled
-// with a wheel but not with a keyboard.
 function buildReadme() {
-  const body = modalBody('p-0');
-
-  const pre = document.createElement('pre');
-  pre.className =
-    'm-0 max-h-[70dvh] overflow-auto px-5 py-4 font-mono text-xs leading-relaxed whitespace-pre-wrap';
-  pre.tabIndex = 0;
-  pre.setAttribute('role', 'document');
-  pre.setAttribute('aria-label', 'README file contents');
-  pre.textContent = readme;
-
-  body.append(pre);
-
-  return createModal({ id: 'readme-dialog', title: 'Read Me', body });
+  return createModal({
+    id: 'readme-dialog',
+    title: 'Read Me',
+    body: markdownBody(readme, 'README contents'),
+  });
 }
 
+// Copy lives in src/about/about.md and is sourced exactly like the README
+// (Phase 6.9, replacing a JS string constant) — so replacing the placeholder is
+// editing one markdown file, with no code change (CONTEXT.md section 10).
 function buildAbout() {
-  const body = modalBody();
-  body.innerHTML = ABOUT_HTML;
-  return createModal({ id: 'about-dialog', title: 'About', body });
+  return createModal({
+    id: 'about-dialog',
+    title: 'About',
+    body: markdownBody(about, 'About this project'),
+  });
 }
 
-// The group heading is set apart from the control names beneath it — same
-// weight for both would make "Presets" the group and "Preset" the control read
-// as the same kind of thing.
-function section({ title, lead, items }) {
-  return `
-    <section class="mt-6 border-t border-border-token pt-4">
-      <h3 class="m-0 text-xs font-semibold uppercase tracking-widest text-accent">${title}</h3>
-      <p class="mt-1 mb-3 text-muted">${lead}</p>
-      <dl class="m-0 grid gap-2.5">
-        ${items
-          .map(
-            ([term, description]) => `
-          <div>
-            <dt class="font-semibold">${term}</dt>
-            <dd class="m-0 text-muted">${description}</dd>
-          </div>`,
-          )
-          .join('')}
-      </dl>
-    </section>`;
+// `tabindex` makes the scroll region reachable: a scrolling div can be moved
+// with a wheel but not with a keyboard unless it can take focus.
+function markdownBody(source, label) {
+  const body = modalBody('markdown');
+  body.innerHTML = renderMarkdown(source);
+  body.tabIndex = 0;
+  body.setAttribute('role', 'document');
+  body.setAttribute('aria-label', label);
+  return body;
 }
 
-function note({ title, body }) {
-  return `
-    <section class="mt-5 rounded-md border border-border-token bg-surface p-3">
-      <h3 class="m-0 text-sm font-semibold">${title}</h3>
-      <p class="mt-1 mb-0 text-muted">${body}</p>
-    </section>`;
+// Help's copy as markdown source (Phase 6.9), rendered by the same converter as
+// the other two rather than assembled as HTML here. Built from the same
+// structured list it always was — the structure is what keeps the groups in the
+// panel's own order — but each entry now emits markdown.
+function helpMarkdown() {
+  const parts = [
+    'Everything is generated in your browser — nothing is uploaded, and no two',
+    'views are alike unless you keep the seed. The panel below the canvas is',
+    'grouped the same way this page is.',
+    '',
+  ];
+
+  for (const { title, lead, items } of SECTIONS) {
+    parts.push(`### ${title}`, '', lead, '');
+    for (const [term, description] of items) {
+      parts.push(`- **${term}** — ${description}`);
+    }
+    parts.push('');
+  }
+
+  for (const { title, body } of NOTES) {
+    parts.push(`#### ${title}`, '', body, '');
+  }
+
+  return parts.join('\n');
 }

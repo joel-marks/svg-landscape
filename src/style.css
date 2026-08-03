@@ -19,6 +19,8 @@
   --text-muted: #59636e;
   --accent: #2f6f8f;
   --accent-contrast: #ffffff;
+  --scrollbar-thumb: #c2ccd8;
+  --scrollbar-thumb-hover: #a9b6c6;
   color-scheme: light;
 }
 
@@ -31,6 +33,8 @@
   --text-muted: #94a2af;
   --accent: #6fb7d4;
   --accent-contrast: #0e1317;
+  --scrollbar-thumb: #3c4a56;
+  --scrollbar-thumb-hover: #4d5e6d;
   color-scheme: dark;
 }
 
@@ -224,10 +228,205 @@
     margin: auto;
     width: min(44rem, calc(100vw - 2rem));
     max-height: min(90dvh, calc(100dvh - 3rem));
+
+    /* A flex column with the shell clipped, so the body is exactly the space
+       left over between header and footer and can never overflow its parent
+       (Phase 6.9). A <dialog> defaults to `overflow: auto`; leaving that free to
+       act is what produced a second scrollbar track on every modal below about
+       560px of viewport height. `hidden` here is not hiding content — the body
+       inside still scrolls — it removes the shell's ability to scroll at all,
+       so there is exactly one scrollable region per modal. */
+    overflow: hidden;
+  }
+
+  /* Gated on [open], and it has to be. A closed <dialog> is hidden by the UA
+     rule `dialog:not([open]) { display: none }`, and *any* author `display`
+     beats it — origin wins over specificity — so declaring `display: flex` on
+     the bare class leaves all three dialogs permanently on screen, stacked over
+     the page. Caught immediately here because an always-open modal swallows
+     every click on the panel behind it. */
+  .app-modal[open] {
+    display: flex;
+    flex-direction: column;
   }
 
   .app-modal::backdrop {
     background-color: rgb(9 13 16 / 0.55);
+  }
+
+  /* Themed scrollbars for that one scrolling region, in both engines: Firefox
+     reads the standard two properties, Chromium and Safari the ::-webkit-*
+     pseudo-elements. Both key off the same tokens the rest of the interface
+     uses, so they follow Light/Dark/System with everything else rather than
+     staying at the browser default grey. */
+  .app-modal > .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  .app-modal > .overflow-y-auto::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .app-modal > .overflow-y-auto::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .app-modal > .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    /* Padding-box plus a transparent border insets the thumb from the track
+       edge, which is what keeps a 10px-wide bar from reading as a heavy slab. */
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 5px;
+  }
+
+  .app-modal > .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  /* Rendered markdown (Phase 6.9). Tailwind's preflight strips every element
+     down — headings lose their size, lists lose their markers, tables lose
+     their spacing — so anything markdown.js emits has to be restyled here or it
+     arrives as undifferentiated text. Scoped to `.markdown` so it applies only
+     inside the modal bodies and cannot leak into the panel or page chrome. */
+  .markdown > :first-child {
+    margin-top: 0;
+  }
+
+  .markdown > :last-child {
+    margin-bottom: 0;
+  }
+
+  .markdown h1,
+  .markdown h2,
+  .markdown h3,
+  .markdown h4 {
+    margin: 1.5rem 0 0.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  .markdown h1 {
+    font-size: 1.25rem;
+  }
+
+  .markdown h2 {
+    font-size: 1.05rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.25rem;
+  }
+
+  /* The group headings inside Help, set apart from the control names beneath
+     them — same weight for both would make "Presets" the group and "Load
+     preset" the control read as the same kind of thing. */
+  .markdown h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+
+  .markdown h4 {
+    font-size: 0.9rem;
+  }
+
+  .markdown p {
+    margin: 0.75rem 0;
+    text-wrap: pretty;
+  }
+
+  .markdown ul,
+  .markdown ol {
+    margin: 0.75rem 0;
+    padding-left: 1.25rem;
+  }
+
+  .markdown ul {
+    list-style: disc;
+  }
+
+  .markdown ol {
+    list-style: decimal;
+  }
+
+  .markdown li {
+    margin: 0.35rem 0;
+    text-wrap: pretty;
+  }
+
+  .markdown a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .markdown strong {
+    font-weight: 600;
+  }
+
+  .markdown code {
+    background-color: var(--surface-sunken);
+    border-radius: 0.25rem;
+    padding: 0.1em 0.35em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9em;
+    /* Long identifiers wrap rather than pushing the body sideways — the modal
+       scrolls in one direction only (see .app-modal). */
+    overflow-wrap: anywhere;
+  }
+
+  .markdown pre {
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    background-color: var(--surface-sunken);
+    /* Wrapped, not horizontally scrollable: a second scroll axis inside the one
+       scrolling region is the thing Phase 6.9 set out to remove. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .markdown pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .markdown blockquote {
+    margin: 0.75rem 0;
+    padding: 0.6rem 0.85rem;
+    border-left: 3px solid var(--border);
+    border-radius: 0 0.375rem 0.375rem 0;
+    background-color: var(--surface);
+    color: var(--text-muted);
+  }
+
+  .markdown table {
+    width: 100%;
+    margin: 0.75rem 0;
+    border-collapse: collapse;
+    /* Fixed layout keeps a wide table inside the body instead of forcing the
+       whole region to scroll sideways. */
+    table-layout: fixed;
+    font-size: 0.8rem;
+  }
+
+  .markdown th,
+  .markdown td {
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.55rem;
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .markdown th {
+    background-color: var(--surface);
+    font-weight: 600;
   }
 
   /* Display cap only — the logical viewBox passed to generate() is untouched

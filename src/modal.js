@@ -18,9 +18,11 @@ export function createModal({ id, title, body, className = '' }) {
   const titleId = `${id}-title`;
   dialog.setAttribute('aria-labelledby', titleId);
 
+  // `shrink-0` on both bands: without it a flex column hands them out as
+  // shrinkable space too, and a long body squeezes the title and Close button.
   const header = document.createElement('div');
   header.className =
-    'flex items-center gap-4 border-b border-border-token px-5 py-3';
+    'flex shrink-0 items-center gap-4 border-b border-border-token px-5 py-3';
   header.innerHTML = `
     <h2 id="${titleId}" class="m-0 text-base font-semibold tracking-tight">${title}</h2>
     <button
@@ -32,7 +34,7 @@ export function createModal({ id, title, body, className = '' }) {
   `;
 
   const footer = document.createElement('div');
-  footer.className = 'border-t border-border-token px-5 py-3 text-right';
+  footer.className = 'shrink-0 border-t border-border-token px-5 py-3 text-right';
   footer.innerHTML = `
     <button
       type="button"
@@ -69,9 +71,19 @@ export function createModal({ id, title, body, className = '' }) {
 
 // The scrolling middle section every modal shares. Kept here rather than left to
 // each caller so the three cannot drift apart in padding or scroll behaviour.
+//
+// `flex-1 min-h-0` rather than a fixed `max-h-[70dvh]` (Phase 6.9). The old cap
+// was set independently of the dialog's own `90dvh`, so on a short viewport the
+// header, a 70dvh body and the footer added up to more than the shell allowed —
+// and because a <dialog> defaults to `overflow: auto`, the shell scrolled too.
+// That is the double scrollbar: two tracks, on all three modals, below roughly
+// 560px of viewport height. Sizing the body as "whatever is left" instead means
+// it cannot overflow its parent, so the shell never has anything to scroll.
+// `min-h-0` is the part that makes it work — a flex item defaults to
+// `min-height: auto` and would otherwise refuse to shrink below its content.
 export function modalBody(className = '') {
   const element = document.createElement('div');
   element.className =
-    `max-h-[70dvh] overflow-y-auto px-5 py-4 text-sm leading-relaxed ${className}`.trim();
+    `min-h-0 flex-1 overflow-y-auto px-5 py-4 text-sm leading-relaxed ${className}`.trim();
   return element;
 }

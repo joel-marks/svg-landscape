@@ -8,10 +8,9 @@ file of the settings that produced it.
 No backend, no accounts, no server. Everything runs in the browser and is
 served as a static site.
 
-**Live demo:** _PLACEHOLDER — link added once GitHub Pages is confirmed
-deployed (expected: https://joel-marks.github.io/svg-landscape/)._
+**Live demo:** [joel-marks.github.io/svg-landscape](https://joel-marks.github.io/svg-landscape/)
 
-> **Status:** Phase 6.8. All nine landscape archetypes generate and are
+> **Status:** Phase 6.9. All nine landscape archetypes generate and are
 > selectable from the control panel, with complexity, peak count, peak
 > sharpness, viewpoint height, seed lock, aspect ratio, a continuous
 > time-of-day lighting system with sun/moon and star visibility toggles, an
@@ -470,11 +469,20 @@ page, this stays a one-pager. Help explains the controls end-user-first, group
 by group in the same order as the panel, carries the seed/reproducibility
 caveat, and says where the Tips switch is. **Read Me** shows this file, imported
 at build time with Vite's `?raw` suffix — the file itself, not a copy, so it
-cannot go stale — rendered as readonly scrollable text rather than parsed,
-since a markdown renderer is a dependency the project has no other use for.
-**About** is wired up but its copy is a placeholder in `src/about-content.js`,
-marked as such on screen: what belongs there is a first-person account of why
-the project exists, which is written by hand rather than generated.
+cannot go stale. **About** is wired up but its copy is a placeholder in
+`src/about/about.md`, sourced the same way and marked as such on screen: what
+belongs there is a first-person account of why the project exists, which is
+written by hand rather than generated.
+
+All three render markdown through `src/markdown.js`, about 200 lines written
+for this project rather than a dependency. It covers what these documents
+actually use — headings, bold, italic, inline code, links, lists, blockquotes,
+fenced code blocks and tables — counted against this file rather than guessed.
+Syntax outside that subset renders as its own literal text instead of breaking,
+which is the failure mode you want at that size. Because this README is
+rendered by it, keep new markdown inside that subset: an `<autolink>`, for
+instance, is not supported, so the live demo link above is written as an
+ordinary inline link.
 
 All three share one implementation. Each is a native `<dialog>` opened with
 `showModal()`, so Escape closes it, focus moves in and returns to the button
@@ -483,6 +491,13 @@ hand-rolled overlay would have to reimplement, which is where keyboard traps
 come from. There are explicit Close
 controls at both ends of the dialog; click-outside also works, but never as the
 only way out, since it is unreachable from a keyboard.
+
+Each modal is a flex column — fixed header, fixed footer, and a body sized as
+whatever is left — with the dialog shell itself clipped. That leaves exactly one
+scrollable region per modal, whose scrollbar is themed to match the interface in
+both light and dark. Before Phase 6.9 the body carried a fixed `70dvh` cap set
+independently of the dialog's own `90dvh`, so on a short viewport the shell
+overflowed as well and you got two scrollbar tracks side by side.
 
 ## The seed lock
 
@@ -556,7 +571,8 @@ src/
   controls.js        Tweakpane panes — the three-column panel plus the presets bar
   tips.js            "?" tooltip trigger + popover beside each folder heading
   modal.js           shared <dialog> shell behind the informational modals
-  about-content.js   About copy — placeholder, to be written by hand
+  markdown.js        hand-rolled markdown -> HTML for the modals (no dependency)
+  about/about.md     About copy — placeholder, to be written by hand
   download.js        SVG export + settings JSON export
   help.js            Help / Read Me / About modal content + open/close
   theme.js           UI light/dark theme, prefers-color-scheme, persistence
