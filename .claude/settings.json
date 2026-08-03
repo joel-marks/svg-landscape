@@ -81,7 +81,8 @@
       "Bash(echo \"exit:$?\")",
       "Bash(node -e \"console.log\\(require\\('./package.json'\\).type\\)\")",
       "Bash(sed -i '' \"s|await fetch\\(base + '/json/new?http://localhost:4321/svg-landscape/'\\)|await fetch\\(base + '/json/new?http://localhost:4321/svg-landscape/', {method:'PUT'}\\)|\" cdp.mjs)",
-      "Bash(node cdp.mjs)"
+      "Bash(node cdp.mjs)",
+      "Bash(echo \"--- exit: $? ---\")"
     ],
     "deny": [
       "Read(**/.env*)",
