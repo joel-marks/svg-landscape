@@ -1,23 +1,18 @@
-# About
+# SVG Landscape Generator
 
-> **Placeholder — not final copy.**
-> This modal is wired up and working, but its text has not been written yet.
-> Replace the contents of `src/about/about.md` with the real thing and delete
-> this quote block.
+SVG Landscape Generator is a small procedural tool: pick a landscape archetype, tune noise-driven terrain, lighting, and colour, and export the result as a standalone SVG — or save the settings that produced it, so a scene can be reproduced or shared. No backend, no accounts. Everything runs client-side and ships as a static site.
 
-What belongs here is the part no one else can write: what this project is, why
-it was built, and how it was put together.
+It's also my first public, functional vibe-coded app. As an app it solved a need I had to create simple svg landscapes or colorscapes for another project. Its started as a single html app in Claude chat, then became an experiment technology demontrator for my own production process in VS Code, using Claude Code and Git.
 
----
+## How it was built
 
-*Notes for whoever edits this file:*
+The workflow split planning from execution. Architecture, scope, and code review happened in conversation with Claude chat in a project; the actual implementation ran through Claude Code inside VS Code on a Claude Max 5x account. I sat in the middle — relaying instructions between the two, testing results, making the calls that got flagged rather than silently resolved, and deciding what actually shipped. Nothing here merged without a human looking at it first. The feedback from this particular process is that the single point of failure is syncing CONTEXT.md manually between the two.
 
-- It is imported with Vite's `?raw` suffix and rendered by `src/markdown.js`,
-  exactly like `README.md` is in the **Read Me** modal — so editing this file is
-  all that is needed, with no code change.
-- The renderer covers headings, **bold**, *italic*, `code spans`, links, lists,
-  blockquotes, fenced code blocks and tables. Anything outside that subset will
-  show as literal text rather than breaking.
-- This file was deliberately not written for you. An "about this project" page
-  is a first-person account, and generated prose would read as yours while being
-  invented — see `CONTEXT.md` section 10.
+## Status
+
+This is under active development, not a finished release. Expect rough edges. In particular, the archetypes will be refined when I have time. Open Valley is the production ready one, with the others having been ported from the original project but not improved or refined.
+
+## Credits
+
+Idea, concept and vibe coding by Joel B. Marks
+joelbmarks.com

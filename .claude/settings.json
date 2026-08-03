@@ -77,7 +77,11 @@
       "Bash(W0=1000 W1=1000 WS=20 DPRS=1 node edgesweep.mjs /Users/joel/dev/vs-code/svg-landscape/src/presets/landscape-rocky-planet-181514680.json edge)",
       "Bash(curl -s -o /dev/null -w \"5173:%{http_code}\\\\n\" http://localhost:5173/svg-landscape/)",
       "Bash(curl -s -o /dev/null -w \"5174:%{http_code}\\\\n\" http://localhost:5174/svg-landscape/)",
-      "Bash(APP_URL=http://localhost:5173/svg-landscape/ W0=1000 W1=1340 WS=20 DPRS=1,1.25,1.5,1.75,2,2.5,3 node edgesweep.mjs /Users/joel/dev/vs-code/svg-landscape/src/presets/landscape-rocky-planet-181514680.json edge)"
+      "Bash(APP_URL=http://localhost:5173/svg-landscape/ W0=1000 W1=1340 WS=20 DPRS=1,1.25,1.5,1.75,2,2.5,3 node edgesweep.mjs /Users/joel/dev/vs-code/svg-landscape/src/presets/landscape-rocky-planet-181514680.json edge)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(node -e \"console.log\\(require\\('./package.json'\\).type\\)\")",
+      "Bash(sed -i '' \"s|await fetch\\(base + '/json/new?http://localhost:4321/svg-landscape/'\\)|await fetch\\(base + '/json/new?http://localhost:4321/svg-landscape/', {method:'PUT'}\\)|\" cdp.mjs)",
+      "Bash(node cdp.mjs)"
     ],
     "deny": [
       "Read(**/.env*)",
