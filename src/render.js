@@ -10,9 +10,22 @@
 // what reads as relief.
 
 import { mistTone, shade } from './palette.js';
-import { clamp01, lerp } from './utils.js';
+import { clamp01, EDGE_BLEED, lerp } from './utils.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+
+// A full-canvas fill, carried past the viewBox on every side. See EDGE_BLEED in
+// utils.js for why: the frame's edge can land between device pixels, and a shape
+// that stops exactly on the viewBox edge leaves that column half-covered.
+function bledRect(width, height, attributes) {
+  return el('rect', {
+    x: -EDGE_BLEED,
+    y: -EDGE_BLEED,
+    width: width + EDGE_BLEED * 2,
+    height: height + EDGE_BLEED * 2,
+    ...attributes,
+  });
+}
 
 export function render(svg, geometry, paint) {
   const { width, height, horizonY, layers, mistAfter = 1 } = geometry;
@@ -30,6 +43,9 @@ export function render(svg, geometry, paint) {
     showStars = true,
   } = paint;
   const mist = hazeBand(haze);
+  // The haze band's own top edge, needed before the defs pass now that its
+  // gradient is anchored in user space rather than to the rect's bounding box.
+  const hazeTop = horizonY - height * mist.spread;
 
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   // `meet`, not `slice`: once the frame is height-capped its box is wider than
@@ -39,7 +55,10 @@ export function render(svg, geometry, paint) {
   svg.replaceChildren();
 
   const defs = el('defs');
-  defs.append(skyGradient(lighting), mistGradient(lighting, mist.opacity));
+  defs.append(
+    skyGradient(lighting, height),
+    mistGradient(lighting, mist.opacity, hazeTop, height),
+  );
   // Only defined when something references them, so hiding the bodies leaves no
   // orphan gradients in the downloaded file.
   if (showBodies) {
@@ -67,7 +86,7 @@ export function render(svg, geometry, paint) {
 
   svg.append(defs);
 
-  svg.append(el('rect', { x: 0, y: 0, width, height, fill: 'url(#sky-gradient)' }));
+  svg.append(bledRect(width, height, { fill: 'url(#sky-gradient)' }));
 
   if (showStars && lighting.starOpacity > 0.01) svg.append(stars(lighting));
   if (showBodies) svg.append(...celestialBodies(lighting));
@@ -78,7 +97,7 @@ export function render(svg, geometry, paint) {
   // distance begins" differs between a wide valley and a narrow gorge.
   layers.forEach((layer, i) => {
     if (i === mistAfter + 1 && mist.visible) {
-      svg.append(mistBand(horizonY, width, height, mist.spread));
+      svg.append(mistBand(hazeTop, width, height));
     }
 
     const base = bases[i];
@@ -99,11 +118,7 @@ export function render(svg, geometry, paint) {
     // so a misted slope lightens whether or not that facet is shaded.
     if (mistPlan[i]) {
       svg.append(
-        el('rect', {
-          x: 0,
-          y: 0,
-          width,
-          height,
+        bledRect(width, height, {
           fill: `url(#valley-mist-${i})`,
           'clip-path': `url(#valley-clip-${i})`,
         }),
@@ -458,6 +473,10 @@ function celestialBodies(lighting) {
 // The slider re-centres what used to be a pair of fixed constants (0.17 spread
 // / 0.7 peak opacity), so the midpoint is close to, but not identical with, the
 // Phase 4 default scene.
+//
+// `spread` is consumed by the caller, which derives the band's top edge once and
+// passes it to both the gradient and the rect — the two have to agree on it now
+// that the gradient is anchored in user space (see mistGradient).
 function hazeBand(haze) {
   const t = Math.min(1, Math.max(0, haze));
   return {
@@ -469,13 +488,15 @@ function hazeBand(haze) {
   };
 }
 
-function mistBand(horizonY, width, height, spread) {
-  const top = horizonY - height * spread;
+// Bled sideways and downward but not upward: the band's top edge is a zero-
+// opacity gradient stop well inside the canvas, so it is not an edge that can
+// leave a seam. The two edges that reach the frame are.
+function mistBand(top, width, height) {
   return el('rect', {
-    x: 0,
+    x: -EDGE_BLEED,
     y: top,
-    width,
-    height: height - top,
+    width: width + EDGE_BLEED * 2,
+    height: height + EDGE_BLEED - top,
     fill: 'url(#mist-gradient)',
   });
 }
@@ -490,13 +511,18 @@ function polygonPath(points, decimals = 2) {
   return `${head} ${body} Z`;
 }
 
-function skyGradient(lighting) {
+// userSpaceOnUse, like the valley-mist gradients: the rect this paints is bled
+// past the viewBox, and against a bounding box the stops would stretch with it,
+// shifting every sky colour by the bleed. Anchored to the canvas instead, the
+// ramp is identical whether the rect is bled or not.
+function skyGradient(lighting, height) {
   const gradient = el('linearGradient', {
     id: 'sky-gradient',
+    gradientUnits: 'userSpaceOnUse',
     x1: 0,
     y1: 0,
     x2: 0,
-    y2: 1,
+    y2: height,
   });
 
   for (const stop of lighting.sky) {
@@ -506,13 +532,16 @@ function skyGradient(lighting) {
   return gradient;
 }
 
-function mistGradient(lighting, peakOpacity) {
+// Same reasoning as skyGradient: anchored to the band's own unbled extent, so
+// bleeding the rect moves no stop.
+function mistGradient(lighting, peakOpacity, top, height) {
   const gradient = el('linearGradient', {
     id: 'mist-gradient',
+    gradientUnits: 'userSpaceOnUse',
     x1: 0,
-    y1: 0,
+    y1: round(top),
     x2: 0,
-    y2: 1,
+    y2: height,
   });
 
   gradient.append(

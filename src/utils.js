@@ -152,15 +152,55 @@ export function wallPoints(samples, height, wall) {
   return points;
 }
 
+// How far every full-canvas fill is carried past the viewBox, in user units
+// (CONTEXT.md section 18, the right-edge band). Nothing here is ever visible:
+// the exported file's root `<svg>` clips to its viewport, and on the page the
+// canvas frame clips to its own rounded box. The bleed exists so that the
+// outermost *device* pixel of the canvas is fully covered by scene paint.
+//
+// Without it every full-canvas shape ends exactly on the viewBox edge. When the
+// frame's edge lands between device pixels — any fractional devicePixelRatio,
+// which is what OS display scaling at 125/150/175% and browser zoom both
+// produce — that outermost column gets partial coverage from the scene and the
+// rest from whatever sits behind it, which is the frame's own backdrop. The
+// result is a pale column that tracks the terrain's luminance without its hue.
+//
+// 8 units is comfortably over a device pixel at every aspect and display scale
+// the app supports, and small enough to be free.
+export const EDGE_BLEED = 8;
+
 // Close a crest line into a filled polygon against the bottom edge.
-export function closeToBottom(points, width, height) {
-  return [...points, [width, height], [0, height]];
+//
+// The crest itself is untouched — `line` still runs 0..width and is what the
+// shadow split and the mist anchors read. Only the closed fill is carried past
+// the frame, by continuing each end at its own crest height, so the silhouette
+// inside the viewBox is unchanged to the last decimal.
+export function closeToBottom(points, width, height, bleed = EDGE_BLEED) {
+  const first = points[0];
+  const last = points[points.length - 1];
+  return [
+    [-bleed, first[1]],
+    ...points,
+    [width + bleed, last[1]],
+    [width + bleed, height + bleed],
+    [-bleed, height + bleed],
+  ];
 }
 
 // Close a wall line into a filled polygon against the left or right edge.
-export function closeToSide(points, side, width, height) {
-  const x = side === 'right' ? width : 0;
-  return [...points, [x, height], [x, 0]];
+// Same treatment on the other axis: the wall's ends are carried past the top and
+// bottom of frame, and the fill closes to a bled side edge.
+export function closeToSide(points, side, width, height, bleed = EDGE_BLEED) {
+  const x = side === 'right' ? width + bleed : -bleed;
+  const first = points[0];
+  const last = points[points.length - 1];
+  return [
+    [first[0], -bleed],
+    ...points,
+    [last[0], height + bleed],
+    [x, height + bleed],
+    [x, -bleed],
+  ];
 }
 
 // Standard terrain layer: crest sampled across the width, closed to the bottom.

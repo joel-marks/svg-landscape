@@ -466,11 +466,25 @@
     max-height: 740px;
   }
 
-  /* Corner clipping stated on the image itself, not left to the frame's
-     `overflow: hidden` alone — the SVG is the thing that has to read as
-     rounded, and an explicit radius survives any future change to how the
-     frame stacks or transforms. */
+  /* Corner clipping stated on the image itself as well as on the frame — the
+     SVG is the thing that has to read as rounded, and an explicit radius
+     survives any future change to how the frame stacks or transforms.
+
+     `overflow: visible` is the half of the right-edge-band fix that lives here
+     (CONTEXT.md section 18; the other half is EDGE_BLEED in utils.js). The UA
+     default for an outermost `<svg>` is `overflow: hidden`, which clips the
+     scene to the element box. That clip and the scene's own outer edge then sit
+     on exactly the same boundary, and when the frame's edge lands between
+     device pixels both get antialiased there — the column ends up covered twice
+     at a fraction each, and the frame's backdrop fills what is left. Letting the
+     frame's own `overflow: hidden` do the clipping leaves one edge instead of
+     two, and the bled scene covers the column outright.
+
+     This only affects the page. The exported file is a clone of this element and
+     carries no stylesheet, so its root `<svg>` keeps the UA default and clips the
+     bleed exactly as before. */
   #landscape {
     border-radius: inherit;
+    overflow: visible;
   }
 }
