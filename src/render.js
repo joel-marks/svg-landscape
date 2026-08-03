@@ -62,7 +62,14 @@ export function render(svg, geometry, paint) {
   // Only defined when something references them, so hiding the bodies leaves no
   // orphan gradients in the downloaded file.
   if (showBodies) {
-    defs.append(bodyGlow('sun-glow', '#fff3d4'), bodyGlow('moon-glow', '#dfe8f5'));
+    // Both glow tones come from lighting.js now (Phase 6.13) rather than being
+    // fixed here. The sun's tracks its hour-indexed ramp and is the same value
+    // its disc is filled with, so the halo can never disagree with the body
+    // inside it; the moon's is the constant it always was.
+    defs.append(
+      bodyGlow('sun-glow', lighting.sun.glow),
+      bodyGlow('moon-glow', lighting.moon.glow),
+    );
   }
 
   // Fills are resolved once, up front: the mist tone for a layer is derived
@@ -438,11 +445,13 @@ function celestialBodies(lighting) {
 
   // Both are drawn whenever they carry any opacity, which is what makes the
   // handover at dawn and dusk a crossfade rather than a swap.
-  for (const [body, glow, fill] of [
-    [lighting.moon, 'moon-glow', '#eef3fb'],
-    [lighting.sun, 'sun-glow', '#fff6de'],
+  for (const [body, glow] of [
+    [lighting.moon, 'moon-glow'],
+    [lighting.sun, 'sun-glow'],
   ]) {
     if (body.opacity <= 0.01) continue;
+    // Phase 6.13: the fill is the body's own colour, not a constant per body.
+    const fill = body.color;
 
     nodes.push(
       el('circle', {

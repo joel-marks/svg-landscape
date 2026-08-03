@@ -36,6 +36,58 @@ const SKY = [
   { hour: 24, sky: ['#060b16', '#0c1526', '#152239', '#22314c'], mist: '#35496a' },
 ];
 
+// hour -> the sun's own colour (Phase 6.13). Prior to this the disc was a fixed
+// #fff6de and its glow a fixed #fff3d4 at every hour, which is what made a
+// sunset sun look like a noon sun that had merely moved.
+//
+// Hand-tuned keyframes, same as SKY and for the same reason: dawn and dusk are
+// not colour mirrors of each other, so a physical model gets this wrong. The
+// asymmetry is the point — sunrise warms **subtly** to a gold, sunset warms
+// **much further**, all the way to a red-orange, matching the stance the sky
+// table already takes about the two ends of the day.
+//
+// The sun is only on screen for roughly 5.6-18.4 (its opacity is a smoothstep
+// over the same altitude term that positions it, so it fades in and out before
+// the idealised 06:00/18:00 rise and set). Keyframes outside that window exist
+// only to make the curve wrap without a seam; nothing renders them. Hours 0 and
+// 24 hold the same value for the same reason SKY's do.
+//
+// The keyframe hours were pulled inward after a first pass put the strongest
+// tones where nothing could see them: the disc's own opacity is under 0.3 by
+// 18:00 and gone by 18.4, so a red-orange keyframed at 18.3 only ever rendered
+// on a sun that had almost finished fading. Both warm ends now land while the
+// body is still at better than 0.9 opacity.
+const SUN = [
+  { hour: 0, color: '#f05a28' },
+  { hour: 5.4, color: '#ffb257' },
+  // First light. Warm, but a gold rather than an orange — deliberately the
+  // gentler of the two ends.
+  { hour: 6.6, color: '#ffcc85' },
+  { hour: 7.6, color: '#ffe3b4' },
+  // The bulk of the day: pale, barely-warm near-white.
+  { hour: 9, color: '#fff2d6' },
+  { hour: 13, color: '#fffbf1' },
+  { hour: 16, color: '#fff2d0' },
+  // Dusk, and the asymmetry: this side keeps going well past where the morning
+  // stopped, through amber into a genuine red-orange.
+  { hour: 16.8, color: '#ffd68f' },
+  { hour: 17.3, color: '#ffa855' },
+  { hour: 17.7, color: '#f4702f' },
+  { hour: 18.3, color: '#e04a22' },
+  { hour: 24, color: '#f05a28' },
+];
+
+// The moon is unchanged by Phase 6.13 — sun only. Held here rather than in
+// render.js so both bodies hand their colours over the same way.
+const MOON_COLOR = '#eef3fb';
+const MOON_GLOW = '#dfe8f5';
+
+// How much larger the moon draws as it nears the horizon (Phase 6.13) — an
+// approximation of the moon illusion, not a physical effect. Rides the same
+// altitude term that already places the body, so rise and set both get it for
+// free and nothing new tracks time.
+const MOON_HORIZON_GROWTH = 0.28;
+
 export function computeLighting({
   hour = 18.5,
   seed = 0,
@@ -59,6 +111,10 @@ export function computeLighting({
   const arc = horizonY * 0.82;
   const bodyRadius = Math.min(width, height) * 0.032;
 
+  // Resolved once and handed to both the disc and the glow below, so there is
+  // no route by which the two could end up on different steps of the ramp.
+  const sun = sunColor(h);
+
   return {
     hour: h,
     sunAltitude,
@@ -72,14 +128,23 @@ export function computeLighting({
       ...bodyPosition((h - SUNRISE) / 12, sunAltitude, width, horizonY, arc),
       r: bodyRadius,
       opacity: sunOpacity,
+      // Disc and glow are the *same* value, so the two cannot drift apart into
+      // a red disc inside a yellow halo (CONTEXT.md 6c).
+      color: sun,
+      glow: sun,
     },
     moon: {
       // The wrap matters: the moon's arc starts at sunset and runs into the
       // next day, so hours after 18:00 have to fold back through midnight or
       // the moon pins to the right edge all evening.
       ...bodyPosition(((h - SUNSET + 24) % 24) / 12, moonAltitude, width, horizonY, arc),
-      r: bodyRadius * 0.78,
+      // Largest on the horizon at both rise and set, smallest at the top of its
+      // arc. `moonAltitude` is already 0 at the horizon and 1 at its peak, so
+      // this is the same term the position above uses, read a second way.
+      r: bodyRadius * 0.78 * (1 + MOON_HORIZON_GROWTH * (1 - clamp01(moonAltitude))),
       opacity: moonOpacity,
+      color: MOON_COLOR,
+      glow: MOON_GLOW,
     },
     suggestedAngle: suggestedAngle(h),
   };
@@ -106,20 +171,28 @@ function bodyPosition(u, altitude, width, horizonY, arc) {
   };
 }
 
-function blendSky(hour) {
-  let lower = SKY[0];
-  let upper = SKY[SKY.length - 1];
+// Locates an hour between two keyframes of an hour-sorted table. Shared by SKY
+// and SUN (Phase 6.13) rather than duplicated: the sun ramp is the same kind of
+// object as the sky one, so it wants the same lookup, and one implementation
+// means the two tables cannot interpolate differently.
+function keyframesAt(table, hour) {
+  let lower = table[0];
+  let upper = table[table.length - 1];
 
-  for (let i = 0; i < SKY.length - 1; i += 1) {
-    if (hour >= SKY[i].hour && hour <= SKY[i + 1].hour) {
-      lower = SKY[i];
-      upper = SKY[i + 1];
+  for (let i = 0; i < table.length - 1; i += 1) {
+    if (hour >= table[i].hour && hour <= table[i + 1].hour) {
+      lower = table[i];
+      upper = table[i + 1];
       break;
     }
   }
 
   const span = upper.hour - lower.hour;
-  const t = span === 0 ? 0 : (hour - lower.hour) / span;
+  return { lower, upper, t: span === 0 ? 0 : (hour - lower.hour) / span };
+}
+
+function blendSky(hour) {
+  const { lower, upper, t } = keyframesAt(SKY, hour);
 
   const sky = lower.sky.map((color, i) => ({
     offset: i / (lower.sky.length - 1),
@@ -127,6 +200,13 @@ function blendSky(hour) {
   }));
 
   return { sky, mist: chroma.mix(lower.mist, upper.mist, t, 'lab').hex() };
+}
+
+// Phase 6.13. Lab-mixed like the sky, so a warm keyframe and a pale one blend
+// through the intermediate warms rather than desaturating through grey.
+function sunColor(hour) {
+  const { lower, upper, t } = keyframesAt(SUN, hour);
+  return chroma.mix(lower.color, upper.color, t, 'lab').hex();
 }
 
 // A fixed backdrop for a given scene seed (CONTEXT.md section 5, Lighting).

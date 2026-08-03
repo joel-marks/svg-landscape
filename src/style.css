@@ -27,10 +27,28 @@
    against mid-gray, not tuned to a contrast target — the formal audit is
    Phase 7's (CONTEXT.md section 11). Measured against these values for that pass:
    text/raised 6.4:1, text/base 4.9:1, muted/raised 4.6:1, accent/raised 4.7:1,
-   border/base 3.1:1. */
+   border/base 3.1:1.
+
+   Phase 6.13 raises --surface-raised again, and only it. 6.12's 60% read as a
+   real but insufficient change against the 52% page, so this was judged
+   **optically** rather than to a computed target: 60 / 68 / 72 / 76 / 80% were
+   each rendered in the live app and compared against a 60% baseline screenshot,
+   and 76% (#bfc2c5) is where the header and panels stop being a slightly lighter
+   grey and read as unmistakably raised at a glance. 80% starts drifting back
+   toward the near-white chrome the band exists to avoid.
+
+   --surface and --surface-sunken deliberately do NOT move — "the page" is
+   unchanged from 6.12, so the raised/base separation widens from 8 to 24 points
+   of lightness, which is the whole point. Foreground tokens do not move either,
+   and this time they don't need to: they only ever sit on --surface-raised or
+   --surface, and a *lighter* raised surface can only improve dark-on-light
+   contrast. Re-measured against the new values, no number falls below 6.12's:
+   text/raised 6.4 -> 10.3:1, muted/raised 4.6 -> 7.4:1, accent/raised
+   4.7 -> 7.5:1, and text/base 4.9:1 and border/base 3.1:1 are unchanged because
+   both of their operands are. */
 :root {
   --surface: #7e848b;
-  --surface-raised: #94999e;
+  --surface-raised: #bfc2c5;
   --surface-sunken: #686d73;
   --border: #34383d;
   --text: #101418;
@@ -98,6 +116,16 @@
      button, each interaction state a step darker than the last, exactly the
      ordering these values had before — only its position moved.
 
+     Phase 6.13 moves the whole light scale up another 16 points of lightness in
+     lockstep with --surface-raised, for the same reason it moved in 6.12: the
+     panel is the largest piece of chrome on the page, so it has to travel with
+     the surface it sits on or the two disagree. Every step keeps its exact
+     hue, saturation and relative spacing — base 76%, input 71.9%, container
+     71.1%, groove 64%, button 63.1%, each interaction state still 3 points
+     darker than the last. Panel contrast improves with the move rather than
+     regressing: input foreground/background 5.6 -> 9.2:1, button
+     foreground/background 4.1 -> 7.0:1, the two weakest numbers in section 11.
+
      `--tp-input-border-color` is **not** a Tweakpane property. Tweakpane 4.0.5's
      theming API exposes no border variable at all; verified against the
      stylesheet it ships (node_modules/tweakpane/dist/tweakpane.js), which
@@ -107,39 +135,46 @@
      definition rather than two. Named in the --tp-* style because it sits with
      them and is consumed the same way. */
   .tweakpane-scope {
-    --tp-base-background-color: #94999e;
+    --tp-base-background-color: #bfc2c5;
     --tp-base-shadow-color: rgb(15 23 32 / 0.18);
 
-    --tp-button-background-color: #72777e;
-    --tp-button-background-color-hover: #6b7076;
-    --tp-button-background-color-focus: #63686e;
-    --tp-button-background-color-active: #5c6166;
+    --tp-button-background-color: #9ca0a6;
+    --tp-button-background-color-hover: #94999e;
+    --tp-button-background-color-focus: #8c9197;
+    --tp-button-background-color-active: #848a90;
     --tp-button-foreground-color: #101418;
 
-    --tp-container-background-color: #878c92;
-    --tp-container-background-color-hover: #7e848b;
-    --tp-container-background-color-focus: #777d83;
-    --tp-container-background-color-active: #6f757b;
+    --tp-container-background-color: #b2b5b9;
+    --tp-container-background-color-hover: #a9adb2;
+    --tp-container-background-color-focus: #a2a6aa;
+    --tp-container-background-color-active: #999ea3;
     --tp-container-foreground-color: #101418;
 
-    --tp-groove-foreground-color: #747a81;
+    --tp-groove-foreground-color: #9ea3a8;
 
-    --tp-input-background-color: #898e94;
-    --tp-input-background-color-hover: #81878d;
-    --tp-input-background-color-focus: #797f86;
-    --tp-input-background-color-active: #72777e;
+    --tp-input-background-color: #b4b7bb;
+    --tp-input-background-color-hover: #acb0b4;
+    --tp-input-background-color-focus: #a4a8ad;
+    --tp-input-background-color-active: #9ca0a6;
     --tp-input-foreground-color: #101418;
 
     --tp-label-foreground-color: #2a3138;
 
-    --tp-monitor-background-color: #797f86;
+    --tp-monitor-background-color: #a4a8ad;
     --tp-monitor-foreground-color: #2a3138;
 
     /* Darker than the field it outlines, which is the direction this design
        system already uses in light mode (--border sits below --surface). ~2.9:1
        against the input and container backgrounds — a pale line, not a hard
-       frame, but unmistakably there, which is the complaint it answers. */
-    --tp-input-border-color: #3f444a;
+       frame, but unmistakably there, which is the complaint it answers.
+
+       Moved up with the scale in Phase 6.13, unlike the page-level foreground
+       tokens: those wanted the extra contrast a brighter surface gave them, but
+       this one is calibrated *to* ~2.9:1 and left at 6.12's #3f444a would have
+       jumped to 4.9:1 — a hard frame around every input, which is the opposite
+       failure from the one it was added to fix. #5b636b restores 3.0:1 against
+       the input field and 3.0:1 against the container. */
+    --tp-input-border-color: #5b636b;
   }
 
   .dark .tweakpane-scope {

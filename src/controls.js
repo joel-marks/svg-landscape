@@ -23,6 +23,7 @@
 
 import { Pane } from 'tweakpane';
 import * as EssentialsPlugin from '@tweakpane/plugin-essentials';
+import * as CamerakitPlugin from '@tweakpane/plugin-camerakit';
 
 import { archetypeOptions } from './archetypes/index.js';
 import { CUSTOM_THEME_ID, themeOptions } from './palette.js';
@@ -101,6 +102,37 @@ const TIP_TEXT = {
 // still owns the mode and its own storage key; this is a view onto it.
 const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 
+// Time of day, in both controls that show it (CONTEXT.md section 5). One
+// definition so the slider and the Phase 6.13 dial cannot format differently.
+//
+// Rounded to whole minutes *first*, rather than taking the hour and the minute
+// off the value independently. Doing it the other way rendered 03:00 as
+// "02:60": Tweakpane's step constraint can land a typed 3 on 2.999999999999999
+// (the ulp described in CONTEXT.md section 18), and `Math.floor` then took the
+// hour down to 2 while `Math.round` took the minutes up to 60. Pre-dates this
+// phase, found while checking the dial against the slider, and fixed here
+// because both controls now read through this one function. The stored value
+// keeps its ulp, exactly as the Phase 6.5 preset-matching fix left it — this
+// corrects what is shown, not what is held.
+const formatHour = (v) => {
+  const minutes = Math.round(v * 60);
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(
+    minutes % 60,
+  ).padStart(2, '0')}`;
+};
+
+// The dial is deliberately unconstrained (see the binding below), so this is
+// what puts its value back on the clock.
+const wrapHour = (v) => ((v % 24) + 24) % 24;
+
+// The dial's scale (Phase 6.13). `value: 1` with `ticks: 2` puts a labelled
+// major tick on every hour and a minor one on each half hour — the "hour ticks"
+// the trial asked for. The pixel spacing was picked by looking at the rendered
+// ring rather than by arithmetic: at 24px it showed six hours at a time, which
+// is too little of the day to steer by, and 18px brings eight into view while
+// still leaving a full day only ~430px of drag away.
+const DIAL_UNIT = { pixels: 18, ticks: 2, value: 1 };
+
 export function initControls({
   presetsContainer,
   leftContainer,
@@ -130,6 +162,10 @@ export function initControls({
   centre.registerPlugin(EssentialsPlugin);
   preferencesPane.registerPlugin(EssentialsPlugin);
 
+  // Camerakit only supplies Lighting's trial Time of day dial (CONTEXT.md
+  // section 5), so only the pane that hosts it registers it.
+  centre.registerPlugin(CamerakitPlugin);
+
   // The Download JSON preview is a monitor over this. It is refreshed with the
   // panes rather than polled on a timer — the JSON only changes when a control
   // does, and building it from exportSettings() is what guarantees the preview
@@ -139,6 +175,16 @@ export function initControls({
   // The UI theme's binding target. theme.js is the authority — this object is
   // the panel's copy of its mode, written straight back on change.
   const prefs = { theme: getThemeMode() };
+
+  // The trial dial's binding target (Phase 6.13). It is *not* bound to
+  // `state.hour` directly: the dial has to be able to run past 24 and below 0
+  // mid-drag so midnight is a place you can turn through rather than a wall,
+  // and `state.hour` has to stay on the clock. So the dial owns a value of its
+  // own and `state.hour` is the wrapped read of it.
+  const dial = { hour: state.hour };
+
+  // Set while the dial is mid-drag; see refresh() and the dial's handler.
+  let dialDragging = false;
 
   // Set while the panel is being written to programmatically.
   let syncing = false;
@@ -161,6 +207,19 @@ export function initControls({
     // than maintained by each individual control handler.
     exportPreview.json = previewJSON();
     state.preset = currentPresetId();
+
+    // The dial follows the hour from here rather than from the slider's own
+    // handler, because this is the one place every source of a change — the
+    // slider, a preset, Reset to defaults, the restored localStorage blob —
+    // already writes the panel from state. Hooking it anywhere else would mean
+    // the dial tracked some of those and not others.
+    //
+    // Skipped mid-drag, so the dial is settled back onto the clock exactly
+    // once, on the change event that ends the drag (see its handler). The ring
+    // graphic doesn't jump when that happens: its offset is the value modulo
+    // one hour, which wrapping by 24 leaves untouched — only the tick labels
+    // renumber, and by then the drag is over.
+    if (!dialDragging) dial.hour = state.hour;
 
     panes.forEach((pane) => pane.refresh());
 
@@ -335,24 +394,61 @@ export function initControls({
 
   const lighting = centre.addFolder({ title: 'Lighting' });
 
+  // Both Time of day controls end up here, so a change made on either one is
+  // indistinguishable downstream from the same change made on the other.
+  const onHourChange = () => {
+    // Under the tidelock the hour drags the light angle with it, so the
+    // panel has to be refreshed for the angle readout to follow.
+    if (syncLockedAngle()) refresh();
+    onPaintChange();
+  };
+
   lighting
     .addBinding(state, 'hour', {
       label: 'Time of day',
       min: 0,
       max: 24,
       step: 0.1,
-      format: (v) =>
-        `${String(Math.floor(v)).padStart(2, '0')}:${String(
-          Math.round((v % 1) * 60),
-        ).padStart(2, '0')}`,
+      format: formatHour,
+    })
+    .on('change', onUserChange(onHourChange));
+
+  // Phase 6.13 trial, alongside the slider above rather than replacing it
+  // (CONTEXT.md section 5) — a rotary control suits a value that comes back
+  // round to where it started better than a bar with two ends does, and the two
+  // are here together so that can be judged rather than asserted.
+  //
+  // Deliberately given no min/max: camerakit clamps to them, and a clamp at
+  // 00:00 and 24:00 is exactly the dead zone this is meant not to have. The
+  // range is enforced by wrapping instead, so turning past midnight in either
+  // direction just keeps going. `step` is left off for the same reason — the
+  // slider's 0.1h step is a slider affordance, and a dial that ratchets is a
+  // worse dial.
+  lighting
+    .addBinding(dial, 'hour', {
+      view: 'cameraring',
+      label: 'Time of day (dial)',
+      series: 0,
+      unit: DIAL_UNIT,
+      format: formatHour,
+      // Full row rather than squeezed into the value column beside its label,
+      // where the ring is narrow enough to show four hours at a time — not a
+      // fair showing for a control that is on trial against the slider above
+      // it. The value it drops in doing so is already on screen: the slider
+      // reads the same hour, and the ring raises its own tooltip while dragged.
+      wide: true,
     })
     .on(
       'change',
-      onUserChange(() => {
-        // Under the tidelock the hour drags the light angle with it, so the
-        // panel has to be refreshed for the angle readout to follow.
-        if (syncLockedAngle()) refresh();
-        onPaintChange();
+      onUserChange((event) => {
+        // Held only for the duration of a drag. While it is set, refresh()
+        // leaves the dial's own value alone: writing the wrapped hour back
+        // mid-drag would be overwritten by the next pointer move anyway, and
+        // in the meantime the tick labels would flicker between 25:00 and
+        // 01:00 as the two writes alternated.
+        dialDragging = !event.last;
+        state.hour = wrapHour(dial.hour);
+        onHourChange();
       }),
     );
 
