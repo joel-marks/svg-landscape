@@ -23,6 +23,23 @@ import { normalizeAngle, responseCurve } from './utils.js';
 const SHADOW_INTENSITY_RESPONSE = responseCurve(2.2);
 const VALLEY_MIST_RESPONSE = responseCurve(3.2);
 
+// --- default lighting state (CONTEXT.md section 6, Phase 6.12) ---------------
+//
+// Shadow and the tidelock are both on out of the box, which means the factory
+// state has to carry a captured phase offset like any other locked scene. It is
+// defined by one reference point — the light source angle reads exactly 0° at
+// 05:40 — and derived from lighting.js's own arc formula at that hour rather
+// than written down as a number, so the two cannot drift apart if the arc is
+// ever retuned.
+//
+// 05:40 is only the reference that defines the relationship. The default hour
+// is unchanged by this phase, and the angle the panel actually opens on is the
+// mechanical consequence of the same offset applied there:
+// suggestedAngle(18.5) = 173, offset = 355, so the slider reads 168.
+const DEFAULT_HOUR = 18.5;
+const ANGLE_ZERO_AT_HOUR = 5 + 40 / 60;
+const DEFAULT_ANGLE_OFFSET = normalizeAngle(0 - suggestedAngle(ANGLE_ZERO_AT_HOUR));
+
 // Height is fixed; the aspect ratio drives width (CONTEXT.md section 5).
 export const CANVAS_HEIGHT = 900;
 
@@ -78,22 +95,26 @@ export const state = {
   mistDistance: 0.5,
 
   // Lighting (CONTEXT.md section 5). The default hour is the dusk the palette
-  // was built around, so this phase doesn't change the scene you already had.
-  hour: 18.5,
+  // was built around, and Phase 6.12 left it alone — only the shadow state
+  // around it changed.
+  hour: DEFAULT_HOUR,
   // Visibility of the drawn bodies and the star field only. Time of day still
   // drives sky, mist and star *opacity* underneath either switch.
   showBodies: true,
   showStars: true,
-  shadow: false,
-  // Seeded from the default hour once, then independently user-controlled —
-  // it is not a live binding to time of day unless the tidelock below is on
-  // (CONTEXT.md section 6).
-  lightAngle: suggestedAngle(18.5),
-  // "Lock angle to time of day". `angleOffset` is the phase captured when the
-  // lock is engaged; while locked the angle is recomputed from it rather than
-  // stored independently.
-  lockAngle: false,
-  angleOffset: 0,
+  // On as of Phase 6.12 (CONTEXT.md section 6). Previously off, so the default
+  // scene has never shown a shadow before — there is no prior default shadow
+  // appearance this is departing from.
+  shadow: true,
+  // Under the tidelock this is a derived value, not an independent one: it is
+  // the default hour's arc position carried through the captured offset above.
+  // Disengaging the lock hands it back to the slider at whatever it then reads.
+  lightAngle: normalizeAngle(suggestedAngle(DEFAULT_HOUR) + DEFAULT_ANGLE_OFFSET),
+  // "Lock angle to time of day" — on as of Phase 6.12. `angleOffset` is the
+  // phase the lock preserves; while locked the angle is recomputed from it
+  // rather than stored independently.
+  lockAngle: true,
+  angleOffset: DEFAULT_ANGLE_OFFSET,
   // Slider position — SHADOW_INTENSITY_RESPONSE maps it to the rendered value.
   shadowIntensity: 0.5,
 
@@ -103,10 +124,11 @@ export const state = {
   preset: CUSTOM_PRESET_ID,
   presetName: '',
 
-  // Preferences (CONTEXT.md section 5). One-line captions under the folder
-  // headings; on by default so a first-time visitor gets the explanation
-  // without having to find the switch that turns it on.
-  tips: true,
+  // Preferences (CONTEXT.md section 5). The "?" trigger beside each folder
+  // heading. **Off by default** — section 5 has specified that since Phase 6.5
+  // and the literal here said `true`, which is what Phase 6.12's verification
+  // pass was asked to check rather than assume. Fixed, not confirmed.
+  tips: false,
 };
 
 // The factory defaults Reset to defaults restores (CONTEXT.md section 5,

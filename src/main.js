@@ -14,6 +14,13 @@ import { slugify } from './utils.js';
 const svg = document.querySelector('#landscape');
 const frame = document.querySelector('#canvas-frame');
 
+// The header's build readout (CONTEXT.md section 3). `__COMMIT_HASH__` is a
+// constant Vite substitutes at build time from `git rev-parse --short HEAD`
+// (vite.config.js) — nothing here runs git, and there is no runtime lookup.
+// Written from JS rather than into the markup because Vite's `define` reaches
+// modules, not index.html.
+document.querySelector('#build-hash').textContent = __COMMIT_HASH__;
+
 setRenderer((geometry, paint, archetype) => {
   render(svg, geometry, paint);
 

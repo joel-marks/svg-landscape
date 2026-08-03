@@ -82,7 +82,15 @@
       "Bash(node -e \"console.log\\(require\\('./package.json'\\).type\\)\")",
       "Bash(sed -i '' \"s|await fetch\\(base + '/json/new?http://localhost:4321/svg-landscape/'\\)|await fetch\\(base + '/json/new?http://localhost:4321/svg-landscape/', {method:'PUT'}\\)|\" cdp.mjs)",
       "Bash(node cdp.mjs)",
-      "Bash(echo \"--- exit: $? ---\")"
+      "Bash(echo \"--- exit: $? ---\")",
+      "Bash(node -p \"require\\('tailwindcss/package.json'\\).version\")",
+      "Bash(node -p \"require\\('/Users/joel/dev/vs-code/svg-landscape/node_modules/tailwindcss/package.json'\\).version\")",
+      "Bash(grep -o \"build-hash[^;]\\\\{0,80\\\\}\" dist/assets/index-BqD8ns3_.js)",
+      "Bash(ls node_modules | head -40; echo \"---\"; ls node_modules/.bin 2>/dev/null; echo \"--- global ---\"; which playwright chromium chrome 2>/dev/null; ls ~/Library/Caches/ms-playwright 2>/dev/null | head)",
+      "Read(//Users/joel/Library/Caches/ms-playwright/chromium-1234/**)",
+      "Bash(node verify.mjs)",
+      "Bash(find ~/Library/Caches/ms-playwright/chromium-1234 -maxdepth 3 | head -20)",
+      "Bash(sed -i '' \"s|chromium-1234/chrome-mac-x64/Chromium.app/Contents/MacOS/Chromium|chromium-1234/chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing|\" verify.mjs)"
     ],
     "deny": [
       "Read(**/.env*)",

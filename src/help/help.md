@@ -25,9 +25,9 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 
 - **Time of day** — a continuous 24-hour slider driving sky, mist tint, the sun/moon arc and star visibility. Dawn and dusk are tuned independently rather than mirrored, since they don't actually look alike.
 - **Show sun/moon** / **Show stars** — independent toggles; hide only the body/glow or the star field, nothing else about the lighting.
-- **Shadow / pseudo-3D** — splits each landform into a lit and shaded facet, based on which way it faces relative to the light.
-- **Light source angle** — independent of time of day by default; only seeds its starting value from the hour.
-- **Lock angle to time of day** — captures the current offset between the angle and the sun/moon position, then preserves that offset as the hour changes, rather than syncing outright.
+- **Shadow / pseudo-3D** — splits each landform into a lit and shaded facet, based on which way it faces relative to the light. On by default.
+- **Light source angle** — free to set on its own whenever the lock below is off. While the lock is on it becomes a readout of the tracked value, and the slider is inactive.
+- **Lock angle to time of day** — captures the current offset between the angle and the sun/moon position, then preserves that offset as the hour changes, rather than syncing outright. On by default, with the offset set so the angle reads 0° at 05:40. Switch it off to take the angle back at wherever it currently sits.
 - **Shadow intensity** — how dark the shaded side gets. Weighted so the lower half of the slider carries most of the usable range.
 
 ## Color
