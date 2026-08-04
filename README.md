@@ -53,7 +53,7 @@ npm run preview   # serve the production build locally
 - Vanilla JS (ES modules), no framework
 - [simplex-noise](https://github.com/jwagner/simplex-noise.js) — noise base
 - [chroma-js](https://gka.github.io/chroma.js/) — palette generation
-- [Tweakpane](https://tweakpane.github.io/docs/) + [plugin-essentials](https://github.com/tweakpane/plugin-essentials) and [plugin-camerakit](https://github.com/tweakpane/plugin-camerakit) — control panel
+- [Tweakpane](https://tweakpane.github.io/docs/) + [plugin-essentials](https://github.com/tweakpane/plugin-essentials) — control panel
 - [Tailwind CSS v4](https://tailwindcss.com/) — page chrome
 
 ## Project structure

@@ -633,3 +633,84 @@
 .tweakpane-scope .tp-mllv_i {
   border: 1px solid var(--tp-input-border-color);
 }
+
+/* --- Time of day clock face (CONTEXT.md section 5, Phase 6.14) ---------------
+
+   Unlayered for the same reason everything above is. The class names here are
+   this project's own and collide with nothing Tweakpane ships, so nothing is
+   being overridden — but Tailwind's preflight (which *is* layered) resets SVG
+   display and stroke defaults, and keeping the whole control's styling in one
+   unlayered block is less surprising than splitting it across a layer boundary.
+
+   Every colour is a --tp-* token, so the face follows Light/Dark/System through
+   the same single code path the rest of the panel does, with no second
+   definition to keep in sync. The face reuses --tp-input-border-color for its
+   rim specifically: it is a field you interact with, and it should carry the
+   same outline the text fields and checkboxes got in Phase 6.12. */
+
+/* Right-aligned to the same edge every other control's value column uses. */
+.clockface .tp-lblv_v {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.clockface_g {
+  width: 96px;
+  height: 96px;
+  /* A rotary control should say it is grabbable before you grab it. */
+  cursor: grab;
+  touch-action: none;
+}
+
+.clockface_g:active {
+  cursor: grabbing;
+}
+
+.clockface_face {
+  fill: var(--tp-input-background-color);
+  stroke: var(--tp-input-border-color);
+  stroke-width: 1;
+}
+
+/* Hour ticks. Every hour gets one; the four that carry a numeral get a longer,
+   stronger one, so the quarters of the day read at a glance. */
+.clockface_t {
+  stroke: var(--tp-groove-foreground-color);
+  stroke-width: 1;
+}
+
+.clockface_t-maj {
+  stroke: var(--tp-label-foreground-color);
+  stroke-width: 1.5;
+}
+
+.clockface_n {
+  fill: var(--tp-label-foreground-color);
+  font-family: inherit;
+  font-size: 9px;
+}
+
+/* The hand and its hub carry the input foreground rather than the label's, so
+   the thing the control is actually reporting is the highest-contrast mark on
+   the face. */
+.clockface_hand {
+  stroke: var(--tp-input-foreground-color);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.clockface_hub {
+  fill: var(--tp-input-foreground-color);
+}
+
+/* Keyboard focus has to be visible on a control with no native focus ring of
+   its own (CONTEXT.md section 11). Drawn as a ring around the face rather than
+   a box around the SVG, so it follows the shape of the thing being focused. */
+.clockface_g:focus {
+  outline: none;
+}
+
+.clockface_g:focus-visible .clockface_face {
+  stroke: var(--tp-input-foreground-color);
+  stroke-width: 2;
+}
