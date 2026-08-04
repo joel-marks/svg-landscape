@@ -1,6 +1,12 @@
 # Claude Code — Project Instructions
 
-Read `CONTEXT.md` at repo root first, on every session. It is the authoritative spec — architecture, control panel structure, archetype list, persistence, license, and README requirements. This file (`CLAUDE.md`) covers operating rules only.
+Read `CONTEXT.md` at repo root first, on every session. Do not read HISTORY.md unless directed (see Project documentation). It is the authoritative spec — architecture, control panel structure, archetype list, persistence, license, and README requirements. This file (`CLAUDE.md`) covers operating rules only.
+
+## Project documentation
+- `CONTEXT.md` — authoritative current state. Read in full at session start, every session. You maintain it directly: apply the edits a phase prompt describes as part of that phase, and always edit the file as it currently stands in the repo — never from a remembered or previously pasted copy.
+- `HISTORY.md` — append-only archive of closed issues, per-phase history, and superseded measurements. Do NOT read at session start. Read only when a phase prompt directs you to, or when a CONTEXT.md pointer for the area you are touching refers there.
+- Archiving is verbatim: when an entry moves from CONTEXT.md to HISTORY.md, cut-and-paste it unedited and note the archiving phase. Never rewrite or summarise during a move.
+- Every phase report lists the CONTEXT.md reconciliation edits made in that phase (or states "none").
 
 ## Operating scope
 - Run from repo root.

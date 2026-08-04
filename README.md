@@ -95,6 +95,7 @@ Pushing to `main` builds with Vite and deploys `dist/` to GitHub Pages via [`.gi
 
 - **Using the app** — the in-app Help panel (bottom-right, Preferences)
 - **Full technical spec** — [`CONTEXT.md`](CONTEXT.md), the project's authoritative architecture and decision record
+- **Archive** — [`HISTORY.md`](HISTORY.md), the append-only record of closed issues, per-phase history and superseded measurements
 
 ## License
 
