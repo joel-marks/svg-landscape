@@ -10,7 +10,7 @@ No backend, no accounts, no server. Runs entirely client-side, deployed as a sta
 
 ## Features
 
-- Nine landscape archetypes, each its own procedural generator
+- Ten landscape archetypes, each its own procedural generator
 - Continuous time-of-day lighting with sun/moon and star fields
 - Optional pseudo-3D shadow split, independently controllable or locked to time of day
 - Eight curated colour themes plus an algorithmic randomiser, with depth and atmospheric haze/mist controls
@@ -34,6 +34,7 @@ Full control-by-control detail is in the app's own **Help** panel — this READM
 | Stacked ridges | Evenly spaced ridgelines, long-lens compression |
 | Dominant peak | One summit outranking its flanking peaks |
 | Twin peaks | Exactly two peaks of similar height |
+| Desert mesa | Flat-topped rock, a dune field, then open sand |
 
 ## Quick start
 

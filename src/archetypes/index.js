@@ -27,6 +27,7 @@ import * as mountainTop from './mountain-top.js';
 import * as stackedRidges from './stacked-ridges.js';
 import * as dominantPeak from './dominant-peak.js';
 import * as twinPeaks from './twin-peaks.js';
+import * as desertMesa from './desert-mesa.js';
 
 export const archetypes = {
   'open-valley': { label: 'Open valley', module: openValley },
@@ -38,6 +39,7 @@ export const archetypes = {
   'stacked-ridges': { label: 'Stacked ridges', module: stackedRidges },
   'dominant-peak': { label: 'Dominant peak', module: dominantPeak },
   'twin-peaks': { label: 'Twin peaks', module: twinPeaks },
+  'desert-mesa': { label: 'Desert mesa', module: desertMesa },
 };
 
 export function getArchetype(name) {

@@ -15,7 +15,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 
 - **Landscape type** — each archetype is its own generator, not one shape with different settings.
 - **Complexity** — detail resolution: noise octave count and point sampling density. Never changes feature count.
-- **Peak count** — how many peaks, spurs or ridge bands. A no-op on archetypes where the count is fixed by definition — Twin peaks is always two.
+- **Peak count** — how many peaks, spurs, ridge bands or rock formations. A no-op on archetypes where the count is fixed by definition — Twin peaks is always two.
 - **Peak sharpness** — blends the terrain profile between two noise flavours: smooth at 0, ridged at 1.
 - **Point of view height** — viewer elevation. Raises the horizon and tightens how features nest toward each other, as if looking down into the landscape. Not available on In gorge.
 - **Seed / Lock seed** — the number the terrain is drawn from. Locked by default, so the sliders above refine what's on screen instead of redrawing it.
@@ -34,7 +34,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 
 - **Theme preset** — eight curated ramps, each three colours running from the farthest ridge to the nearest foreground. Previous/Next step through them; Randomise generates a new one algorithmically (complementary, analogous or split-hue), shown as "Randomized". Whichever theme is showing also lightly tints the panel's accents and outlines.
 - **Color depth** — how strongly near and far separate. 0.5 is the theme as authored; below that everything flattens toward the middle colour, above it the extremes spread further apart. It works in both Layers modes, and means the same thing in each — with Layers off it moves where layers sit on the ramp, with Layers on it moves the three band colours apart or together.
-- **Layers** — off, the three theme colours blend into a continuous ramp across the depth of the scene. On, each layer takes one of the three flat, by how far away it is: background, middle distance or foreground. Where those regions divide is a property of each landscape type. The Desert theme is built for this mode.
+- **Layers** — off, the three theme colours blend into a continuous ramp across the depth of the scene. On, each layer takes one of the three flat, by how far away it is: background, middle distance or foreground. Where those regions divide is a property of each landscape type. The Desert theme and the Desert mesa landscape type are built for this mode, and are the clearest place to see it.
 - **Distance haze** — the atmospheric band at the horizon. Coloured by time of day, not the palette.
 - **Valley mist** — a wash that fades from each layer's own summit down to the next-nearer layer's summit, clear at the top. The nearest layer never takes it, so the foreground stays sharp. Deliberately subtle for most of the slider, more visible near the top.
 - **Distance** — how much valley mist grows with distance: even across every layer at 0, weighted toward the far ones at 1. Inactive while Valley mist is 0.
