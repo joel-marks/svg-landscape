@@ -126,7 +126,18 @@
       "Bash(node crop.mjs Lighting clock3)",
       "Bash(node crop.mjs Lighting clock4)",
       "Bash(node verify614.mjs)",
-      "Bash(APP_URL=http://localhost:4321/svg-landscape/ node verify614.mjs)"
+      "Bash(APP_URL=http://localhost:4321/svg-landscape/ node verify614.mjs)",
+      "Bash(pkill -f vite)",
+      "Bash(node baseline.mjs before)",
+      "Bash(node baseline.mjs after1)",
+      "Bash(node baseline.mjs after2)",
+      "Bash(perl -pi -e 's/foregroundFrom: 0\\\\.9,\\\\n/foregroundFrom: 0.75,\\\\n/ if 0' src/archetypes/mountain-top.js)",
+      "Bash(perl -0pi -e 's/\\(backgroundUntil: 0\\\\.25,\\\\n  foregroundFrom: \\)0\\\\.9/${1}0.75/' src/archetypes/mountain-top.js)",
+      "Bash(node mt.mjs)",
+      "Bash(node baseline.mjs after3)",
+      "Bash(node bands.mjs)",
+      "Bash(node final.mjs)",
+      "Bash(git reset *)"
     ],
     "deny": [
       "Read(**/.env*)",
