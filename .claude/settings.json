@@ -137,7 +137,8 @@
       "Bash(node baseline.mjs after3)",
       "Bash(node bands.mjs)",
       "Bash(node final.mjs)",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "Bash(git fetch *)"
     ],
     "deny": [
       "Read(**/.env*)",
