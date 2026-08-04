@@ -138,7 +138,22 @@
       "Bash(node bands.mjs)",
       "Bash(node final.mjs)",
       "Bash(git reset *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(node shot.mjs '{\"palette\":\"desert\",\"layersMode\":false,\"hour\":11}' d1 760)",
+      "Bash(node shot.mjs '{\"palette\":\"desert\",\"layersMode\":true,\"hour\":11}' d2 760)",
+      "Bash(cat)",
+      "Bash(node batch.mjs '[ *)",
+      "Read(//usr/local/lib/node_modules/**)",
+      "Read(//Users/joel/.npm-global/lib/**)",
+      "Bash(mkdir -p pw)",
+      "Bash(npm i *)",
+      "Bash(node check.mjs)",
+      "Bash(sed -i '' \"s#'/src/#'/svg-landscape/src/#g\" check.mjs)",
+      "Bash(sed -i '' \"s#const { svgMarkup } = await import\\('/svg-landscape/src/download.js'\\).then\\(\\(m\\) => \\({ svgMarkup: m }\\)\\);\\\\n  return Object.keys\\(svgMarkup\\);#x#\" check.mjs)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in ['coupling','svgExport','reload','sweepFailures','extremes','consoleErrors']}, indent=2\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in ['coupling','stateAfterPanel','presetDropdown','jsonExport']}, indent=2\\)\\)\")",
+      "Bash(sed -i '' 's#localhost:5174#localhost:5173#g' diag.mjs check.mjs)",
+      "Bash(node diag.mjs)"
     ],
     "deny": [
       "Read(**/.env*)",
