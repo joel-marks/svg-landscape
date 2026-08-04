@@ -499,6 +499,18 @@ export function initControls({
     })
     .on('change', onUserChange(onPaintChange));
 
+  // Between Color depth and Distance haze (CONTEXT.md section 5, Phase 7), and
+  // that position is the explanation: it changes what Color depth means — from
+  // a ramp-position control to a contrast-between-bands one — and everything
+  // below it is atmosphere, which both modes share untouched.
+  //
+  // A plain repaint like every other Color control. Geometry does not move: the
+  // toggle picks between two ways of colouring the layers an archetype has
+  // already produced, so the seed lock has nothing to suppress here.
+  colour
+    .addBinding(state, 'layersMode', { label: 'Layers' })
+    .on('change', onUserChange(onPaintChange));
+
   colour
     .addBinding(state, 'haze', {
       label: 'Distance haze',

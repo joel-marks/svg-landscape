@@ -20,6 +20,30 @@ import {
   wallPoints,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The one
+// archetype where the bands cut across two *kinds* of layer: distant peaks at
+// depth 0 and 0.1, the canyon floor at 0.32, and then wall pairs from 0.45 to 1
+// — which are vertical silhouettes, not crests.
+//
+// 0.2 takes the peaks seen through the gap, and only those. 0.9 takes the
+// nearest wall pair — the one leaning in at the bottom of frame, which is the
+// wall the viewer is standing beside. The floor and every wall behind that pair
+// share the middle band, and that is the intended read rather than a
+// compromise: the floor and the walls above it are the same middle distance,
+// and colouring the floor with the distant peaks would flatten the enclosure
+// the archetype exists to draw.
+//
+// This is the archetype where the boundary matters least, and it is worth
+// saying why rather than leaving the value looking more considered than it is:
+// the nearest wall pair occludes almost everything behind it at the frame
+// edges, so 0.8 and 0.9 render nearly the same picture. 0.9 wins on the reading
+// rather than on the pixels — one pair of walls in the foreground band is what
+// "the wall beside me" means, whatever the wall count happens to be.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.2,
+  foregroundFrom: 0.9,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

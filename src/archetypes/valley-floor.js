@@ -23,6 +23,22 @@ import {
   widthScale,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The one
+// archetype whose boundaries are pinned to specific constants further down this
+// file rather than chosen as round fractions, because its depths are not evenly
+// spaced: the crowding peaked ridge bands occupy 0 to exactly 0.3, the two
+// floor layers sit at 0.42 and 0.58, and the two framing spurs at 0.82 and 1.
+//
+// So 0.32 is "every peaked ridge band and nothing else" with a little room for
+// the band count to change, and 0.7 is "both framing spurs". The middle band
+// gets the valley floor itself, which is exactly the three-part reading the
+// archetype was drawn with — and the clearest case in the set for what Layers
+// mode is for.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.32,
+  foregroundFrom: 0.7,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

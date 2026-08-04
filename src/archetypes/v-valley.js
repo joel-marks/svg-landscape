@@ -25,6 +25,25 @@ import {
   spurCrest,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The pair of
+// ridges across the head of the valley sit at depth 0 and 0.08; everything else
+// is a spur, running 0.18 to 1.
+//
+// Both values are set to fall *between* spur pairs rather than at a round
+// fraction, and that is this archetype's whole boundary problem. Spurs
+// alternate left, right, left — so a boundary landing mid-pair puts one side of
+// the valley in one band and its opposite number in the next, and the
+// interlocking wedges the archetype exists to draw come apart into a staircase
+// of colour changes down the middle of the frame. 0.28 takes the two ridges
+// plus the first left/right pair; 0.82 takes the last pair and a half. Spur
+// count runs from 3 to 14 with Peak count, elevation and canvas width, so no
+// pair of values holds this for every scene — these hold it for most, which is
+// the best a fixed fraction can do against a varying count.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.28,
+  foregroundFrom: 0.82,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

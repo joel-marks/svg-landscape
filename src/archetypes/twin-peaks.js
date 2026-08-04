@@ -22,6 +22,21 @@ import {
 
 const PEAK_COUNT = 2;
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). Identical to
+// dominant-peak's, and for the identical reasons — the same four-layer skeleton
+// at depths 0, 0.45, 0.75 and 1, and the same near-hill crest sitting below the
+// frame, so the foreground band takes both rolling layers rather than only the
+// nearest. See that file for the full working.
+//
+// Offered the all-one-band escape hatch by the Phase 7 prompt and declining it
+// for the same reason stacked-ridges does: the pair of peaks, the ridge behind
+// the pair and the ground in front of it are three distinct distances whether
+// or not the peak count is fixed at two.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.3,
+  foregroundFrom: 0.7,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

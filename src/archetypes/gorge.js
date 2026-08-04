@@ -20,6 +20,30 @@ import {
   spurCrest,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). Depths are
+// the distant sliver at 0 and then spurs from 0.12 to 1.
+//
+// The background band is wider than v-valley's, which shares this archetype's
+// skeleton, and the reason is the terracing: a gorge spur holds a plateau most
+// of the way in before breaking at the tip (see `ease: 13` below), so its walls
+// stack into visible terraces rather than interlocking wedges. Terraces group
+// into bands without losing anything; the wedges did not.
+//
+// The foreground band is *narrower* than it first looked like it should be, and
+// that came out of rendering rather than reasoning. The nearest wall alone
+// covers most of the lower frame here — every layer behind it shows only as a
+// sliver above its neighbour — so widening the foreground band does not enlarge
+// the foreground, it just eats the terraced strip that is the only place the
+// middle band is visible at all. 0.9 keeps that strip.
+//
+// Worth naming rather than treating as a fault: the background band is a sliver
+// in this archetype whatever these values are, because the distant ridge down
+// the throat of the gorge *is* a sliver by design (`mistAfter: 0`).
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.25,
+  foregroundFrom: 0.9,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

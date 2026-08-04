@@ -7,8 +7,15 @@
 
 import { getArchetype } from './archetypes/index.js';
 import { computeLighting, suggestedAngle } from './lighting.js';
-import { createPalette, CUSTOM_THEME_ID, generatePalette, themes } from './palette.js';
+import {
+  createPalette,
+  CUSTOM_THEME_ID,
+  generatePalette,
+  themes,
+  themeTint,
+} from './palette.js';
 import { CUSTOM_PRESET_ID, presetId, presets } from './presets.js';
+import { setUITint } from './uitint.js';
 import { normalizeAngle, responseCurve } from './utils.js';
 
 // Non-linear slider response (CONTEXT.md section 6b). The shared utility, given
@@ -85,6 +92,13 @@ export const state = {
   // 0.5 is the theme exactly as authored; 0 flattens every layer onto its
   // midpoint, 1 spreads them toward the ramp's extremes (see palette.js).
   colorDepth: 0.5,
+  // The Color folder's "Layers" toggle (CONTEXT.md section 5, Phase 7). false
+  // is the continuous ramp every scene before this phase was drawn with; true
+  // gives each layer one of the theme's three stops flat, by region. A scene
+  // parameter rather than a preference — it changes what the picture looks
+  // like, so it travels with the scene, is exported, and is restored by a
+  // preset. Default off, so no existing scene changes appearance.
+  layersMode: false,
   haze: 0.5,
   // Slider position, not the rendered strength — VALLEY_MIST_RESPONSE maps it.
   // 0 by default so no existing scene changes appearance.
@@ -183,6 +197,9 @@ const SETTINGS_KEYS = [
   'palette',
   'customPalette',
   'colorDepth',
+  // Added Phase 7. Per-scene, not a preference (see the state literal above),
+  // which is what puts it here rather than in EXTRA_PERSISTED_KEYS.
+  'layersMode',
   'haze',
   'valleyMist',
   'mistDistance',
@@ -251,10 +268,28 @@ function paint(archetype) {
     horizonY: lastGeometry.horizonY,
   });
 
+  const theme = activeTheme();
+
+  // Hooked to the paint rather than to the theme controls, so every route to a
+  // new scene theme — the dropdown, the prev/next/randomise row, a preset, the
+  // restored session — carries the interface with it without each of them
+  // having to remember to (CONTEXT.md section 5, Phase 7). setUITint ignores a
+  // repeat of the same tint, so the ordinary case of repainting for some
+  // unrelated control costs one comparison.
+  setUITint(themeTint(theme));
+
   renderer?.(
     lastGeometry,
     {
-      palette: createPalette(activeTheme(), { colorDepth: state.colorDepth }),
+      palette: createPalette(theme, {
+        colorDepth: state.colorDepth,
+        layersMode: state.layersMode,
+        // The archetype's own region declaration (CONTEXT.md section 5). Read
+        // per paint rather than cached: switching Landscape type has to switch
+        // the boundaries with it, and this is the one place that can't be
+        // reached without an archetype in hand.
+        boundaries: archetype.module.LAYER_BOUNDARIES,
+      }),
       lighting,
       haze: state.haze,
       valleyMist: VALLEY_MIST_RESPONSE(state.valleyMist),
@@ -432,9 +467,33 @@ function assignSettings(settings) {
 // so matching the factory default's type is all this needs to catch.
 function plausible(key, value) {
   const expected = FACTORY_DEFAULTS[key];
-  // customPalette: null when curated, an array of colours when generated.
-  if (expected === null) return value === null || Array.isArray(value);
+  // customPalette is the one key with no factory value to match a type
+  // against: null while a curated theme is selected, a generated theme object
+  // once the user has randomised.
+  //
+  // This test read `value === null || Array.isArray(value)` from Phase 5 until
+  // Phase 7, and the comment beside it said "an array of colours" — which
+  // generatePalette has never returned. It returns an object carrying the
+  // triple among other fields, so every restore of a randomised palette failed
+  // this check silently and was skipped; activeTheme() then generated a fresh
+  // one, and a returning visitor got a different palette from the one they
+  // left. Found while adding `uiTint` to the generated shape (CONTEXT.md
+  // section 18).
+  if (expected === null) return value === null || isThemeObject(value);
   return typeof value === typeof expected;
+}
+
+// Deliberately shallow: enough that an unparseable blob can't reach the ramp as
+// undefined stops, not a schema. chroma.scale falls back on its own for a stop
+// it can't read, and getTheme covers an unknown id.
+function isThemeObject(value) {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Array.isArray(value.terrain) &&
+    value.terrain.length >= 2
+  );
 }
 
 // Which preset, if any, the live scene currently is. Called after every change,
@@ -467,8 +526,12 @@ function sameSettings(a, b) {
 // seed too: seeds are integers, so the nearest distinct pair differs by 1.
 const EPSILON = 1e-9;
 
-// customPalette is the one array-valued setting, so equality has to reach one
-// level in rather than comparing references.
+// customPalette is the one structured setting, so equality has to reach into it
+// rather than comparing references — two identical generated palettes read off
+// two files are never the same object. Its `terrain` array is why the array
+// branch exists; the object branch was added in Phase 7 alongside the restore
+// fix in plausible(), since a preset carrying a generated palette would
+// otherwise load correctly and then immediately report itself as "Custom".
 function sameValue(a, b) {
   if (Array.isArray(a) || Array.isArray(b)) {
     return (
@@ -478,10 +541,19 @@ function sameValue(a, b) {
       a.every((value, index) => sameValue(value, b[index]))
     );
   }
+  if (isPlainObject(a) || isPlainObject(b)) {
+    if (!isPlainObject(a) || !isPlainObject(b)) return false;
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+    return [...keys].every((key) => sameValue(a[key], b[key]));
+  }
   if (typeof a === 'number' && typeof b === 'number') {
     return Math.abs(a - b) <= EPSILON;
   }
   return a === b;
+}
+
+function isPlainObject(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 // --- persistence (CONTEXT.md section 7) --------------------------------------

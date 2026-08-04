@@ -8,6 +8,15 @@
 // each layer is { index, depth, points } and points is a closed polygon in
 // absolute coordinates. `depth` runs 0 (farthest) to 1 (nearest) and selects
 // the palette ramp position.
+//
+// Since Phase 7 every module also exports `LAYER_BOUNDARIES` — the two
+// fractional depths at which that archetype's stack divides into background,
+// middle and foreground regions for the Color folder's Layers mode (CONTEXT.md
+// section 5). Declared per archetype rather than globally because the right
+// division is a property of the geometry: see each module's own note for why
+// its two numbers are what they are. state.js reads them off the module and
+// hands them to createPalette; a module without them falls back to a generic
+// stack rather than failing (palette.js, DEFAULT_BOUNDARIES).
 
 import * as openValley from './open-valley.js';
 import * as valleyFloor from './valley-floor.js';

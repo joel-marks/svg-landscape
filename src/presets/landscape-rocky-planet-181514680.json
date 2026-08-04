@@ -17,6 +17,7 @@
   "shadowIntensity": 1,
   "palette": "volcanic-ash",
   "colorDepth": 0.74,
+  "layersMode": false,
   "haze": 0.31,
   "valleyMist": 0.71,
   "mistDistance": 0.5099999999999999

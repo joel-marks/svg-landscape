@@ -17,6 +17,7 @@
   "shadowIntensity": 0.51,
   "palette": "alpine-dusk",
   "colorDepth": 0.85,
+  "layersMode": false,
   "haze": 0.26,
   "valleyMist": 0.45,
   "mistDistance": 1

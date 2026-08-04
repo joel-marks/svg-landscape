@@ -13,7 +13,9 @@ No backend, no accounts, no server. Runs entirely client-side, deployed as a sta
 - Nine landscape archetypes, each its own procedural generator
 - Continuous time-of-day lighting with sun/moon and star fields
 - Optional pseudo-3D shadow split, independently controllable or locked to time of day
-- Seven curated colour themes plus an algorithmic randomiser, with depth and atmospheric haze/mist controls
+- Eight curated colour themes plus an algorithmic randomiser, with depth and atmospheric haze/mist controls
+- Two colouring modes: a continuous depth ramp, or flat colour bands per depth region ("Layers")
+- Themes live in `src/themes.json` — three ramp colours and a UI tint each, so adding one is a data change
 - Presets: drop a settings JSON into `src/presets/` and it appears in the dropdown — no code changes
 - Full state persisted between visits; every setting exports to SVG and JSON
 
@@ -63,7 +65,9 @@ src/
   main.js            entry point
   state.js           app state + localStorage persistence
   noise.js            fbm / ridged-fbm over simplex-noise
-  palette.js           curated themes + algorithmic generator
+  palette.js           theme loading, algorithmic generator, ramp + band modes
+  themes.json           the curated themes themselves — data, not code
+  uitint.js              tints interface accents from the current theme
   presets.js            preset discovery (globs presets/*.json)
   presets/               preset files
   lighting.js             time-of-day model
@@ -81,7 +85,7 @@ public/                             static assets
 index.html                          single page
 ```
 
-Every archetype exports `generate({ seed, elevation, complexity, peakCount, sharpness, width, height })` and returns a set of closed-polygon layers, ordered farthest to nearest.
+Every archetype exports `generate({ seed, elevation, complexity, peakCount, sharpness, width, height })` and returns a set of closed-polygon layers, ordered farthest to nearest, plus a `LAYER_BOUNDARIES` declaration saying where its own stack divides into background, middle and foreground for Layers mode.
 
 ## Deployment
 

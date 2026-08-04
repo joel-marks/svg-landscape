@@ -20,6 +20,31 @@ import {
   widthScale,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The ridge
+// bands run 0 to 0.82 and the single rolling hill at the bottom of frame is
+// depth 1.
+//
+// 0.25 puts the summit line and the band behind it in the background band. That
+// is the Phase 7 prompt's own example — a summit is background — and it holds
+// here for a reason worth stating: this archetype's subject is *looking down
+// from* a summit, so the peaks in frame are the far range, not the one being
+// stood on.
+//
+// The foreground boundary looked self-selecting and was not. 0.9 reads as "the
+// rolling hill, and nothing else" — the only layer here a viewer could stand on
+// — and rendering it is what showed the flaw: this archetype's ridge bands are
+// spaced by an accelerating curve (`Math.pow(p, 1.55)` below), so the near ones
+// bunch together and overlap almost completely. Five of eight layers landed in
+// the middle band and painted as one flat mass with a sliver of foreground
+// under it. 0.75 takes the last ridge band as well, and the three regions come
+// back into proportion. The lesson generalises: what matters is how much of the
+// *frame* each band ends up covering, which is not the same as how many layers
+// it contains.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.25,
+  foregroundFrom: 0.75,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

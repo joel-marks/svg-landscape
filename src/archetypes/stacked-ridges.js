@@ -18,6 +18,23 @@ import {
   scaleFrequency,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7).
+//
+// The Phase 7 prompt offered this archetype the all-one-band escape hatch, on
+// the grounds that the far/mid/near concept might not apply to a rhythmic
+// repeating silhouette. Sitting with the geometry says the opposite: six to
+// eight evenly spaced bands marching from a high horizon to the bottom of frame
+// is the most legibly ordered stack in the project, and three colour regions
+// across it read as a deliberate screen-printed poster rather than as an
+// accident. Even spacing is also what makes plain fractions right here, where
+// every other archetype needed its boundaries fitted to its own depth
+// constants: 0.3 and 0.75 give roughly two rear, three middle, two near on a
+// seven-band scene, at any elevation.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.3,
+  foregroundFrom: 0.75,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

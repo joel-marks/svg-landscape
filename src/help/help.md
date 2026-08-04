@@ -32,8 +32,9 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 
 ## Color
 
-- **Theme preset** — seven curated ramps running from a pale far stop to a dark near one. Previous/Next step through them; Randomise generates a new one algorithmically (complementary, analogous or split-hue), shown as "Randomized".
-- **Color depth** — how strongly near and far layers separate. 0.5 is the theme as authored; below that layers flatten toward each other, above it they spread toward the ramp's extremes.
+- **Theme preset** — eight curated ramps, each three colours running from the farthest ridge to the nearest foreground. Previous/Next step through them; Randomise generates a new one algorithmically (complementary, analogous or split-hue), shown as "Randomized". Whichever theme is showing also lightly tints the panel's accents and outlines.
+- **Color depth** — how strongly near and far separate. 0.5 is the theme as authored; below that everything flattens toward the middle colour, above it the extremes spread further apart. It works in both Layers modes, and means the same thing in each — with Layers off it moves where layers sit on the ramp, with Layers on it moves the three band colours apart or together.
+- **Layers** — off, the three theme colours blend into a continuous ramp across the depth of the scene. On, each layer takes one of the three flat, by how far away it is: background, middle distance or foreground. Where those regions divide is a property of each landscape type. The Desert theme is built for this mode.
 - **Distance haze** — the atmospheric band at the horizon. Coloured by time of day, not the palette.
 - **Valley mist** — a wash that fades from each layer's own summit down to the next-nearer layer's summit, clear at the top. The nearest layer never takes it, so the foreground stays sharp. Deliberately subtle for most of the slider, more visible near the top.
 - **Distance** — how much valley mist grows with distance: even across every layer at 0, weighted toward the far ones at 1. Inactive while Valley mist is 0.

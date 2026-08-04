@@ -19,6 +19,20 @@ import {
   scaleFrequency,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). Depth here
+// is `i / (layerCount - 1)` — evenly spaced across 5 to 11 layers — so the two
+// values are read as fractions of the whole stack rather than as layer counts.
+//
+// 0.3 puts the two or three ridges nearest the horizon in the background band:
+// those are the ones whose crests stay above the horizon line and read as
+// distance. 0.72 takes the two nearest, which are the layers that sweep up the
+// frame edges and drop below the bottom of frame at the centre — the valley
+// walls the viewer is standing between, and genuinely foreground.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.3,
+  foregroundFrom: 0.72,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

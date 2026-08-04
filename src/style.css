@@ -46,17 +46,35 @@
    text/raised 6.4 -> 10.3:1, muted/raised 4.6 -> 7.4:1, accent/raised
    4.7 -> 7.5:1, and text/base 4.9:1 and border/base 3.1:1 are unchanged because
    both of their operands are. */
+/* Three tokens are declared twice from Phase 7 onward: a `-base` holding the
+   theme's own neutral value, and the token everything else consumes, which
+   defaults to it. uitint.js reads the base, mixes a little of the current scene
+   theme's declared `uiTint` into it, and writes the result to the consumed
+   token as an inline custom property on <html> — which outranks both blocks
+   below without either of them having to know about it. Nothing else changes:
+   with no scene tint, or with Ink wash's deliberately neutral one, every
+   consumer resolves to exactly the value it had before. */
 :root {
   --surface: #7e848b;
   --surface-raised: #bfc2c5;
   --surface-sunken: #686d73;
-  --border: #34383d;
+  --border-base: #34383d;
+  --border: var(--border-base);
   --text: #101418;
   --text-muted: #2a3138;
-  --accent: #0a3247;
+  --accent-base: #0a3247;
+  --accent: var(--accent-base);
   --accent-contrast: #ffffff;
   --scrollbar-thumb: #4d545b;
   --scrollbar-thumb-hover: #3d4248;
+
+  /* The Tweakpane input outline, moved up here from .tweakpane-scope in Phase 7
+     so it sits with the other two tinted tokens rather than a block away from
+     them. Its calibration is unchanged and the reasoning for the value still
+     lives with the panel theming below. */
+  --input-ring-base: #5b636b;
+  --input-ring: var(--input-ring-base);
+
   color-scheme: light;
 }
 
@@ -64,13 +82,19 @@
   --surface: #0e1317;
   --surface-raised: #161d23;
   --surface-sunken: #090d10;
-  --border: #27323b;
+  --border-base: #27323b;
+  --border: var(--border-base);
   --text: #e9eef3;
   --text-muted: #94a2af;
-  --accent: #6fb7d4;
+  --accent-base: #6fb7d4;
+  --accent: var(--accent-base);
   --accent-contrast: #0e1317;
   --scrollbar-thumb: #3c4a56;
   --scrollbar-thumb-hover: #4d5e6d;
+
+  --input-ring-base: #4e5f6d;
+  --input-ring: var(--input-ring-base);
+
   color-scheme: dark;
 }
 
@@ -173,8 +197,14 @@
        this one is calibrated *to* ~2.9:1 and left at 6.12's #3f444a would have
        jumped to 4.9:1 — a hard frame around every input, which is the opposite
        failure from the one it was added to fix. #5b636b restores 3.0:1 against
-       the input field and 3.0:1 against the container. */
-    --tp-input-border-color: #5b636b;
+       the input field and 3.0:1 against the container.
+
+       Phase 7 moved both themes' literals to --input-ring-base on :root/.dark
+       and left one mapping here, because this is the panel's focus/hover ring
+       and therefore one of the three tokens the scene theme tints. Declaring it
+       once, outside the light/dark split, is what makes the tinted value reach
+       both themes — the .dark .tweakpane-scope block no longer restates it. */
+    --tp-input-border-color: var(--input-ring);
   }
 
   .dark .tweakpane-scope {
@@ -206,11 +236,13 @@
     --tp-monitor-background-color: #0e1317;
     --tp-monitor-foreground-color: #94a2af;
 
-    /* Lighter than the field here, for the same reason the light theme's is
-       darker: that is the direction this system's borders already run in each
-       theme (dark --border sits above dark --surface). ~2.8:1 against the
-       near-black input background. */
-    --tp-input-border-color: #4e5f6d;
+    /* --tp-input-border-color is deliberately absent here since Phase 7. Its
+       dark value is --input-ring-base on .dark, and the mapping in the block
+       above serves both themes — restating it here would shadow the tinted
+       value in dark mode only, which is the sort of half-working the token
+       split exists to prevent. The value itself is unchanged: #4e5f6d, lighter
+       than the field it outlines for the same reason the light theme's is
+       darker, ~2.8:1 against the near-black input background. */
   }
 }
 

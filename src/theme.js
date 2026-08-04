@@ -12,6 +12,8 @@
 // state.js — the theme is an interface preference, not part of the scene, and
 // it has to be readable before any of that is loaded.
 
+import { applyUITint } from './uitint.js';
+
 const STORAGE_KEY = 'svg-landscape:theme';
 
 // Dropdown order in the panel, and the list setThemeMode validates against.
@@ -57,6 +59,12 @@ export function setThemeMode(next) {
 
 function apply() {
   document.documentElement.classList.toggle('dark', getResolvedTheme() === 'dark');
+  // The scene theme's UI tint is mixed into whichever set of base tokens is now
+  // in force (CONTEXT.md section 5, Phase 7), so switching Light/Dark has to
+  // recompute it — the tint itself is unchanged, the neutral it sits on is not.
+  // Called after the class, since that is what decides which base values
+  // uitint.js will read back.
+  applyUITint();
 }
 
 function readStoredMode() {

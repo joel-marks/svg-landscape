@@ -21,6 +21,24 @@ import {
   widthScale,
 } from '../utils.js';
 
+// Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). Four layers,
+// at depths 0, 0.45, 0.75 and 1 — the peak line, the mid-ground ridge, and two
+// rolling foreground bands. With so few layers the values only have to fall in
+// the gaps, so what is being chosen here is really which *layer* goes where.
+//
+// 0.3 isolates the peak line as background. 0.7 puts both rolling layers in the
+// foreground band, which is the half of this that took looking at rather than
+// reasoning about: 0.9 also falls in a gap and reads more precisely ("the
+// nearest hill, and nothing else"), but the nearest hill's crest sits at 1.06 ×
+// canvas height, so almost all of it is below the frame and it renders as a
+// sliver of foreground colour along the bottom edge. Taking both gives three
+// bands of roughly comparable area. Layer counts and frame area are different
+// measures and this archetype is where they disagree most.
+export const LAYER_BOUNDARIES = {
+  backgroundUntil: 0.3,
+  foregroundFrom: 0.7,
+};
+
 export function generate({
   seed = 0,
   elevation = 0.5,

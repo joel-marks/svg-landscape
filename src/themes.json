@@ -1,0 +1,56 @@
+[
+  {
+    "id": "alpine-dusk",
+    "name": "Alpine dusk",
+    "terrain": ["#9aa8c0", "#4a5670", "#141c28"],
+    "uiTint": "#6d80ad",
+    "_note": "The Phase 2 palette. Endpoints unchanged so the default scene is the one the lighting keyframes were tuned against; only the mid stop is new."
+  },
+  {
+    "id": "glacier",
+    "name": "Glacier",
+    "terrain": ["#d6e7ee", "#6a9cb2", "#10242f"],
+    "uiTint": "#5aa0bd",
+    "_note": "Pale cyan distance falling to a deep meltwater teal — the coldest and highest-key of the set."
+  },
+  {
+    "id": "cascade-pine",
+    "name": "Cascade pine",
+    "terrain": ["#a9c2b1", "#3d6b55", "#0d1f17"],
+    "uiTint": "#4a8f6d"
+  },
+  {
+    "id": "sandstone-mesa",
+    "name": "Sandstone mesa",
+    "terrain": ["#e3c3a0", "#a96b48", "#3a1f18"],
+    "uiTint": "#b96f45",
+    "_note": "Warm ochre through burnt sienna. The counterweight to Alpine dusk."
+  },
+  {
+    "id": "volcanic-ash",
+    "name": "Volcanic ash",
+    "terrain": ["#b8ada4", "#6b5a50", "#191311"],
+    "uiTint": "#8d7568",
+    "_note": "Near-neutral, but warm-shifted rather than grey so it doesn't collide with Ink wash. Its tint is deliberately the quietest of the eight for the same reason."
+  },
+  {
+    "id": "heather-moor",
+    "name": "Heather moor",
+    "terrain": ["#c6b4c8", "#7a5f80", "#231a2b"],
+    "uiTint": "#8c6a95"
+  },
+  {
+    "id": "ink-wash",
+    "name": "Ink wash",
+    "terrain": ["#d0d0d0", "#787878", "#131313"],
+    "uiTint": "#8a8a8a",
+    "_note": "Deliberately zero-chroma, and its tint is too. A tint with no hue of its own cannot tint anything — it very slightly drains the interface's own colour instead, which is the honest outcome for a palette whose identity is having none, and makes this the control case when checking that the other seven tints are doing something."
+  },
+  {
+    "id": "desert",
+    "name": "Desert",
+    "terrain": ["#5a3f2f", "#c9a04d", "#e8d9b8"],
+    "uiTint": "#c9a04d",
+    "_note": "Phase 7's demonstrator for Layers mode: rocky mesa brown behind, dune yellow through the middle, sand off-white in front. The one theme whose ramp runs dark-to-pale rather than pale-to-dark, because the band it is naming (foreground sand) is the pale one — see CONTEXT.md section 6d for what that means in continuous mode."
+  }
+]
