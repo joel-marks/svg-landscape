@@ -23,12 +23,26 @@ export function createModal({ id, title, body, className = '' }) {
   const header = document.createElement('div');
   header.className =
     'flex shrink-0 items-center gap-4 border-b border-border-token px-5 py-3';
+  // Both Close controls were `border-border-token bg-surface text-muted`
+  // through Phase 7.5, and Phase 8's contrast audit failed them three ways at
+  // once (CONTEXT.md section 11). The fill was doing no work — 2.13:1 against
+  // the dialog in light and 1.19:1 in dark, so what identified the button was
+  // always its outline — and that outline was `--border`, which is the page's
+  // *decorative* rule token and sits at 1.3:1 in dark. `text-muted` on the fill
+  // came to 3.49:1 in light, under the 4.5:1 a label needs.
+  //
+  // So the fill goes (the dialog's own surface shows through, and now arrives
+  // on hover instead, where it reads as the affordance it always should have
+  // been), the outline moves to `--input-ring` — the token that exists for
+  // interactive boundaries, 3.7:1 and 3.6:1 against the dialog in the two
+  // themes — and the label takes the full text colour: 10.3:1 at rest, 4.9:1
+  // over the hover fill.
   header.innerHTML = `
     <h2 id="${titleId}" class="m-0 text-base font-semibold tracking-tight">${title}</h2>
     <button
       type="button"
       data-modal-close
-      class="ml-auto rounded-md border border-border-token bg-surface px-2 py-1 text-sm text-muted transition-colors hover:text-text"
+      class="ml-auto rounded-md border border-input-ring px-2 py-1 text-sm transition-colors hover:bg-surface"
       aria-label="Close ${title.toLowerCase()}"
     >&#10005;</button>
   `;
@@ -39,7 +53,7 @@ export function createModal({ id, title, body, className = '' }) {
     <button
       type="button"
       data-modal-close
-      class="rounded-md border border-border-token bg-surface px-3 py-1.5 text-sm transition-colors hover:text-text"
+      class="rounded-md border border-input-ring px-3 py-1.5 text-sm transition-colors hover:bg-surface"
     >Close</button>
   `;
 

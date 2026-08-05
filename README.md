@@ -6,7 +6,7 @@ No backend, no accounts, no server. Runs entirely client-side, deployed as a sta
 
 **Live demo:** [joel-marks.github.io/svg-landscape](https://joel-marks.github.io/svg-landscape/)
 
-**Status:** actively developed. Core generation, lighting, colour, presets and persistence are complete; accessibility and a responsive pass are still in progress. See [About](src/about/about.md) for more on how this was built.
+**Status:** feature-complete for its planned scope. Generation, lighting, colour, presets and persistence, plus an accessibility, contrast and responsive pass across both UI themes. See [About](src/about/about.md) for more on how this was built.
 
 ## Features
 
@@ -14,10 +14,12 @@ No backend, no accounts, no server. Runs entirely client-side, deployed as a sta
 - Continuous time-of-day lighting with sun/moon and star fields
 - Optional pseudo-3D shadow split, independently controllable or locked to time of day
 - Eight curated colour themes plus an algorithmic randomiser, with depth and atmospheric haze/mist controls
-- Two colouring modes: a continuous depth ramp, or flat colour bands per depth region ("Layers")
+- Two colouring modes: a continuous depth ramp, or flat colour bands per depth region ("Banded colors")
 - Themes live in `src/themes.json` — three ramp colours and a UI tint each, so adding one is a data change
 - Presets: drop a settings JSON into `src/presets/` and it appears in the dropdown — no code changes
 - Full state persisted between visits; every setting exports to SVG and JSON
+- Keyboard-operable throughout, WCAG AA contrast in both themes, and `prefers-reduced-motion` respected
+- Desktop-first layout that reflows to two columns and then one below 1024px and 640px
 
 Full control-by-control detail is in the app's own **Help** panel — this README stays a quick orientation, not a manual.
 
@@ -74,6 +76,7 @@ src/
   lighting.js             time-of-day model
   render.js                SVG paint
   controls.js               Tweakpane panel
+  panel-a11y.js              accessible names/roles for the panel's controls
   archetypes/                one module per landscape type
   help/help.md                in-app Help content
   about/about.md                in-app About content

@@ -58,7 +58,8 @@ loadState();
 initControls({
   presetsContainer: document.querySelector('#panel-presets'),
   leftContainer: document.querySelector('#panel-left'),
-  centreContainer: document.querySelector('#panel-centre'),
+  lightingContainer: document.querySelector('#panel-lighting'),
+  colourContainer: document.querySelector('#panel-colour'),
   actionsContainer: document.querySelector('#panel-actions'),
   preferencesContainer: document.querySelector('#panel-preferences'),
   onDownloadSVG: () => downloadSVG(svg, `${exportName()}.svg`),
@@ -71,3 +72,17 @@ initControls({
 
 initTheme();
 regenerate();
+
+// The other half of the initial-load fade (CONTEXT.md section 9; the critical
+// style that starts it is inlined in index.html's <head>, because it has to
+// work before style.css exists). Clearing this class is the whole signal: it
+// drops the starting opacity, cancels the failsafe animation, and releases the
+// `a { color: inherit }` fallback that keeps the header icon off the UA's link
+// colour while there is no stylesheet.
+//
+// Last statement in the module, and after regenerate() rather than before it,
+// so what fades in is the finished scene rather than an empty canvas frame. On
+// the failure path the class is never added and the failsafe animation in the
+// head reveals the page anyway — which is why nothing here is wrapped in a
+// try/finally pretending to guard it.
+document.documentElement.classList.add('app-ready');

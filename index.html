@@ -5,24 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- PLACEHOLDER copy — final title/description/OG values land in the SEO pass (CONTEXT.md section 11). -->
-    <title>SVG Landscape Generator</title>
+    <!-- Final copy as of Phase 8; these were scaffold placeholders through 7.5
+         (CONTEXT.md section 11). The description is deliberately literal about
+         what the app is and what it costs — there is no signup, no backend and
+         no upload, and those are the three things worth saying in 160
+         characters. -->
+    <title>SVG Landscape Generator — procedural landscape SVGs in your browser</title>
     <meta
       name="description"
-      content="PLACEHOLDER — Generate procedural 2D landscape SVGs in the browser and download them. No backend, no accounts."
+      content="Generate procedural 2D landscape SVGs in your browser: ten landscape types, curated colour themes, time-of-day lighting. Free, no signup, nothing uploaded."
     />
+    <link rel="canonical" href="https://joel-marks.github.io/svg-landscape/" />
+
+    <!-- Two theme-colors rather than one: the browser chrome should match
+         whichever surface the page is actually showing (--surface, per
+         style.css). A single value is wrong in one of the two schemes. -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#7e848b" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e1317" />
 
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SVG Landscape Generator" />
     <meta property="og:title" content="SVG Landscape Generator" />
     <meta
       property="og:description"
-      content="PLACEHOLDER — Generate procedural 2D landscape SVGs in the browser and download them."
+      content="Generate procedural 2D landscape SVGs in your browser: ten landscape types, curated colour themes, time-of-day lighting. Free, no signup, nothing uploaded."
     />
     <meta property="og:url" content="https://joel-marks.github.io/svg-landscape/" />
-    <!-- PLACEHOLDER — og:image asset not yet created. -->
+    <!-- Absolute, and it has to be: the crawlers that read these do not resolve
+         relative URLs against the page. Rendered by the offline harness from a
+         real scene rather than mocked up — see CONTEXT.md section 17, Phase 8. -->
     <meta property="og:image" content="https://joel-marks.github.io/svg-landscape/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="A generated dusk landscape: six ridgelines receding into haze under a rising moon and a field of stars, in cool blues with a warm band at the horizon."
+    />
 
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SVG Landscape Generator" />
+    <meta
+      name="twitter:description"
+      content="Generate procedural 2D landscape SVGs in your browser: ten landscape types, curated colour themes, time-of-day lighting. Free, no signup, nothing uploaded."
+    />
+    <meta name="twitter:image" content="https://joel-marks.github.io/svg-landscape/og-image.png" />
+
+    <!-- Critical, inline, and deliberately not in style.css: everything here
+         exists to cover the window *before* style.css has arrived, so a rule
+         living in that file could not do the job (Phase 8, CONTEXT.md
+         section 9).
+
+         Two problems, one gate. (1) The header's GitHub mark is an inlined
+         <svg> inside an <a>. With no stylesheet it has no intrinsic size, so
+         the UA falls back to 300x150, and `fill="currentColor"` resolves
+         against the UA's own link colour — a visited link is purple. That is
+         the large purple flash this replaces; explicit width/height attributes
+         on the SVG fix the size and the `color: inherit` below fixes the
+         colour. (2) The page fades in once the app has initialised.
+
+         Every selector is scoped under `html:not(.app-ready)`, which main.js
+         clears at the end of init. That matters more than it looks: this block
+         is *unlayered*, so it would otherwise outrank every rule in style.css's
+         @layer base regardless of specificity — `a { color: inherit }` left
+         live would beat `.markdown a` and the header link's own hover. Scoped
+         this way it stops applying entirely the moment the app is up.
+
+         **Failure-safe.** The fade is not an `opacity: 0` waiting on a class
+         that a thrown exception would stop arriving. The same `:not(.app-ready)`
+         state also carries a 2.5s animation that ends at full opacity, so a
+         module that errors before init — or one that never runs at all — costs
+         the fade, not the page. The <noscript> block covers scripting being off
+         outright, where no animation is needed at all.
+
+         Reduced motion (CONTEXT.md section 11) gates the whole thing: at
+         `reduce` there is no starting opacity, so the content simply appears. -->
+    <style>
+      html:not(.app-ready) a {
+        color: inherit;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        html:not(.app-ready) body {
+          opacity: 0;
+          /* Reveals the page even if `.app-ready` never arrives. An animation
+             beats the declaration above it once it starts, so this cannot be
+             stuck behind the thing it is insuring against. */
+          animation: app-load-failsafe 1ms linear 2.5s forwards;
+        }
+
+        body {
+          transition: opacity 200ms ease-out;
+        }
+
+        @keyframes app-load-failsafe {
+          to {
+            opacity: 1;
+          }
+        }
+      }
+    </style>
+    <noscript>
+      <style>
+        html:not(.app-ready) body {
+          opacity: 1;
+          animation: none;
+        }
+      </style>
+    </noscript>
   </head>
 
   <body class="flex min-h-dvh flex-col">
@@ -60,8 +149,14 @@
             <!-- The GitHub mark, inlined rather than pulled from an icon
                  package: one static icon does not justify reinstating the
                  dependency Phase 6.5 removed (CONTEXT.md section 2). -->
+            <!-- The width/height attributes are the pre-stylesheet size, and
+                 match what `h-5 w-5` resolves to once CSS arrives (20px). An
+                 <svg> with neither has no intrinsic size and the UA gives it
+                 300x150 — see the critical style in <head>. -->
             <svg
               class="h-5 w-5"
+              width="20"
+              height="20"
               viewBox="0 0 16 16"
               fill="currentColor"
               aria-hidden="true"
@@ -100,10 +195,25 @@
            A side panel is unworkable once the canvas can be an X-Pan or
            LinkedIn strip. Each column hosts one Tweakpane instance; the folder
            titles inside are the accordion headings, so there is no separate
-           markup chrome to keep in sync with them. -->
+           markup chrome to keep in sync with them.
+
+           Phase 8 adds the step down. Desktop-first stays — three columns at
+           `lg` and up — but the layout no longer falls straight from three to
+           one at 1024px, which is what it did through 7.5 and what made the
+           768px range the worst width to use the app at: a single 736px-wide
+           column of controls under a 736px-wide canvas, scrolled forever.
+           `sm` (640px) is where two columns stop fitting: the panes' own label
+           and value columns need roughly 300px each before Tweakpane starts
+           truncating labels, and two of those plus the gutter and the gap is
+           just about 640. The three column wrappers reflow 2 + 1 at that size
+           rather than being repacked — `items-start` means the odd one out sits
+           at the top of the second row, and the alternative (splitting the
+           wrappers so six panes flow freely) would let Presets and Preferences
+           land next to each other, which is exactly the grouping the three
+           columns exist to prevent. -->
       <div
         id="control-columns"
-        class="tweakpane-scope mt-6 grid items-start gap-4 lg:grid-cols-3"
+        class="tweakpane-scope mt-6 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <!-- The left column stacks two panes: Presets on top as its own panel,
              then Canvas/Scene. The inner gap matches the grid's own gutter so
@@ -112,7 +222,12 @@
           <section id="panel-presets" aria-label="Presets"></section>
           <section id="panel-left" aria-label="Canvas and scene controls"></section>
         </div>
-        <section id="panel-centre" aria-label="Lighting and colour controls"></section>
+        <!-- The centre column stacks two panes on the same rhythm as the outer
+             two, Lighting above Color (CONTEXT.md section 5). -->
+        <div class="flex flex-col gap-4">
+          <section id="panel-lighting" aria-label="Lighting controls"></section>
+          <section id="panel-colour" aria-label="Color controls"></section>
+        </div>
 
         <!-- The right column stacks two panes on the same rhythm as the left,
              Actions above Preferences (CONTEXT.md section 5). -->

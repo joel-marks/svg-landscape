@@ -23,7 +23,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 
 ## Lighting
 
-- **Time of day** — a continuous 24-hour slider driving sky, mist tint, the sun/moon arc and star visibility. Dawn and dusk are tuned independently rather than mirrored, since they don't actually look alike.
+- **Time of day** — a 24-hour clock face: drag the hand, or focus it and use the arrow keys. Noon is at the top and the day runs clockwise, so sunrise sits on the left and sunset on the right. It drives sky, mist tint, the sun/moon arc and star visibility. Dawn and dusk are tuned independently rather than mirrored, since they don't actually look alike.
 - **Show sun/moon** / **Show stars** — independent toggles; hide only the body/glow or the star field, nothing else about the lighting.
 - **Shadow / pseudo-3D** — splits each landform into a lit and shaded facet, based on which way it faces relative to the light. On by default.
 - **Light source angle** — free to set on its own whenever the lock below is off. While the lock is on it becomes a readout of the tracked value, and the slider is inactive.
@@ -33,9 +33,9 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 ## Color
 
 - **Theme preset** — eight curated ramps, each three colours running from the farthest ridge to the nearest foreground. Previous/Next step through them; Randomise generates a new one algorithmically (complementary, analogous or split-hue), shown as "Randomized". Whichever theme is showing also lightly tints the panel's accents and outlines.
-- **Color depth** — how strongly near and far separate. 0.5 is the theme as authored; below that everything flattens toward the middle colour, above it the extremes spread further apart. It works in both Layers modes, and means the same thing in each — with Layers off it moves where layers sit on the ramp, with Layers on it moves the three band colours apart or together.
-- **Layers** — off, the three theme colours blend into a continuous ramp across the depth of the scene. On, each layer takes one of the three flat, by how far away it is: background, middle distance or foreground. Where those regions divide is a property of each landscape type. The Desert theme and the Desert mesa landscape type are built for this mode, and are the clearest place to see it.
-- **Distance haze** — the atmospheric band at the horizon. Coloured by time of day, not the palette.
+- **Color depth** — how strongly near and far separate. 0.5 is the theme as authored; below that everything flattens toward the middle colour, above it the extremes spread further apart. It works in both colouring modes, and means the same thing in each — with Banded colors off it moves where layers sit on the ramp, with Banded colors on it moves the three band colours apart or together.
+- **Banded colors** — off, the three theme colours blend into a continuous ramp across the depth of the scene. On, each layer takes one of the three flat, by how far away it is: background, middle distance or foreground. Where those regions divide is a property of each landscape type. The Desert theme and the Desert mesa landscape type are built for this mode, and are the clearest place to see it.
+- **Horizon haze** — the atmospheric band at the horizon. Coloured by time of day, not the palette.
 - **Valley mist** — a wash that fades from each layer's own summit down to the next-nearer layer's summit, clear at the top. The nearest layer never takes it, so the foreground stays sharp. Deliberately subtle for most of the slider, more visible near the top.
 - **Distance** — how much valley mist grows with distance: even across every layer at 0, weighted toward the far ones at 1. Inactive while Valley mist is 0.
 

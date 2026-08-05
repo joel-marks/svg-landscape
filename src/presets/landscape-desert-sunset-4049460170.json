@@ -1,0 +1,35 @@
+{
+  "app": "svg-landscape",
+  "presetName": "Desert sunset",
+  "archetype": "desert-mesa",
+  "seed": 4049460170,
+  "complexity": 0.91,
+  "peakCount": 0,
+  "sharpness": 1,
+  "elevation": 0.53,
+  "aspect": "cine",
+  "hour": 16.6,
+  "showBodies": true,
+  "showStars": true,
+  "shadow": true,
+  "lightAngle": 16,
+  "lockAngle": true,
+  "shadowIntensity": 0.5,
+  "palette": "custom",
+  "customPalette": {
+    "id": "custom",
+    "name": "Randomized (complementary)",
+    "strategy": "complementary",
+    "terrain": [
+      "#c4c7ac",
+      "#a16464",
+      "#21223d"
+    ],
+    "uiTint": "#a16464"
+  },
+  "colorDepth": 0.49999999999999983,
+  "layersMode": false,
+  "haze": 0.29000000000000004,
+  "valleyMist": 0.7000000000000001,
+  "mistDistance": 0.49999999999999994
+}

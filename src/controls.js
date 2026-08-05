@@ -6,7 +6,7 @@
 // are title-less so the only accordion headings are the folder titles.
 //
 //   left    Presets (its own pane), then Canvas, Scene
-//   centre  Lighting, Color
+//   centre  Lighting, then Color — one pane each
 //   right   Actions, then Preferences — one pane each
 //
 // Presets is a separate Pane instance stacked at the top of the left column,
@@ -47,6 +47,7 @@ import {
   syncLockedAngle,
 } from './state.js';
 import { getThemeMode, setThemeMode, THEME_MODES } from './theme.js';
+import { applyPanelA11y } from './panel-a11y.js';
 import { createTips } from './tips.js';
 
 // Elevation is implemented everywhere except In gorge, which is a deferred edge
@@ -124,7 +125,8 @@ const formatHour = (v) => {
 export function initControls({
   presetsContainer,
   leftContainer,
-  centreContainer,
+  lightingContainer,
+  colourContainer,
   actionsContainer,
   preferencesContainer,
   onDownloadSVG,
@@ -135,19 +137,30 @@ export function initControls({
 }) {
   const presetsPane = new Pane({ container: presetsContainer });
   const left = new Pane({ container: leftContainer });
-  const centre = new Pane({ container: centreContainer });
+  // Lighting and Color are a pane each, by the same precedent as Presets in the
+  // left column and Actions/Preferences in the right: two separate things the
+  // scene is described by, so two panels rather than two folders in one.
+  const lightingPane = new Pane({ container: lightingContainer });
+  const colourPane = new Pane({ container: colourContainer });
   // Two instances, not two folders in one (Phase 6.6). Actions is what you do
   // to the scene and Preferences is how the app behaves — separate panels say
   // that, the way the Presets panel already stands apart from the main grid.
   const actionsPane = new Pane({ container: actionsContainer });
   const preferencesPane = new Pane({ container: preferencesContainer });
-  const panes = [presetsPane, left, centre, actionsPane, preferencesPane];
+  const panes = [
+    presetsPane,
+    left,
+    lightingPane,
+    colourPane,
+    actionsPane,
+    preferencesPane,
+  ];
 
   // Registered before any blade is added, on each pane that hosts a blade from
   // it: Scene's regenerate row, Color's theme row, and Preferences'
   // Help/Read Me/About row.
   left.registerPlugin(EssentialsPlugin);
-  centre.registerPlugin(EssentialsPlugin);
+  colourPane.registerPlugin(EssentialsPlugin);
   preferencesPane.registerPlugin(EssentialsPlugin);
 
   // The Download JSON preview is a monitor over this. It is refreshed with the
@@ -201,6 +214,12 @@ export function initControls({
     syncShadowAffordance();
     syncMistAffordance();
     syncTips();
+
+    // After the affordances, not before: two of them rewrite a control's label,
+    // and the accessible name is copied from the label that is now showing
+    // (panel-a11y.js, Phase 8). Hooked here for the same reason saveState() is
+    // — this is the one place every change already passes through.
+    syncPanelA11y();
 
     syncing = false;
 
@@ -363,7 +382,7 @@ export function initControls({
 
   // --- centre column -------------------------------------------------------
 
-  const lighting = centre.addFolder({ title: 'Lighting' });
+  const lighting = lightingPane.addFolder({ title: 'Lighting' });
 
   const onHourChange = () => {
     // Under the tidelock the hour drags the light angle with it, so the
@@ -458,7 +477,7 @@ export function initControls({
   displacedFirst?.classList.remove('tp-v-fst', 'tp-v-vfst');
   clock.element.classList.add('tp-v-fst', 'tp-v-vfst');
 
-  const colour = centre.addFolder({ title: 'Color' });
+  const colour = colourPane.addFolder({ title: 'Color' });
 
   // "Randomized" is a real entry in the dropdown rather than a mode the button
   // silently drops the panel into: once a generated palette is showing, the
@@ -507,13 +526,20 @@ export function initControls({
   // A plain repaint like every other Color control. Geometry does not move: the
   // toggle picks between two ways of colouring the layers an archetype has
   // already produced, so the seed lock has nothing to suppress here.
+  //
+  // Labelled "Banded colors" since Phase 8, in its own folder's spelling. It
+  // read as "Layers" through Phase 7.5 and that named the wrong thing: every
+  // scene has layers in both modes, so a checkbox called Layers invites the
+  // guess that it turns them up rather than that it switches how they are
+  // coloured. Label only — the state key stays `layersMode`, so exports,
+  // presets and the localStorage blob are byte-identical either side of this.
   colour
-    .addBinding(state, 'layersMode', { label: 'Layers' })
+    .addBinding(state, 'layersMode', { label: 'Banded colors' })
     .on('change', onUserChange(onPaintChange));
 
   colour
     .addBinding(state, 'haze', {
-      label: 'Distance haze',
+      label: 'Horizon haze',
       min: 0,
       max: 1,
       step: 0.01,
@@ -575,13 +601,20 @@ export function initControls({
   // name) drops Tweakpane's label column so the textarea gets the pane's full
   // width; `interval: 0` makes it a manually-refreshed monitor rather than one
   // polling on a timer.
-  jsonTab.addBinding(exportPreview, 'json', {
+  const jsonPreview = jsonTab.addBinding(exportPreview, 'json', {
     label: undefined,
     readonly: true,
     multiline: true,
     rows: 5,
     interval: 0,
   });
+
+  // The one focusable control in the panel with no label to take a name from —
+  // dropping the label column is what gave it the full width, and panel-a11y.js
+  // copies names from labels that exist (Phase 8). Named here instead.
+  jsonPreview.element
+    .querySelector('.tp-mllv_i')
+    ?.setAttribute('aria-label', 'Settings JSON preview');
 
   // --- right column, preferences panel --------------------------------------
 
@@ -624,6 +657,38 @@ export function initControls({
   const infoHandlers = [() => onHelp?.(), () => onReadme?.(), () => onAbout?.()];
   infoRow.on('click', ({ index: [x] }) => infoHandlers[x]?.());
 
+  // All three open a modal rather than acting on the scene, and say so (Phase 8,
+  // CONTEXT.md section 11). The buttons are already named by their own text —
+  // this adds only the fact that pressing one opens a dialog, which is the
+  // difference between them and every other button in the panel.
+  for (const cell of infoRow.element.querySelectorAll('.tp-btnv_b')) {
+    cell.setAttribute('aria-haspopup', 'dialog');
+  }
+
+  // Every folder heading is an accordion control, and Tweakpane renders each as
+  // a plain <button>: named by its own title text and operable from the
+  // keyboard, but saying nothing about whether the section it controls is open
+  // (Phase 8, CONTEXT.md section 11). `aria-expanded` is the whole of what was
+  // missing. Seeded from the folder's current state — folders can come up
+  // collapsed — and kept in step through Tweakpane's own `fold` event, so a
+  // click, a keypress and a programmatic change all route through one line.
+  for (const folder of [
+    presetsFolder,
+    canvas,
+    scene,
+    lighting,
+    colour,
+    actions,
+    preferences,
+  ]) {
+    const bar = folder.element.querySelector(':scope > .tp-fldv_b');
+    if (!bar) continue;
+    bar.setAttribute('aria-expanded', String(folder.expanded));
+    folder.on('fold', (event) =>
+      bar.setAttribute('aria-expanded', String(event.expanded)),
+    );
+  }
+
   // Tooltips are DOM, not blades: Tweakpane has no label-only or trigger view,
   // and a readonly binding would render as a field — which reads as a control
   // you can't use rather than as a note. tips.js owns the trigger, the popover
@@ -637,6 +702,14 @@ export function initControls({
 
   function syncTips() {
     tips.sync(state.tips);
+  }
+
+  // Named and roled from the labels Tweakpane renders beside its controls
+  // (panel-a11y.js). Run over each pane's own container rather than the page,
+  // so nothing outside the panel — the header, the canvas, the modals, all of
+  // which carry their own ARIA — is walked at all.
+  function syncPanelA11y() {
+    for (const pane of panes) applyPanelA11y(pane.element);
   }
 
   function syncShadowAffordance() {

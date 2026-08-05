@@ -15,6 +15,12 @@ dist
 dist-ssr
 *.local
 
+# Claude Code's per-machine permission file. The project's standing permissions
+# (CLAUDE.md, Operating scope) live in the tracked .claude/settings.json as
+# broad Bash/Edit/Write rules; this file only ever accumulated auto-recorded
+# one-off entries, one of which needed its own commit in Phase 7.5.
+.claude/settings.local.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
