@@ -5,7 +5,7 @@
 // the one preference persisted elsewhere — theme.js has owned its own key
 // since Phase 2 and keeps it.
 
-import { getArchetype } from './archetypes/index.js';
+import { getArchetype } from '../archetypes/index.js';
 import { computeLighting, suggestedAngle } from './lighting.js';
 import {
   createPalette,
@@ -15,7 +15,7 @@ import {
   themeTint,
 } from './palette.js';
 import { CUSTOM_PRESET_ID, presetId, presets } from './presets.js';
-import { setUITint } from './uitint.js';
+import { setUITint } from '../ui/uitint.js';
 import { normalizeAngle, responseCurve } from './utils.js';
 
 // Non-linear slider response (CONTEXT.md section 6b). The shared utility, given

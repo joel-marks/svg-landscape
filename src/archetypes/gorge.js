@@ -5,7 +5,7 @@
 // in, then breaks sharply to the tip and drops away. Narrower nesting and
 // taller walls read as a steep-sided canyon rather than an open valley.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   clamp01,
   featureCount,
@@ -18,7 +18,7 @@ import {
   sampleCount,
   scaleFrequency,
   spurCrest,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). Depths are
 // the distant sliver at 0 and then spurs from 0.12 to 1.

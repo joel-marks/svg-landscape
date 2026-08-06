@@ -2,14 +2,14 @@
 
 import './style.css';
 
-import { exportSettings, loadState, regenerate, setRenderer, state } from './state.js';
+import { exportSettings, loadState, regenerate, setRenderer, state } from './core/state.js';
 import { getArchetype } from './archetypes/index.js';
-import { render } from './render.js';
-import { initControls } from './controls.js';
-import { downloadSettings, downloadSVG } from './download.js';
-import { initHelp } from './help.js';
-import { initTheme } from './theme.js';
-import { slugify } from './utils.js';
+import { render } from './core/render.js';
+import { initControls } from './ui/controls.js';
+import { downloadSettings, downloadSVG } from './ui/download.js';
+import { initHelp } from './ui/help.js';
+import { initTheme } from './ui/theme.js';
+import { slugify } from './core/utils.js';
 
 const svg = document.querySelector('#landscape');
 const frame = document.querySelector('#canvas-frame');

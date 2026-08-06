@@ -5,7 +5,7 @@
 // point: the main peak is roughly twice the height of its neighbours, unlike
 // twin-peaks' even pairing.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   featureCount,
   horizonFor,
@@ -19,7 +19,7 @@ import {
   sampleCount,
   scaleFrequency,
   widthScale,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). Four layers,
 // at depths 0, 0.45, 0.75 and 1 — the peak line, the mid-ground ridge, and two

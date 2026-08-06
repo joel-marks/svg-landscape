@@ -8,7 +8,9 @@
       "Read(//Users/joel/Library/Caches/ms-playwright/**)",
       "Read(//Users/joel/.npm/_npx/**)",
       "Bash(git add *)",
-      "Bash(git --no-pager diff --cached --stat)"
+      "Bash(git --no-pager diff --cached --stat)",
+      "Bash(git --no-pager diff --cached -M --stat)",
+      "Bash(git --no-pager diff --cached -M -- src/ index.html vite.config.js)"
     ],
     "deny": [
       "Read(**/.env*)",

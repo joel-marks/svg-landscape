@@ -5,7 +5,7 @@
 // edges and fall below the frame at the centre, which opens the valley instead
 // of stacking ridges.
 
-import { createNoise, fbm } from '../noise.js';
+import { createNoise, fbm } from '../core/noise.js';
 import {
   clamp01,
   featureCount,
@@ -17,7 +17,7 @@ import {
   ridgeWeightFor,
   sampleCount,
   scaleFrequency,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). Depth here
 // is `i / (layerCount - 1)` — evenly spaced across 5 to 11 layers — so the two

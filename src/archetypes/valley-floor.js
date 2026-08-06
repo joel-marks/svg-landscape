@@ -5,7 +5,7 @@
 // low rolling spurs meet near centre-bottom with a soft split between their
 // tips.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   featureCount,
   horizonFor,
@@ -21,7 +21,7 @@ import {
   scaleFrequency,
   spurCrest,
   widthScale,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The one
 // archetype whose boundaries are pinned to specific constants further down this

@@ -13,9 +13,9 @@
 // replacing a structured list in this module that assembled its markdown at
 // runtime. Editing any of the three is now editing one .md file, no code change.
 
-import readme from '../README.md?raw';
-import about from './about/about.md?raw';
-import help from './help/help.md?raw';
+import readme from '../../README.md?raw';
+import about from '../about/about.md?raw';
+import help from '../help/help.md?raw';
 
 import { renderMarkdown } from './markdown.js';
 import { createModal, modalBody } from './modal.js';

@@ -11,7 +11,7 @@
 //   high -> convergence and horizon rise, spurs multiply and nest tighter,
 //           reading as looking down into a narrowing funnel.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   clamp01,
   lerp,
@@ -23,7 +23,7 @@ import {
   scaleCount,
   scaleFrequency,
   spurCrest,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The pair of
 // ridges across the head of the valley sit at depth 0 and 0.08; everything else

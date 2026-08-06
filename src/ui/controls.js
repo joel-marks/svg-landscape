@@ -24,10 +24,10 @@
 import { Pane } from 'tweakpane';
 import * as EssentialsPlugin from '@tweakpane/plugin-essentials';
 
-import { archetypeOptions } from './archetypes/index.js';
+import { archetypeOptions } from '../archetypes/index.js';
 import { createClockFace } from './clockface.js';
-import { CUSTOM_THEME_ID, themeOptions } from './palette.js';
-import { findPreset, presetOptions } from './presets.js';
+import { CUSTOM_THEME_ID, themeOptions } from '../core/palette.js';
+import { findPreset, presetOptions } from '../core/presets.js';
 import {
   applySettings,
   ASPECTS,
@@ -45,7 +45,7 @@ import {
   state,
   stepTheme,
   syncLockedAngle,
-} from './state.js';
+} from '../core/state.js';
 import { getThemeMode, setThemeMode, THEME_MODES } from './theme.js';
 import { applyPanelA11y } from './panel-a11y.js';
 import { createTips } from './tips.js';

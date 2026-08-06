@@ -4,7 +4,7 @@
 // ridgelines with peak clusters descend below it, and a single rolling
 // foreground hill closes the very bottom.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   featureCount,
   horizonFor,
@@ -18,7 +18,7 @@ import {
   sampleCount,
   scaleFrequency,
   widthScale,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The ridge
 // bands run 0 to 0.82 and the single rolling hill at the bottom of frame is

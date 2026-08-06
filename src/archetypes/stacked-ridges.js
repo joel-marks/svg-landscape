@@ -6,7 +6,7 @@
 // layer count stays in its 6–8 band on every canvas, and width adds undulations
 // within each ridge rather than more ridges.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   horizonFor,
   lerp,
@@ -16,7 +16,7 @@ import {
   ridgeWeightFor,
   sampleCount,
   scaleFrequency,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7).
 //

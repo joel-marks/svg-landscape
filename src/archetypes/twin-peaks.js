@@ -5,7 +5,7 @@
 // defining trait, so neither complexity nor canvas width may add a third —
 // width scales the ridge detail beneath them instead.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   horizonFor,
   nestingFor,
@@ -18,7 +18,7 @@ import {
   sampleCount,
   scaleFrequency,
   widthScale,
-} from '../utils.js';
+} from '../core/utils.js';
 
 const PEAK_COUNT = 2;
 

@@ -6,7 +6,7 @@
 // visible. The far wall on each side leans in at the top and the near wall
 // leans in at the bottom, so both stay visible instead of one hiding the other.
 
-import { createNoise, fbm } from '../noise.js';
+import { createNoise, fbm } from '../core/noise.js';
 import {
   closeToSide,
   featureCount,
@@ -18,7 +18,7 @@ import {
   sampleCount,
   scaleFrequency,
   wallPoints,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // Layers mode's region boundaries (CONTEXT.md section 5, Phase 7). The one
 // archetype where the bands cut across two *kinds* of layer: distant peaks at

@@ -15,8 +15,8 @@ No backend, no accounts, no server. Runs entirely client-side, deployed as a sta
 - Optional pseudo-3D shadow split, independently controllable or locked to time of day
 - Eight curated colour themes plus an algorithmic randomiser, with depth and atmospheric haze/mist controls
 - Two colouring modes: a continuous depth ramp, or flat colour bands per depth region ("Banded colors")
-- Themes live in `src/themes.json` — three ramp colours and a UI tint each, so adding one is a data change
-- Presets: drop a settings JSON into `src/presets/` and it appears in the dropdown — no code changes
+- Themes live in `src/core/themes.json` — three ramp colours and a UI tint each, so adding one is a data change
+- Presets: drop a settings JSON into `src/core/presets/` and it appears in the dropdown — no code changes
 - Full state persisted between visits; every setting exports to SVG and JSON
 - Keyboard-operable throughout, WCAG AA contrast in both themes, and `prefers-reduced-motion` respected
 - Desktop-first layout that reflows to two columns and then one below 1024px and 640px
@@ -63,30 +63,39 @@ npm run preview   # serve the production build locally
 
 ## Project structure
 
+`src/core/` computes the picture and `src/ui/` presents it; nothing in `core/`
+imports from `ui/`.
+
 ```
 src/
   main.js            entry point
-  state.js           app state + localStorage persistence
-  noise.js            fbm / ridged-fbm over simplex-noise
-  palette.js           theme loading, algorithmic generator, ramp + band modes
-  themes.json           the curated themes themselves — data, not code
-  uitint.js              tints interface accents from the current theme
-  presets.js            preset discovery (globs presets/*.json)
-  presets/               preset files
-  lighting.js             time-of-day model
-  render.js                SVG paint
-  controls.js               Tweakpane panel
-  panel-a11y.js              accessible names/roles for the panel's controls
-  archetypes/                one module per landscape type
-  help/help.md                in-app Help content
-  about/about.md                in-app About content
-  markdown.js                    hand-rolled markdown renderer (no dependency)
-  modal.js                        shared dialog shell
-  download.js                      SVG + JSON export
-  theme.js                          light/dark UI theme
-  utils.js                           shared geometry + response-curve helpers
-public/                             static assets
-index.html                          single page
+  style.css          page chrome, design tokens
+  core/              computes the picture — no DOM
+    state.js         app state + localStorage persistence
+    noise.js          fbm / ridged-fbm over simplex-noise
+    palette.js         theme loading, algorithmic generator, ramp + band modes
+    themes.json         the curated themes themselves — data, not code
+    lighting.js          time-of-day model
+    render.js             SVG paint
+    utils.js               shared geometry + response-curve helpers
+    presets.js              preset discovery (globs presets/*.json)
+    presets/                 preset files
+  ui/                everything that touches the DOM
+    controls.js       Tweakpane panel
+    panel-a11y.js      accessible names/roles for the panel's controls
+    clockface.js        24-hour clock face for Time of day
+    tips.js              "?" tooltips beside each folder heading
+    markdown.js           hand-rolled markdown renderer (no dependency)
+    modal.js               shared dialog shell
+    help.js                 Help / readme.md / About modals
+    download.js              SVG + JSON export
+    theme.js                  light/dark UI theme
+    uitint.js                  tints interface accents from the current theme
+  archetypes/        one module per landscape type
+  help/help.md       in-app Help content
+  about/about.md     in-app About content
+public/              static assets
+index.html           single page
 ```
 
 Every archetype exports `generate({ seed, elevation, complexity, peakCount, sharpness, width, height })` and returns a set of closed-polygon layers, ordered farthest to nearest, plus a `LAYER_BOUNDARIES` declaration saying where its own stack divides into background, middle and foreground for Layers mode.

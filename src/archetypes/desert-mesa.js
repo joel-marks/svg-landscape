@@ -14,7 +14,7 @@
 // `Math.max` rather than a sum is what keeps that flat: summed bumps round each
 // other's tops off and reintroduce the peak this archetype exists not to have.
 
-import { createNoise } from '../noise.js';
+import { createNoise } from '../core/noise.js';
 import {
   clamp01,
   featureCount,
@@ -26,7 +26,7 @@ import {
   sampleCount,
   scaleFrequency,
   smoothstep,
-} from '../utils.js';
+} from '../core/utils.js';
 
 // How many layers each region gets. Fixed rather than derived, and that is the
 // decision the boundaries below depend on: with the counts pinned, every
