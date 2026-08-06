@@ -50,7 +50,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 - **UI theme** — Light, Dark, or System, which follows your operating system and keeps following it while the page is open. This is the interface only; it has nothing to do with the time of day in the scene.
 - **Tint UX to scene** — **off by default.** On, the controls take their colour from whichever theme the scene is using: rows, fields, buttons, outlines and the focus ring all shift toward it, so the panel reads as part of the picture. The page, the bar across the top and the panel's own background stay neutral on purpose — what the interface sits on shouldn't compete with the artwork. Switching scene theme then recolours the controls with it. Nothing about the artwork changes, and nothing about it is exported — this is a preference, so presets never carry it and Reset to defaults leaves it where you put it. Ink wash is the one theme with no colour of its own, so it very slightly drains the interface's instead of tinting it.
 - **Tips** — off by default. On, a "?" appears beside each panel heading with a one-line description of what that group does.
-- **Help | readme.md | About** — this page, the project's README, and the story behind the app.
+- **Help | Readme.md | About** — this page, the project's README, and the story behind the app.
 
 ## Seeds and reproducibility
 

@@ -70,9 +70,11 @@ const THEME_ACTIONS = ['Previous', 'Randomise', 'Next'];
 // first: it is the one that explains the controls you are standing in front of.
 // The middle cell was "Read Me" through Phase 6.11; relabelled to the filename
 // in 6.12 so a technically literate visitor can see it is the repo's own
-// README rather than a second, app-specific document. Label only — the handler
-// and the modal behind it are untouched.
-const INFO_ACTIONS = ['Help', 'readme.md', 'About'];
+// README rather than a second, app-specific document, and capitalised to
+// "Readme.md" afterwards so it sits with Help and About as a title rather than
+// reading as a lowercase stray. Label only — the handler and the modal behind
+// it are untouched.
+const INFO_ACTIONS = ['Help', 'Readme.md', 'About'];
 
 // Scene's regenerate row, left to right (CONTEXT.md section 5). Ordered by what
 // each one changes — seed only, both, parameters only — so the combination sits

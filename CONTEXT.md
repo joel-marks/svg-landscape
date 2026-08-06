@@ -130,7 +130,7 @@ Folders are collapsible (accordion). Header/nav side margins align with canvas a
 - UI theme: Light / Dark / System
 - **Tint UX to scene: on/off. Default: off** (Phase 10) — directly below UI theme, above Tips. Whether the scene theme's `uiTint` reaches the interface at all; see the scene-theme UI tint block below. A preference, not a scene parameter, and handled exactly as Tips is: `EXTRA_PERSISTED_KEYS` and `RESET_EXEMPT`, never in `SETTINGS_KEYS`, so it is persisted and restored but never exported, never carried by a preset and invisible to preset matching (sections 7, 8). Toggling repaints; geometry is untouched.
 - Tips: on/off. **Default: off** — found wrong (`true`) in `state.js` in Phase 6.12 and fixed. Scope: Presets, Scene, Canvas, Lighting, Color, Actions. Preferences deliberately excluded.
-- Help | **readme.md** | About — one row of three (middle button relabelled from "Read Me" in 6.12)
+- Help | **Readme.md** | About — one row of three (middle button relabelled from "Read Me" to "readme.md" in 6.12, and capitalised to "Readme.md" afterwards)
 
 **Scene-theme UI tint — opt-in since Phase 10, default off.** The Preferences checkbox "Tint UX to scene" decides whether the current scene theme's declared `uiTint` reaches the interface at all. Unchecked — the factory default, and what a first-ever visitor sees — every override is removed and the interface is exactly what its `-base` tokens declare. `src/ui/uitint.js` owns the mechanism, ~140 lines, no dependency beyond chroma-js.
 
@@ -222,7 +222,7 @@ Three in-app modals sharing one `<dialog>` implementation (`modal.js`, Phase 6.6
 All three render markdown through `src/ui/markdown.js` (Phase 6.9), and all three are sourced from `.md` files via Vite's `?raw` since Phase 6.11. `help.js` holds modal wiring and nothing else — no copy for any of the three.
 
 - **Help** — control explanations for end users, seed/reproducibility caveat, Tips-toggle location. Copy in `src/help/help.md`.
-- **Read Me** — `README.md` via `?raw`. Button labelled "readme.md" since 6.12.
+- **Read Me** — `README.md` via `?raw`. Button labelled "readme.md" from 6.12, "Readme.md" since. The dialog's own heading remains "Read Me"; the button names the file, the heading names the document.
 - **About** — `src/about/about.md`. Real hand-written content since 6.11 (verify wording against the file directly).
 
 Layout: each modal is a flex column, shell set to `overflow: hidden`, body sized as remaining space (`flex-1 min-h-0`). Exactly one scrollable region per modal — see HISTORY.md (Closed issues) for the double-scrollbar bug this replaced. `display: flex` must be gated on `[open]` (author `display` beats the UA's `dialog:not([open])` rule). Scroll region carries `tabindex`; scrollbar themed from the same tokens as elsewhere.
@@ -275,7 +275,7 @@ An effect correctly implemented per spec but reading well on some archetypes and
 MIT.
 
 ## 15. README
-Root-level, rewritten in Phase 6.11 to narrower scope — standard open-source orientation only (features, live demo, quick start, stack, structure, deploy note, pointers to Help and this file, license). Roughly a tenth of its previous length. Per-control detail lives in `src/help/help.md`, decision history lives here. As of 6.6 also user-facing via the readme.md modal, so accuracy matters. Rendered as markdown since 6.9 — has to stay within `markdown.js`'s subset (section 2 / 10). Live demo URL real since 6.9.
+Root-level, rewritten in Phase 6.11 to narrower scope — standard open-source orientation only (features, live demo, quick start, stack, structure, deploy note, pointers to Help and this file, license). Roughly a tenth of its previous length. Per-control detail lives in `src/help/help.md`, decision history lives here. As of 6.6 also user-facing via the Readme.md modal, so accuracy matters. Rendered as markdown since 6.9 — has to stay within `markdown.js`'s subset (section 2 / 10). Live demo URL real since 6.9.
 
 ## 16. Claude Code operating scope
 CC runs from repo root with standing permission to execute bash/git/npm/vite. Since Phase 6.7, **CC maintains this file directly** — edits described in a phase prompt are applied to CONTEXT.md as part of that phase, not relayed through chat and pasted. Replaced a relay that failed silently for phases 6/6.5/6.6.

@@ -88,7 +88,7 @@ src/
     tips.js              "?" tooltips beside each folder heading
     markdown.js           hand-rolled markdown renderer (no dependency)
     modal.js               shared dialog shell
-    help.js                 Help / readme.md / About modals
+    help.js                 Help / Readme.md / About modals
     download.js              SVG + JSON export
     theme.js                  light/dark UI theme
     uitint.js                  tints the interface from the current theme (opt-in)
