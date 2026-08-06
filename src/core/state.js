@@ -143,6 +143,19 @@ export const state = {
   // and the literal here said `true`, which is what Phase 6.12's verification
   // pass was asked to check rather than assume. Fixed, not confirmed.
   tips: false,
+
+  // "Tint UX to scene" (CONTEXT.md section 5, Phase 10). Whether the scene
+  // theme's declared uiTint is mixed into the interface's own tokens at all.
+  // **Off by default**: the tint was always-on and deliberately subtle from
+  // Phase 7 to Phase 9, and this phase traded that for opt-in and obvious — so
+  // the untinted interface is what a first-ever visitor gets, and the eight
+  // themes only reach the chrome of someone who asked for it.
+  //
+  // A preference, not a scene parameter, and treated exactly as `tips` is: it
+  // changes nothing about the picture, so it is persisted (EXTRA_PERSISTED_KEYS
+  // below) but never exported, never carried by a preset, and never part of the
+  // preset match test. Reset to defaults leaves it alone (RESET_EXEMPT).
+  uiTintEnabled: false,
 };
 
 // The factory defaults Reset to defaults restores (CONTEXT.md section 5,
@@ -276,7 +289,13 @@ function paint(archetype) {
   // having to remember to (CONTEXT.md section 5, Phase 7). setUITint ignores a
   // repeat of the same tint, so the ordinary case of repainting for some
   // unrelated control costs one comparison.
-  setUITint(themeTint(theme));
+  //
+  // The Preferences toggle is gated here rather than inside uitint.js (Phase
+  // 10): "off" and "this theme declares no tint" are the same interface, so
+  // they arrive as the same value and the module downstream needs no opinion
+  // about preferences. The toggle's own handler repaints, which is what makes
+  // it take effect immediately without regenerating geometry.
+  setUITint(state.uiTintEnabled ? themeTint(theme) : null);
 
   renderer?.(
     lastGeometry,
@@ -563,10 +582,10 @@ const STORAGE_KEY = 'svg-landscape:state';
 // Panel values a returning visitor expects to find as they left them, but which
 // are deliberately not scene parameters and so are not in SETTINGS_KEYS: the
 // seed lock is a guard on how the seed changes, `presetName` labels an export,
-// and `tips` is a preference. The saved blob is therefore a *superset* of a
-// settings export, not a second format — everything in it that a preset file
-// also carries sits under the same key, in the same shape.
-const EXTRA_PERSISTED_KEYS = ['seedLocked', 'presetName', 'tips'];
+// and `tips` and `uiTintEnabled` are preferences. The saved blob is therefore a
+// *superset* of a settings export, not a second format — everything in it that
+// a preset file also carries sits under the same key, in the same shape.
+const EXTRA_PERSISTED_KEYS = ['seedLocked', 'presetName', 'tips', 'uiTintEnabled'];
 
 // Called on every control change, from the same refresh() the panel already
 // runs after one (see controls.js) — so "saved" and "what the panel is showing"
@@ -613,12 +632,13 @@ function persistedState() {
 }
 
 // Preferences are about the interface, not the artwork, so Reset — a button on
-// the Actions tab — leaves them where the user put them. The UI theme is
-// excluded by construction (theme.js owns it, not this object); `tips` has to
-// be excluded explicitly, because resetting one Preference and not the other
-// would be the incoherent outcome. Reset means "reset the scene and the panel
-// that builds it", not "undo my interface settings".
-const RESET_EXEMPT = new Set(['tips']);
+// the Presets panel — leaves them where the user put them. The UI theme is
+// excluded by construction (theme.js owns it, not this object); `tips` and
+// `uiTintEnabled` have to be excluded explicitly, because resetting some
+// Preferences and not the others would be the incoherent outcome. Reset means
+// "reset the scene and the panel that builds it", not "undo my interface
+// settings".
+const RESET_EXEMPT = new Set(['tips', 'uiTintEnabled']);
 
 // Reset to defaults (CONTEXT.md section 5, Actions tab 1). Restores the spec's
 // values, *not* the last-used ones — which is the whole point of the control,

@@ -30,8 +30,8 @@
     "id": "volcanic-ash",
     "name": "Volcanic ash",
     "terrain": ["#b8ada4", "#6b5a50", "#191311"],
-    "uiTint": "#8d7568",
-    "_note": "Near-neutral, but warm-shifted rather than grey so it doesn't collide with Ink wash. Its tint is deliberately the quietest of the eight for the same reason."
+    "uiTint": "#aa6861",
+    "_note": "Near-neutral terrain, warm-shifted rather than grey so it doesn't collide with Ink wash. Its tint was #8d7568 (L51 C13 h56) from Phase 7 to Phase 9 and is the one literal Phase 10 retuned: at that chroma the opt-in tint landed the page surface at C1.4 — fractionally *less* chromatic than the untinted token, because the surface's own base is faintly cool and a weak warm tint only cancels it. So the quietest of the eight had become the second neutral one, which is Ink wash's job. Now L51 C30 h31: still the quietest chromatic tint of the seven (surface C5.9 against Sandstone's 7.8 and Glacier's 9.6), but rose-taupe rather than sienna — the hue moved as well as the chroma, deliberately, because at these chromas Sandstone's h46 and this theme's old h56 were the same tan and the two themes have to be told apart at a glance. Terrain untouched."
   },
   {
     "id": "heather-moor",

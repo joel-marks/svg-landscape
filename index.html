@@ -115,7 +115,11 @@
   </head>
 
   <body class="flex min-h-dvh flex-col">
-    <header class="border-b border-border-token bg-surface-raised">
+    <!-- `bg-surface-header`, not `bg-surface-raised`: the two hold the same
+         value, but the header deliberately sits on the untinted side of the
+         scene tint (CONTEXT.md section 5, Phase 10). The page field behind it
+         does too; the panel chrome below does not. -->
+    <header class="border-b border-border-token bg-surface-header">
       <!-- `shell` is shared by header and main so every side margin resolves to
            the same computed value (CONTEXT.md section 5). It was header + main +
            footer through Phase 6.11; the footer is gone as of 6.12 and the

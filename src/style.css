@@ -46,18 +46,44 @@
    text/raised 6.4 -> 10.3:1, muted/raised 4.6 -> 7.4:1, accent/raised
    4.7 -> 7.5:1, and text/base 4.9:1 and border/base 3.1:1 are unchanged because
    both of their operands are. */
-/* Three tokens are declared twice from Phase 7 onward: a `-base` holding the
-   theme's own neutral value, and the token everything else consumes, which
-   defaults to it. uitint.js reads the base, mixes a little of the current scene
-   theme's declared `uiTint` into it, and writes the result to the consumed
-   token as an inline custom property on <html> — which outranks both blocks
-   below without either of them having to know about it. Nothing else changes:
-   with no scene tint, or with Ink wash's deliberately neutral one, every
-   consumer resolves to exactly the value it had before. */
+/* Tokens that the scene-theme tint can reach are declared twice: a `-base`
+   holding the theme's own neutral value, and the token everything else
+   consumes, which defaults to it. uitint.js reads the base, mixes a little of
+   the current scene theme's declared `uiTint` into it, and writes the result to
+   the consumed token as an inline custom property on <html> — which outranks
+   both blocks below without either of them having to know about it. With the
+   tint off (the default since Phase 10) uitint.js removes the inline property
+   outright, so every consumer resolves to exactly the value its `-base`
+   declares — the untinted interface, byte for byte.
+
+   Phase 7 gave three tokens this treatment: --accent, --border, --input-ring.
+   **Phase 10 extends it to the surfaces**, because an opt-in tint is not bound
+   by the reasoning that kept the always-on one to lines and accents, and the
+   surfaces are the area that makes the effect readable at a glance. That is
+   --surface-raised and --surface-sunken plus the fourteen Tweakpane background
+   steps, which are listed here as `--panel-*` rather than in `.tweakpane-scope`
+   for the reason --input-ring already was: an inline custom property on <html>
+   cannot beat a declaration made *on* the pane element, so a token uitint.js
+   writes has to be declared at the document root and mapped onto the --tp-*
+   name below.
+
+   **Two surfaces are held back on purpose.** `--surface` — the page field the
+   whole app sits on — and the header take no tint at all, so the chrome that
+   frames the artwork stays neutral while the chrome you operate follows the
+   scene. The header would otherwise have come along for free, being
+   `bg-surface-raised` in index.html; it takes `--surface-header` instead, which
+   is declared as --surface-raised's *base* rather than as a third copy of the
+   hex, so the two can never disagree about the untinted value. */
 :root {
   --surface: #7e848b;
-  --surface-raised: #bfc2c5;
-  --surface-sunken: #686d73;
+  --surface-raised-base: #bfc2c5;
+  --surface-raised: var(--surface-raised-base);
+  /* The header's own surface: --surface-raised's *base*, never its tinted
+     value. Same value, deliberately taken from the other side of the tint —
+     see the note above the :root block. */
+  --surface-header: var(--surface-raised-base);
+  --surface-sunken-base: #686d73;
+  --surface-sunken: var(--surface-sunken-base);
   --border-base: #34383d;
   --border: var(--border-base);
   --text: #101418;
@@ -67,6 +93,52 @@
   --accent-contrast: #ffffff;
   --scrollbar-thumb: #4d545b;
   --scrollbar-thumb-hover: #3d4248;
+
+  /* The Tweakpane background scale (Phase 10). These are the values that lived
+     as literals in `.tweakpane-scope` from Phase 2 to Phase 9 — moved, not
+     copied; the block below now maps each --tp-* name onto the token here.
+     `--tp-base-background-color` is absent because it was always exactly
+     --surface-raised, and it now says so rather than restating the hex.
+
+     Every step is tinted, interaction states included. The scale's shape is
+     untouched by that: the mix holds each token's own lightness, so what the
+     tint adds is hue at a constant lightness ladder — base lightest, then
+     input, container, groove, button, each state a step darker than the last,
+     exactly as 6.12/6.13 tuned it. Leaving the hover/focus/active steps out
+     would have been the cheaper list and the wrong one: a tinted row that
+     flicks back to neutral grey under the pointer reads as a bug. */
+  --panel-button-base: #9ca0a6;
+  --panel-button: var(--panel-button-base);
+  --panel-button-hover-base: #94999e;
+  --panel-button-hover: var(--panel-button-hover-base);
+  --panel-button-focus-base: #8c9197;
+  --panel-button-focus: var(--panel-button-focus-base);
+  --panel-button-active-base: #848a90;
+  --panel-button-active: var(--panel-button-active-base);
+
+  --panel-container-base: #b2b5b9;
+  --panel-container: var(--panel-container-base);
+  --panel-container-hover-base: #a9adb2;
+  --panel-container-hover: var(--panel-container-hover-base);
+  --panel-container-focus-base: #a2a6aa;
+  --panel-container-focus: var(--panel-container-focus-base);
+  --panel-container-active-base: #999ea3;
+  --panel-container-active: var(--panel-container-active-base);
+
+  --panel-groove-base: #9ea3a8;
+  --panel-groove: var(--panel-groove-base);
+
+  --panel-input-base: #b4b7bb;
+  --panel-input: var(--panel-input-base);
+  --panel-input-hover-base: #acb0b4;
+  --panel-input-hover: var(--panel-input-hover-base);
+  --panel-input-focus-base: #a4a8ad;
+  --panel-input-focus: var(--panel-input-focus-base);
+  --panel-input-active-base: #9ca0a6;
+  --panel-input-active: var(--panel-input-active-base);
+
+  --panel-monitor-base: #a4a8ad;
+  --panel-monitor: var(--panel-monitor-base);
 
   /* The Tweakpane input outline, moved up here from .tweakpane-scope in Phase 7
      so it sits with the other two tinted tokens rather than a block away from
@@ -89,8 +161,11 @@
 
 .dark {
   --surface: #0e1317;
-  --surface-raised: #161d23;
-  --surface-sunken: #090d10;
+  --surface-raised-base: #161d23;
+  --surface-raised: var(--surface-raised-base);
+  --surface-header: var(--surface-raised-base);
+  --surface-sunken-base: #090d10;
+  --surface-sunken: var(--surface-sunken-base);
   --border-base: #27323b;
   --border: var(--border-base);
   --text: #e9eef3;
@@ -100,6 +175,46 @@
   --accent-contrast: #0e1317;
   --scrollbar-thumb: #3c4a56;
   --scrollbar-thumb-hover: #4d5e6d;
+
+  /* The dark half of the Tweakpane background scale (Phase 10), moved here from
+     `.dark .tweakpane-scope` for the reason the light half moved: uitint.js
+     writes its override inline on <html>, and a declaration on the pane element
+     itself would win over it. Values unchanged. Both halves have to be restated
+     per theme block rather than inherited, because `--x: var(--x-base)` is
+     substituted at the element that declares it — a single declaration on :root
+     would resolve to the light base and then inherit that. */
+  --panel-button-base: #38454f;
+  --panel-button: var(--panel-button-base);
+  --panel-button-hover-base: #43515c;
+  --panel-button-hover: var(--panel-button-hover-base);
+  --panel-button-focus-base: #4b5a66;
+  --panel-button-focus: var(--panel-button-focus-base);
+  --panel-button-active-base: #54646f;
+  --panel-button-active: var(--panel-button-active-base);
+
+  --panel-container-base: #1e262d;
+  --panel-container: var(--panel-container-base);
+  --panel-container-hover-base: #232c34;
+  --panel-container-hover: var(--panel-container-hover-base);
+  --panel-container-focus-base: #27313a;
+  --panel-container-focus: var(--panel-container-focus-base);
+  --panel-container-active-base: #2c3740;
+  --panel-container-active: var(--panel-container-active-base);
+
+  --panel-groove-base: #27323b;
+  --panel-groove: var(--panel-groove-base);
+
+  --panel-input-base: #0e1317;
+  --panel-input: var(--panel-input-base);
+  --panel-input-hover-base: #131a1f;
+  --panel-input-hover: var(--panel-input-hover-base);
+  --panel-input-focus-base: #172026;
+  --panel-input-focus: var(--panel-input-focus-base);
+  --panel-input-active-base: #1c262d;
+  --panel-input-active: var(--panel-input-active-base);
+
+  --panel-monitor-base: #0e1317;
+  --panel-monitor: var(--panel-monitor-base);
 
   /* The one dark-mode token this project has ever moved, and the audit is why
      (Phase 8). Every other dark pair passed at its original value; this one was
@@ -116,6 +231,8 @@
 @theme inline {
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  /* The header's untinted twin of --surface-raised (Phase 10). */
+  --color-surface-header: var(--surface-header);
   --color-surface-sunken: var(--surface-sunken);
   --color-border-token: var(--border);
   /* Exposed to Tailwind in Phase 8 so the modal's Close controls can be
@@ -178,34 +295,42 @@
      So the border is a scoped override on Tweakpane's own input classes in
      @layer base below, driven by this token so the two themes stay one
      definition rather than two. Named in the --tp-* style because it sits with
-     them and is consumed the same way. */
+     them and is consumed the same way.
+
+     Phase 10 moved every background value out of this block and its `.dark`
+     counterpart onto the `--panel-*` tokens on :root/.dark, so the scene-theme
+     tint can reach them (see the note there). Nothing about the scale changed:
+     each name below maps onto exactly the value that used to be written here.
+     Foregrounds stay as literals and stay untinted — they are text, and text
+     that follows the tint is contrast risk for no readable gain. */
   .tweakpane-scope {
-    --tp-base-background-color: #bfc2c5;
+    /* Always was --surface-raised, to the byte, in both themes. Says so now. */
+    --tp-base-background-color: var(--surface-raised);
     --tp-base-shadow-color: rgb(15 23 32 / 0.18);
 
-    --tp-button-background-color: #9ca0a6;
-    --tp-button-background-color-hover: #94999e;
-    --tp-button-background-color-focus: #8c9197;
-    --tp-button-background-color-active: #848a90;
+    --tp-button-background-color: var(--panel-button);
+    --tp-button-background-color-hover: var(--panel-button-hover);
+    --tp-button-background-color-focus: var(--panel-button-focus);
+    --tp-button-background-color-active: var(--panel-button-active);
     --tp-button-foreground-color: #101418;
 
-    --tp-container-background-color: #b2b5b9;
-    --tp-container-background-color-hover: #a9adb2;
-    --tp-container-background-color-focus: #a2a6aa;
-    --tp-container-background-color-active: #999ea3;
+    --tp-container-background-color: var(--panel-container);
+    --tp-container-background-color-hover: var(--panel-container-hover);
+    --tp-container-background-color-focus: var(--panel-container-focus);
+    --tp-container-background-color-active: var(--panel-container-active);
     --tp-container-foreground-color: #101418;
 
-    --tp-groove-foreground-color: #9ea3a8;
+    --tp-groove-foreground-color: var(--panel-groove);
 
-    --tp-input-background-color: #b4b7bb;
-    --tp-input-background-color-hover: #acb0b4;
-    --tp-input-background-color-focus: #a4a8ad;
-    --tp-input-background-color-active: #9ca0a6;
+    --tp-input-background-color: var(--panel-input);
+    --tp-input-background-color-hover: var(--panel-input-hover);
+    --tp-input-background-color-focus: var(--panel-input-focus);
+    --tp-input-background-color-active: var(--panel-input-active);
     --tp-input-foreground-color: #101418;
 
     --tp-label-foreground-color: #2a3138;
 
-    --tp-monitor-background-color: #a4a8ad;
+    --tp-monitor-background-color: var(--panel-monitor);
     --tp-monitor-foreground-color: #2a3138;
 
     /* Darker than the field it outlines, which is the direction this design
@@ -255,33 +380,18 @@
     }
   }
 
+  /* Only the values that are *not* reachable by the scene tint are left here
+     since Phase 10 — the shadow colour and the four foregrounds. Every
+     background moved to the `--panel-*` tokens on `.dark`, and the mapping in
+     the block above serves both themes, exactly as --tp-input-border-color has
+     since Phase 7 and for the same mechanical reason. */
   .dark .tweakpane-scope {
-    --tp-base-background-color: #161d23;
     --tp-base-shadow-color: rgb(0 0 0 / 0.3);
 
-    --tp-button-background-color: #38454f;
-    --tp-button-background-color-hover: #43515c;
-    --tp-button-background-color-focus: #4b5a66;
-    --tp-button-background-color-active: #54646f;
     --tp-button-foreground-color: #e9eef3;
-
-    --tp-container-background-color: #1e262d;
-    --tp-container-background-color-hover: #232c34;
-    --tp-container-background-color-focus: #27313a;
-    --tp-container-background-color-active: #2c3740;
     --tp-container-foreground-color: #e9eef3;
-
-    --tp-groove-foreground-color: #27323b;
-
-    --tp-input-background-color: #0e1317;
-    --tp-input-background-color-hover: #131a1f;
-    --tp-input-background-color-focus: #172026;
-    --tp-input-background-color-active: #1c262d;
     --tp-input-foreground-color: #e9eef3;
-
     --tp-label-foreground-color: #94a2af;
-
-    --tp-monitor-background-color: #0e1317;
     --tp-monitor-foreground-color: #94a2af;
 
     /* --tp-input-border-color is deliberately absent here since Phase 7. Its

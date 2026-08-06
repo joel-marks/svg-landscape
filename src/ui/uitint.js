@@ -1,12 +1,21 @@
-// uitint.js — tints a small set of interface tokens from the current scene's
-// theme (CONTEXT.md section 5, Phase 7).
+// uitint.js — tints the interface's tokens from the current scene's theme
+// (CONTEXT.md section 5, Phases 7 and 10).
 //
-// The idea is that the panel should feel like it belongs to the picture beside
-// it without competing with it. So this touches accents and lines only — the
-// accent token, the page's border token, and the ring Tweakpane's inputs are
-// outlined with. **Not surface backgrounds**: a tinted page behind a tinted
-// artwork is two colour fields fighting for the same attention, and the artwork
-// has to win.
+// **Opt-in since Phase 10, and off by default.** The Preferences checkbox
+// "Tint UX to scene" owns it: unchecked, state.js passes null here, every
+// inline override is removed and the interface is exactly what its `-base`
+// tokens declare. So the question this module answers is no longer "how much
+// tint can the interface carry without anyone objecting" — nobody who has not
+// asked for it sees any — but "when someone asks, is the answer unmistakable".
+//
+// That is what changed the token list. Phase 7 tinted accents and lines only,
+// on the reasoning that a tinted page behind a tinted artwork is two colour
+// fields fighting for the same attention and the artwork has to win. Phase 8
+// confirmed the mechanism worked and that nobody could see it, which is the
+// same finding read twice: two of the three tokens draw 1px lines. An opt-in
+// mode is not bound by the always-on argument — the always-on design is now
+// simply the off state — so the surfaces are in, and they are what makes the
+// effect readable at arm's length.
 //
 // Three things about the mechanism, each of which is the reason the obvious
 // version doesn't work:
@@ -48,34 +57,84 @@ import chroma from 'chroma-js';
 // has none to lose and reads the tint as hue almost immediately; a saturated
 // one reads it as washing out until the ratio is high enough to cross over.
 //
-// So the more neutral the token, the more tint it can carry. Both borders are
-// near-neutral by design and take about a third; the accent is a saturated blue
-// in both UI themes and stays at 0.18, where every theme moves it visibly
-// without any theme flattening it to grey. An accent that has stopped being a
-// colour has stopped being an accent — it is the page's focus ring.
+// So the more neutral the token, the more tint it can carry. The surfaces and
+// both borders are near-neutral by design; the accent is a saturated blue in
+// both UI themes and is the one token held back, because an accent that has
+// stopped being a colour has stopped being an accent — it is the page's focus
+// ring. 0.4 is where every theme moves it unmistakably and Ink wash, the
+// neutral control case, still leaves a blue rather than a grey; 0.5 puts
+// Volcanic ash and Ink wash within a couple of steps of each other.
 //
-// Tuned by eye across all eight themes and both UI themes, not to a chroma
-// target. Same numbers in light and dark: the tokens differ but their *relative*
-// chroma does not, so one set held for both, which is one less thing to keep
-// straight when Phase 8's contrast audit comes round.
+// **Punch comes from ratio and coverage, never from lightness.** Every mix
+// holds the token's own L (see mixTint), which is what keeps the contrast audit
+// one lightness per token per UI theme instead of a worst-case sweep across
+// eight scene themes. Where a ratio had to come down it came down; lightness
+// was never the knob.
+//
+// Tuned by eye in **light mode** across all eight themes plus a randomised
+// palette (Phase 10's stated target), then checked in dark for breakage rather
+// than retuned for it. Same numbers in both: the tokens differ but their
+// relative chroma does not, so one set holds for both.
 const TINTED_TOKENS = [
+  // --- surfaces (Phase 10) ---------------------------------------------------
+  // The raised surface — panel cards, modals, the tips popover — and the
+  // letterbox bars inside the canvas frame. Area is the whole reason these are
+  // here: 0.25 across a panel reads harder than 0.5 on a 1px line.
+  //
+  // **`--surface` and the header are deliberately absent.** The page field the
+  // app sits on and the bar across the top of it stay neutral, so what frames
+  // the artwork does not follow it while what you operate does. The header is
+  // the one that had to be arranged rather than merely left out: it is
+  // `bg-surface-raised` in index.html and would have tinted with the panels, so
+  // style.css gives it `--surface-header`, the same value read off the untinted
+  // side.
+  ['--surface-raised-base', '--surface-raised', 0.25],
+  ['--surface-sunken-base', '--surface-sunken', 0.25],
+
+  // --- Tweakpane's own background scale (Phase 10) ---------------------------
+  // The panel chrome. `--tp-base-background-color` is not listed because it is
+  // --surface-raised and tints with it. Every other step is here, interaction
+  // states included — a row that reverts to neutral grey under the pointer
+  // reads as a bug, not as restraint.
+  ['--panel-button-base', '--panel-button', 0.25],
+  ['--panel-button-hover-base', '--panel-button-hover', 0.25],
+  ['--panel-button-focus-base', '--panel-button-focus', 0.25],
+  ['--panel-button-active-base', '--panel-button-active', 0.25],
+  ['--panel-container-base', '--panel-container', 0.25],
+  ['--panel-container-hover-base', '--panel-container-hover', 0.25],
+  ['--panel-container-focus-base', '--panel-container-focus', 0.25],
+  ['--panel-container-active-base', '--panel-container-active', 0.25],
+  ['--panel-groove-base', '--panel-groove', 0.25],
+  ['--panel-input-base', '--panel-input', 0.25],
+  ['--panel-input-hover-base', '--panel-input-hover', 0.25],
+  ['--panel-input-focus-base', '--panel-input-focus', 0.25],
+  ['--panel-input-active-base', '--panel-input-active', 0.25],
+  ['--panel-monitor-base', '--panel-monitor', 0.25],
+
+  // --- lines and accents (Phase 7, ratios raised in Phase 10) ----------------
   // Links, the Help modal's group headings, and the page focus ring.
-  ['--accent-base', '--accent', 0.18],
+  ['--accent-base', '--accent', 0.4],
   // Every line the page draws: the canvas frame's inset ring, the tips popover,
   // modal rules and table borders.
-  ['--border-base', '--border', 0.32],
+  ['--border-base', '--border', 0.5],
   // The 1px outline on Tweakpane's inputs, sliders and checkboxes (Phase 6.12).
   // .tweakpane-scope maps --tp-input-border-color onto it.
-  ['--input-ring-base', '--input-ring', 0.3],
+  ['--input-ring-base', '--input-ring', 0.5],
 ];
 
 // The scene theme's declared tint, or null for none. Held here because the two
 // things that invalidate it — the scene's theme and the UI's light/dark mode —
 // change independently and neither knows about the other.
+//
+// null is now two situations rather than one: no tint declared, and the
+// Preferences toggle being off (Phase 10). They want identical treatment — the
+// untinted interface — so state.js collapses them into this one value rather
+// than this module learning about the preference.
 let tint = null;
 
 // Called from state.js on every paint, so a theme change, a randomised palette,
-// a preset load and a restored session all arrive through one path.
+// a preset load, a restored session and the Preferences toggle all arrive
+// through one path.
 export function setUITint(next) {
   if (next === tint) return;
   tint = next;
@@ -87,6 +146,17 @@ export function setUITint(next) {
 // recomputed from them.
 export function applyUITint() {
   const root = document.documentElement;
+
+  // No tint: remove every override outright rather than writing the base value
+  // back over itself. The computed values are the same either way, but "off"
+  // should leave nothing of this module on the element — which is what makes
+  // the default state checkable by looking at <html> rather than by diffing
+  // colours (Phase 10).
+  if (!tint) {
+    for (const [, target] of TINTED_TOKENS) root.style.removeProperty(target);
+    return;
+  }
+
   const styles = getComputedStyle(root);
 
   for (const [source, target, ratio] of TINTED_TOKENS) {
@@ -99,7 +169,7 @@ export function applyUITint() {
       continue;
     }
 
-    root.style.setProperty(target, tint ? mixTint(base, tint, ratio) : base);
+    root.style.setProperty(target, mixTint(base, tint, ratio));
   }
 }
 

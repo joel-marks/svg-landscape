@@ -16,6 +16,7 @@ No backend, no accounts, no server. Runs entirely client-side, deployed as a sta
 - Eight curated colour themes plus an algorithmic randomiser, with depth and atmospheric haze/mist controls
 - Two colouring modes: a continuous depth ramp, or flat colour bands per depth region ("Banded colors")
 - Themes live in `src/core/themes.json` — three ramp colours and a UI tint each, so adding one is a data change
+- Optional "Tint UX to scene" preference: the control panel takes its colour from the current scene theme, page and header held neutral (off by default)
 - Presets: drop a settings JSON into `src/core/presets/` and it appears in the dropdown — no code changes
 - Full state persisted between visits; every setting exports to SVG and JSON
 - Keyboard-operable throughout, WCAG AA contrast in both themes, and `prefers-reduced-motion` respected
@@ -90,7 +91,7 @@ src/
     help.js                 Help / readme.md / About modals
     download.js              SVG + JSON export
     theme.js                  light/dark UI theme
-    uitint.js                  tints interface accents from the current theme
+    uitint.js                  tints the interface from the current theme (opt-in)
   archetypes/        one module per landscape type
   help/help.md       in-app Help content
   about/about.md     in-app About content

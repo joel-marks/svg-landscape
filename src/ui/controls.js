@@ -640,6 +640,18 @@ export function initControls({
       }),
     );
 
+  // Directly below UI theme and above Tips (CONTEXT.md section 5, Phase 10):
+  // the two above it are both "what should the interface look like", and Tips
+  // is about what it tells you.
+  //
+  // A repaint, not a regenerate. The tint is applied from paint() — the one
+  // place every route to a new scene theme already passes through — so
+  // repainting the existing geometry is the whole of what this needs, and the
+  // scene on screen is untouched.
+  preferences
+    .addBinding(state, 'uiTintEnabled', { label: 'Tint UX to scene' })
+    .on('change', onUserChange(onPaintChange));
+
   preferences
     .addBinding(state, 'tips', { label: 'Tips' })
     .on('change', onUserChange(refresh));

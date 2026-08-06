@@ -5,7 +5,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 ## Presets
 
 - **Load preset** — loads a saved scene in one step. Falls back to "Custom" the moment you change anything, since the scene is now yours rather than the saved one.
-- **Reset to defaults** — returns every control to its factory value and draws a new seed. Your UI theme and Tips setting are left alone; they're interface preferences, not scene parameters.
+- **Reset to defaults** — returns every control to its factory value and draws a new seed. Everything under Preferences is left alone; those are interface settings, not scene parameters.
 
 ## Canvas
 
@@ -32,7 +32,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 
 ## Color
 
-- **Theme preset** — eight curated ramps, each three colours running from the farthest ridge to the nearest foreground. Previous/Next step through them; Randomise generates a new one algorithmically (complementary, analogous or split-hue), shown as "Randomized". Whichever theme is showing also lightly tints the panel's accents and outlines.
+- **Theme preset** — eight curated ramps, each three colours running from the farthest ridge to the nearest foreground. Previous/Next step through them; Randomise generates a new one algorithmically (complementary, analogous or split-hue), shown as "Randomized". Each theme also carries a colour for the interface, used only if you switch **Tint UX to scene** on under Preferences.
 - **Color depth** — how strongly near and far separate. 0.5 is the theme as authored; below that everything flattens toward the middle colour, above it the extremes spread further apart. It works in both colouring modes, and means the same thing in each — with Banded colors off it moves where layers sit on the ramp, with Banded colors on it moves the three band colours apart or together.
 - **Banded colors** — off, the three theme colours blend into a continuous ramp across the depth of the scene. On, each layer takes one of the three flat, by how far away it is: background, middle distance or foreground. Where those regions divide is a property of each landscape type. The Desert theme and the Desert mesa landscape type are built for this mode, and are the clearest place to see it.
 - **Horizon haze** — the atmospheric band at the horizon. Coloured by time of day, not the palette.
@@ -44,6 +44,13 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 - **Download SVG** — the artwork as a vector file.
 - **Preset name** — optional; sets the name written into the JSON and its filename.
 - **Download JSON** — every control value, including the seed. The box below the button previews exactly what's written.
+
+## Preferences
+
+- **UI theme** — Light, Dark, or System, which follows your operating system and keeps following it while the page is open. This is the interface only; it has nothing to do with the time of day in the scene.
+- **Tint UX to scene** — **off by default.** On, the controls take their colour from whichever theme the scene is using: panels, buttons, fields, outlines and the focus ring all shift toward it, so the panel reads as part of the picture. The page behind it and the bar across the top stay neutral on purpose — what frames the artwork shouldn't compete with it. Switching scene theme then recolours the controls with it. Nothing about the artwork changes, and nothing about it is exported — this is a preference, so presets never carry it and Reset to defaults leaves it where you put it. Ink wash is the one theme with no colour of its own, so it very slightly drains the interface's instead of tinting it.
+- **Tips** — off by default. On, a "?" appears beside each panel heading with a one-line description of what that group does.
+- **Help | readme.md | About** — this page, the project's README, and the story behind the app.
 
 ## Seeds and reproducibility
 
