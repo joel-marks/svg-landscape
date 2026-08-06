@@ -81,21 +81,24 @@ const TINTED_TOKENS = [
   // letterbox bars inside the canvas frame. Area is the whole reason these are
   // here: 0.25 across a panel reads harder than 0.5 on a 1px line.
   //
-  // **`--surface` and the header are deliberately absent.** The page field the
-  // app sits on and the bar across the top of it stay neutral, so what frames
-  // the artwork does not follow it while what you operate does. The header is
-  // the one that had to be arranged rather than merely left out: it is
-  // `bg-surface-raised` in index.html and would have tinted with the panels, so
-  // style.css gives it `--surface-header`, the same value read off the untinted
-  // side.
+  // **`--surface`, the header and the panel's own card are deliberately
+  // absent.** The three fields the interface sits *on* stay neutral, so what
+  // frames the artwork does not follow it while what you operate does. Two of
+  // the three had to be arranged rather than merely left out, both being
+  // `--surface-raised` by value: style.css points the header at
+  // `--surface-header` and the panel card at `--tp-base-background-color`, and
+  // declares each as `var(--surface-raised-base)` — the same value, read off
+  // the untinted side.
   ['--surface-raised-base', '--surface-raised', 0.25],
   ['--surface-sunken-base', '--surface-sunken', 0.25],
 
   // --- Tweakpane's own background scale (Phase 10) ---------------------------
-  // The panel chrome. `--tp-base-background-color` is not listed because it is
-  // --surface-raised and tints with it. Every other step is here, interaction
-  // states included — a row that reverts to neutral grey under the pointer
-  // reads as a bug, not as restraint.
+  // The panel chrome. `--tp-base-background-color` is not listed and does not
+  // tint: the panel's own card is a field the rest of the panel sits on, and
+  // tinting it as well as everything standing on it took the effect past where
+  // it should stop. Every other step is here, interaction states included — a
+  // row that reverts to neutral grey under the pointer reads as a bug, not as
+  // restraint.
   ['--panel-button-base', '--panel-button', 0.25],
   ['--panel-button-hover-base', '--panel-button-hover', 0.25],
   ['--panel-button-focus-base', '--panel-button-focus', 0.25],

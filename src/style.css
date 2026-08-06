@@ -67,13 +67,15 @@
    writes has to be declared at the document root and mapped onto the --tp-*
    name below.
 
-   **Two surfaces are held back on purpose.** `--surface` — the page field the
-   whole app sits on — and the header take no tint at all, so the chrome that
-   frames the artwork stays neutral while the chrome you operate follows the
-   scene. The header would otherwise have come along for free, being
-   `bg-surface-raised` in index.html; it takes `--surface-header` instead, which
-   is declared as --surface-raised's *base* rather than as a third copy of the
-   hex, so the two can never disagree about the untinted value. */
+   **Three fields are held back on purpose**, all of them things the interface
+   sits *on* rather than things you operate: `--surface` (the page), the header,
+   and the control panel's own card. The chrome that frames the artwork stays
+   neutral; the rows, fields, buttons and outlines standing on it follow the
+   scene. Neither of the two that would otherwise have come along for free
+   restates a value to get out: the header takes `--surface-header` and the
+   panel card takes `--tp-base-background-color`, and both are declared as
+   --surface-raised's *base*, so none of the three can disagree about what the
+   untinted value is. */
 :root {
   --surface: #7e848b;
   --surface-raised-base: #bfc2c5;
@@ -97,8 +99,9 @@
   /* The Tweakpane background scale (Phase 10). These are the values that lived
      as literals in `.tweakpane-scope` from Phase 2 to Phase 9 — moved, not
      copied; the block below now maps each --tp-* name onto the token here.
-     `--tp-base-background-color` is absent because it was always exactly
-     --surface-raised, and it now says so rather than restating the hex.
+     `--tp-base-background-color` is absent because it takes no tint: it was
+     always exactly --surface-raised and now reads that token's *base*, so the
+     panel's own card stays neutral behind the rows that do tint.
 
      Every step is tinted, interaction states included. The scale's shape is
      untouched by that: the mix holds each token's own lightness, so what the
@@ -304,8 +307,14 @@
      Foregrounds stay as literals and stay untinted — they are text, and text
      that follows the tint is contrast risk for no readable gain. */
   .tweakpane-scope {
-    /* Always was --surface-raised, to the byte, in both themes. Says so now. */
-    --tp-base-background-color: var(--surface-raised);
+    /* Always was --surface-raised, to the byte, in both themes — so it is read
+       off that token rather than restated as a hex. Deliberately the **base**
+       and not the tinted value: the panel's own card sits behind everything the
+       panel draws, and tinting the field as well as the rows on it took the
+       effect past where it should stop. So the card stays neutral and the rows,
+       fields, buttons and outlines standing on it are what follow the scene —
+       the same rule the page and the header already sit on the other side of. */
+    --tp-base-background-color: var(--surface-raised-base);
     --tp-base-shadow-color: rgb(15 23 32 / 0.18);
 
     --tp-button-background-color: var(--panel-button);
