@@ -94,8 +94,9 @@ src/
     uitint.js                  tints the interface from the current theme (opt-in)
   archetypes/        one module per landscape type
   help/help.md       in-app Help content
-  about/about.md     in-app About content
-public/              static assets
+  about/about.md     About content — rendered into index.html at build time and
+                     adopted by the About modal, so there is one copy of it
+public/              static assets, sitemap.xml, robots.txt
 index.html           single page
 ```
 

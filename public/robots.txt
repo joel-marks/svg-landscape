@@ -1,0 +1,8 @@
+# Nothing here is private and nothing is generated per-visitor, so there is
+# nothing to keep a crawler out of.
+User-agent: *
+Allow: /
+
+# Absolute, as the spec requires — a Sitemap line is not resolved against the
+# robots.txt's own location.
+Sitemap: https://joel-marks.github.io/svg-landscape/sitemap.xml

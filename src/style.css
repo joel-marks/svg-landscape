@@ -571,29 +571,30 @@
      their spacing — so anything markdown.js emits has to be restyled here or it
      arrives as undifferentiated text. Scoped to `.markdown` so it applies only
      inside the modal bodies and cannot leak into the panel or page chrome. */
-  .markdown > :first-child {
-    margin-top: 0;
-  }
 
-  .markdown > :last-child {
-    margin-bottom: 0;
-  }
-
-  .markdown h1,
-  .markdown h2,
-  .markdown h3,
-  .markdown h4 {
+  /* Headings are sized by the `md-hN` class markdown.js puts on each one, not by
+     its tag (Phase 12). The class names the level the author *wrote*; the tag
+     names the level the heading *occupies* in the page it lands in, which are no
+     longer the same thing now that the About copy is rendered into index.html
+     under the header's <h1> and shifted a level down to keep it the only one.
+     Sizing on the tag would restyle that document as a side effect of fixing its
+     outline. Same four levels as before the swap — nothing gained a style here,
+     the selectors changed axis. */
+  .markdown .md-h1,
+  .markdown .md-h2,
+  .markdown .md-h3,
+  .markdown .md-h4 {
     margin: 1.5rem 0 0.5rem;
     font-weight: 600;
     line-height: 1.3;
     text-wrap: balance;
   }
 
-  .markdown h1 {
+  .markdown .md-h1 {
     font-size: 1.25rem;
   }
 
-  .markdown h2 {
+  .markdown .md-h2 {
     font-size: 1.05rem;
     border-top: 1px solid var(--border);
     padding-top: 1.25rem;
@@ -602,15 +603,31 @@
   /* The group headings inside Help, set apart from the control names beneath
      them — same weight for both would make "Presets" the group and "Load
      preset" the control read as the same kind of thing. */
-  .markdown h3 {
+  .markdown .md-h3 {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--accent);
   }
 
-  .markdown h4 {
+  .markdown .md-h4 {
     font-size: 0.9rem;
+  }
+
+  /* These two sit *below* the heading rules, and that is load-bearing rather than
+     arbitrary — it is the one thing the Phase 12 selector swap broke and the
+     screenshot diff caught. `.markdown h1` was (0,1,1) and lost to
+     `.markdown > :first-child` (0,2,0) wherever they met, so a document opening
+     with a heading had no top margin. `.markdown .md-h1` is (0,2,0): a tie, which
+     source order decides. Declared above the headings it lost, and every modal
+     gained 24px of dead space above its first line. Everything after this point
+     is (0,1,1) or lower, so the position only has to clear the heading block. */
+  .markdown > :first-child {
+    margin-top: 0;
+  }
+
+  .markdown > :last-child {
+    margin-bottom: 0;
   }
 
   .markdown p {

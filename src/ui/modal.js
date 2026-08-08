@@ -95,9 +95,14 @@ export function createModal({ id, title, body, className = '' }) {
 // it cannot overflow its parent, so the shell never has anything to scroll.
 // `min-h-0` is the part that makes it work — a flex item defaults to
 // `min-height: auto` and would otherwise refuse to shrink below its content.
+// Exported since Phase 12, because the About modal no longer builds its body —
+// it adopts the pre-rendered container from index.html and has to be able to give
+// it these classes without a second copy of the list living in help.js.
+export const MODAL_BODY_CLASS =
+  'min-h-0 flex-1 overflow-y-auto px-5 py-4 text-sm leading-relaxed';
+
 export function modalBody(className = '') {
   const element = document.createElement('div');
-  element.className =
-    `min-h-0 flex-1 overflow-y-auto px-5 py-4 text-sm leading-relaxed ${className}`.trim();
+  element.className = `${MODAL_BODY_CLASS} ${className}`.trim();
   return element;
 }

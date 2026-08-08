@@ -50,6 +50,51 @@
     />
     <meta name="twitter:image" content="https://joel-marks.github.io/svg-landscape/og-image.png" />
 
+    <!-- Structured data (Phase 12). One block, two nodes in a @graph rather than
+         a Person nested inside the WebApplication: the author is a stable entity
+         with its own `@id`, so anything else on this site that wants to reference
+         the same person references the node instead of repeating it.
+
+         `description` is the meta description above, word for word — the same app
+         has to be described the same way in every place a crawler reads it, and
+         two nearly-identical descriptions are worse than one repeated.
+
+         The name and site URL are the ones about.md's own Credits line carries,
+         not a variant invented here; `sameAs` pairs it with the GitHub profile
+         the header's repo link belongs to. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://joel-marks.github.io/svg-landscape/#app",
+            "name": "SVG Landscape Generator",
+            "url": "https://joel-marks.github.io/svg-landscape/",
+            "description": "Generate procedural 2D landscape SVGs in your browser: ten landscape types, curated colour themes, time-of-day lighting. Free, no signup, nothing uploaded.",
+            "applicationCategory": "DesignApplication",
+            "operatingSystem": "Web",
+            "browserRequirements": "Requires JavaScript.",
+            "isAccessibleForFree": true,
+            "license": "https://opensource.org/licenses/MIT",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "author": { "@id": "https://joelbmarks.com/#person" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://joelbmarks.com/#person",
+            "name": "Joel B. Marks",
+            "url": "https://joelbmarks.com",
+            "sameAs": ["https://joelbmarks.com", "https://github.com/joel-marks"]
+          }
+        ]
+      }
+    </script>
+
     <!-- Critical, inline, and deliberately not in style.css: everything here
          exists to cover the window *before* style.css has arrived, so a rule
          living in that file could not do the job (Phase 8, CONTEXT.md
@@ -129,9 +174,21 @@
            Preferences folder in Phase 6 (CONTEXT.md section 5) — it is not
            duplicated here. -->
       <div class="shell flex items-center gap-4 py-3">
-        <h1 class="text-base font-semibold tracking-tight">
-          SVG Landscape Generator
-        </h1>
+        <!-- The page's single <h1>, and it was already one before Phase 12 — the
+             heading level needed no promoting, only the guarantee that nothing
+             else claims it. The About copy injected into <main> below is the one
+             thing that could, and is rendered a level down for exactly that
+             reason (vite.config.js, markdown.js).
+
+             The subtitle is the only visible text Phase 12 adds anywhere on the
+             page. `leading-tight` keeps the two lines close enough to read as one
+             block, and the header grows by the line's height and nothing else. -->
+        <div>
+          <h1 class="text-base font-semibold tracking-tight">
+            SVG Landscape Generator
+          </h1>
+          <p class="text-xs leading-tight text-muted">A procedural scene designer</p>
+        </div>
 
         <!-- Top-right, and the page's only outbound link since the footer was
              removed in Phase 6.12. The build hash replaces package.json's
@@ -240,6 +297,25 @@
           <section id="panel-preferences" aria-label="Preferences"></section>
         </div>
       </div>
+
+      <!-- The About copy, rendered into this container at build time from
+           src/about/about.md by the hook in vite.config.js — the same file the
+           About modal has always shown, through the same renderer, now rendered
+           once instead of per-open (CONTEXT.md sections 10, 11).
+
+           Why it is in the document at all: before this phase this prose reached
+           the page only when the About button was pressed, so the one piece of
+           real writing about what this app is did not exist in the HTML a crawler
+           is served. It ships here instead, inside <main> so it sits in the
+           landmark structure, and `hidden` because the About button is what
+           reveals it — user-revealable content, not text positioned off-screen
+           for a robot to find. `help.js` moves this exact node into the dialog on
+           first open rather than rendering a second copy of it.
+
+           The slot comment is what the hook replaces; with no hook this container
+           is simply empty, which is the honest failure rather than a stale copy
+           of the copy. -->
+      <div id="about-content" class="markdown" hidden><!--about-content--></div>
     </main>
 
     <!-- No footer as of Phase 6.12 (CONTEXT.md sections 3 and 11). It carried

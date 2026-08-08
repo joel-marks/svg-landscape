@@ -24,13 +24,23 @@
 // character in source is a trap for anyone editing this file later.
 const CODE_PLACEHOLDER = '\u0000';
 
-export function renderMarkdown(source) {
-  return blocks(String(source ?? '').replace(/\r\n?/g, '\n').split('\n')).join('\n');
+// `headingOffset` shifts every heading down the document outline without
+// changing how it looks (Phase 12). It exists because about.md is rendered into
+// index.html at build time and the page already has an `<h1>` — a document
+// opening with `# Title` would give it a second one. Presentation is therefore
+// decoupled from the tag: every heading carries an `md-hN` class naming its
+// *authored* level, which is what style.css sizes on, while the tag names its
+// level *in the document it lands in*. Two axes, because with one they disagree —
+// demoting the tags alone would render about.md's `##` sections in the 0.75rem
+// uppercase treatment the third level is styled for.
+export function renderMarkdown(source, { headingOffset = 0 } = {}) {
+  const lines = String(source ?? '').replace(/\r\n?/g, '\n').split('\n');
+  return blocks(lines, headingOffset).join('\n');
 }
 
 // --- block level -------------------------------------------------------------
 
-function blocks(lines) {
+function blocks(lines, headingOffset = 0) {
   const out = [];
   let i = 0;
 
@@ -78,8 +88,13 @@ function blocks(lines) {
 
     const heading = line.match(/^(#{1,6})\s+(.*)$/);
     if (heading) {
-      const level = heading[1].length;
-      out.push(`<h${level}>${inline(heading[2].trim())}</h${level}>`);
+      const authored = heading[1].length;
+      // Clamped: there is no <h7>, so a `######` in an offset document keeps the
+      // deepest tag there is and its own authored class carries the styling.
+      const level = Math.min(6, authored + headingOffset);
+      out.push(
+        `<h${level} class="md-h${authored}">${inline(heading[2].trim())}</h${level}>`,
+      );
       i += 1;
       continue;
     }
@@ -92,7 +107,7 @@ function blocks(lines) {
         body.push(lines[i].replace(/^>\s?/, ''));
         i += 1;
       }
-      out.push(`<blockquote>${blocks(body).join('\n')}</blockquote>`);
+      out.push(`<blockquote>${blocks(body, headingOffset).join('\n')}</blockquote>`);
       continue;
     }
 

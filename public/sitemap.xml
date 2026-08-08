@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- One URL, because the app is one page: no routing, no per-scene URLs, nothing
+     server-rendered (CONTEXT.md sections 1, 13). The three informational modals
+     are dialogs in this same document, not addresses of their own. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://joel-marks.github.io/svg-landscape/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
