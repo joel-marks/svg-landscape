@@ -63,12 +63,49 @@ export function aspectWidth(key) {
   return Math.round(CANVAS_HEIGHT * aspect.ratio);
 }
 
+// --- viewport-dependent default aspect (Phase 13.5) --------------------------
+//
+// The factory default aspect is Cine at >=1024px and 16:9 below it: a 2.39:1
+// strip is a good default on a desktop frame and a 90px-tall sliver on a phone,
+// where the pinned scene (section 5) is capped at 40dvh anyway. This is the
+// *default* only — a returning visitor's stored aspect always wins, presets and
+// exports carry their own, and nothing here ever reacts to a resize.
+//
+// **`/core` does not read the DOM** (section 3), so main.js resolves the
+// viewport class and hands it in — the same inversion `setRenderer` uses, and
+// the reason the offline render harness still imports this module in plain
+// Node. With nothing handed in, `wide` stands, which is the value this project
+// has shipped since Phase 4: no caller changes behaviour by not calling.
+const VIEWPORT_ASPECTS = { wide: 'cine', narrow: '16:9' };
+
+let viewportAspect = VIEWPORT_ASPECTS.wide;
+
+// Called once, from main.js, before loadState() — so a first visit renders the
+// viewport's default and a returning visitor's blob overwrites it a moment
+// later. Not wired to a resize listener, deliberately: changing the aspect of a
+// scene someone is working on because they rotated the phone is a worse outcome
+// than a default that was right when they arrived.
+export function setViewportClass(viewport) {
+  if (VIEWPORT_ASPECTS[viewport]) {
+    viewportAspect = VIEWPORT_ASPECTS[viewport];
+    setAspect(viewportAspect);
+  }
+  return viewportAspect;
+}
+
+// The one factory default that is not the FACTORY_DEFAULTS snapshot's, because
+// it is resolved at runtime rather than written in the literal below. Reset to
+// defaults reads this so it lands on the same value a first visit would.
+export function defaultAspect() {
+  return viewportAspect;
+}
+
 export const state = {
   archetype: 'open-valley',
   seed: randomSeed(),
   // On by default (Phase 5.12): tweaking Scene/Canvas controls is nearly always
   // an attempt to refine the layout in front of you, so incidental reseeding is
-  // the surprising behaviour, not the useful one. New View is unaffected — it
+  // the surprising behaviour, not the useful one. New seed is unaffected — it
   // reseeds explicitly and the lock never applies to it.
   seedLocked: true,
   elevation: 0.5,
@@ -78,8 +115,13 @@ export const state = {
   peakCount: 0.5,
   // Terrain profile: 0 rounded hills, 1 sharp ridgelines.
   sharpness: 0.5,
-  aspect: 'cine',
-  width: aspectWidth('cine'),
+  // Written from VIEWPORT_ASPECTS rather than as its own literal (Phase 13.5),
+  // so the value here and the one setViewportClass('wide') resolves to cannot
+  // drift apart. This is what a desktop first visit and a headless import both
+  // get; main.js overwrites it with the narrow default below 1024px, before
+  // loadState() has had a chance to restore anything.
+  aspect: VIEWPORT_ASPECTS.wide,
+  width: aspectWidth(VIEWPORT_ASPECTS.wide),
   height: CANVAS_HEIGHT,
 
   // Color (CONTEXT.md section 5). `palette` is a curated theme id, or
@@ -146,16 +188,28 @@ export const state = {
 
   // "Tint UX to scene" (CONTEXT.md section 5, Phase 10). Whether the scene
   // theme's declared uiTint is mixed into the interface's own tokens at all.
-  // **Off by default**: the tint was always-on and deliberately subtle from
-  // Phase 7 to Phase 9, and this phase traded that for opt-in and obvious — so
-  // the untinted interface is what a first-ever visitor gets, and the eight
-  // themes only reach the chrome of someone who asked for it.
+  //
+  // **On by default as of Phase 13.5**, and that is a change to the default
+  // rather than to Phase 10's design. Phase 10 built the tint as opt-in because
+  // an always-on tint had to be subtle enough to live with unasked-for, which
+  // made it invisible; the mechanism it landed — nineteen tokens at ratios
+  // tuned to be obvious — is untouched here, and the toggle, its persistence
+  // and its exemption from Reset all work exactly as that phase left them. What
+  // changed is the answer to "should a first-ever visitor see it", and the
+  // reason is that they should: the tint is the clearest signal the interface
+  // gives that the scene theme is a choice. Anyone who dislikes it unchecks it
+  // once and the box below persists that forever.
+  //
+  // Phase 10 audited contrast with the tint **on**, for all eight themes plus a
+  // randomised palette in both UI themes, so this default costs no new
+  // measurement (CONTEXT.md section 11).
   //
   // A preference, not a scene parameter, and treated exactly as `tips` is: it
   // changes nothing about the picture, so it is persisted (EXTRA_PERSISTED_KEYS
   // below) but never exported, never carried by a preset, and never part of the
-  // preset match test. Reset to defaults leaves it alone (RESET_EXEMPT).
-  uiTintEnabled: false,
+  // preset match test. Reset to defaults leaves it alone (RESET_EXEMPT) — which
+  // is what makes this a first-visit default and not a reset value.
+  uiTintEnabled: true,
 };
 
 // The factory defaults Reset to defaults restores (CONTEXT.md section 5,
@@ -163,10 +217,12 @@ export const state = {
 // — a restored localStorage blob included — has had a chance to write to it, so
 // "default" here means the spec's value and not the last-used one.
 //
-// The seed is the deliberate exception: its factory value is a *fresh draw*
-// (that is what a first-ever visitor gets), not whichever number this page load
-// happened to start with, so resetToDefaults() redraws it rather than restoring
-// the snapshot's.
+// Two keys are deliberate exceptions and resetToDefaults() handles both by
+// hand. The seed's factory value is a *fresh draw* (that is what a first-ever
+// visitor gets), not whichever number this page load happened to start with.
+// And `aspect`'s is resolved from the viewport class at runtime rather than
+// written in the literal, so the snapshot holds the wide value and reset asks
+// defaultAspect() for the right one (Phase 13.5).
 const FACTORY_DEFAULTS = Object.freeze(structuredClone(state));
 
 // The control values a settings object carries — audited against CONTEXT.md
@@ -240,7 +296,7 @@ export function setAspect(key) {
 //
 // `reseed: 'incidental'` — a side effect of changing some other control. The
 // lock exists precisely to suppress this.
-// `reseed: 'explicit'` — the user asked for a new seed (New View, the only
+// `reseed: 'explicit'` — the user asked for a new seed (New seed, the only
 // action that does). The lock does not apply: a control whose whole purpose is
 // to change the seed shouldn't be silently disabled by it (CONTEXT.md s5).
 export function regenerate({ reseed = 'none' } = {}) {
@@ -339,7 +395,7 @@ function rollSceneParams() {
   }
 }
 
-// Random scene (CONTEXT.md section 5). The mirror image of New View, which keeps
+// Random scene (CONTEXT.md section 5). The mirror image of New seed, which keeps
 // every parameter and changes only the seed — this is new parameters over the
 // same seed.
 //
@@ -353,10 +409,10 @@ export function randomizeScene() {
 
 // Random all (Phase 6.7) — the third cell of Scene's button row, and literally
 // the other two combined: the same parameter roll Random scene does, through the
-// same explicit reseed New View asks for. One press, both effects; no third
+// same explicit reseed New seed asks for. One press, both effects; no third
 // implementation of either half.
 //
-// `reseed: 'explicit'`, so the lock does not block it — same as New View, and
+// `reseed: 'explicit'`, so the lock does not block it — same as New seed, and
 // for the same reason (CONTEXT.md section 5): a control whose stated purpose
 // includes drawing a new seed shouldn't be silently disabled by the guard
 // against *incidental* reseeding.
@@ -656,6 +712,13 @@ export function resetToDefaults() {
   // See FACTORY_DEFAULTS: the seed's default is a new draw, not the one this
   // page load opened with.
   state.seed = randomSeed();
+
+  // And the aspect's default is resolved from the viewport class rather than
+  // held in the snapshot (Phase 13.5), so a reset on a phone lands on 16:9 and
+  // a reset on a desktop on Cine — the same value a first visit at that width
+  // would have started on. The loop above has just written the snapshot's Cine;
+  // this is the correction, not a second source of truth.
+  state.aspect = defaultAspect();
   setAspect(state.aspect);
 
   return regenerate();

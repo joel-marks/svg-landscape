@@ -2,7 +2,14 @@
 
 import './style.css';
 
-import { exportSettings, loadState, regenerate, setRenderer, state } from './core/state.js';
+import {
+  exportSettings,
+  loadState,
+  regenerate,
+  setRenderer,
+  setViewportClass,
+  state,
+} from './core/state.js';
 import { getArchetype } from './archetypes/index.js';
 import { render } from './core/render.js';
 import { initControls } from './ui/controls.js';
@@ -50,6 +57,19 @@ function settingsName() {
 
 const help = initHelp();
 
+// The viewport class the default aspect is resolved from (CONTEXT.md section 5,
+// Phase 13.5). Measured here rather than in state.js because `/core` computes
+// the picture and does not read the DOM (section 3) — the same inversion
+// setRenderer uses, and what keeps the module importable in plain Node.
+//
+// Read once, before loadState(), and never again: a returning visitor's stored
+// aspect overwrites this a line later, and resizing across the breakpoint
+// mid-session deliberately changes nothing. `min-width: 1024px` is the same
+// boundary style.css's `width < 1024px` draws, from the other side.
+setViewportClass(
+  window.matchMedia('(min-width: 1024px)').matches ? 'wide' : 'narrow',
+);
+
 // Before the panel is built and before the first render (CONTEXT.md section 7),
 // so the controls come up showing the restored values and the scene that draws
 // is the one the visitor left — same seed included. A first visit restores
@@ -58,7 +78,8 @@ loadState();
 
 initControls({
   presetsContainer: document.querySelector('#panel-presets'),
-  leftContainer: document.querySelector('#panel-left'),
+  canvasContainer: document.querySelector('#panel-canvas'),
+  sceneContainer: document.querySelector('#panel-scene'),
   lightingContainer: document.querySelector('#panel-lighting'),
   colourContainer: document.querySelector('#panel-colour'),
   actionsContainer: document.querySelector('#panel-actions'),

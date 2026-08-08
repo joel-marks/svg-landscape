@@ -20,7 +20,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 - **Peak sharpness** — blends the terrain profile between two noise flavours: smooth at 0, ridged at 1.
 - **Point of view height** — viewer elevation. Raises the horizon and tightens how features nest toward each other, as if looking down into the landscape. Not available on In gorge.
 - **Seed / Lock seed** — the number the terrain is drawn from. Locked by default, so the sliders above refine what's on screen instead of redrawing it.
-- **New View | Random all | Random scene** — three ways to change the scene, ordered by how much they touch. New View: new seed, same parameters. Random scene: same seed, new parameters (Complexity, Peak count, Peak sharpness, Point of view height). Random all: both at once. None of the three touches Landscape type, and the seed lock doesn't block any of them — Random scene never reseeds, and the other two reseed on purpose.
+- **New seed | Random all | Random scene** — three ways to change the scene, ordered by how much they touch. New seed: new seed, same parameters. Random scene: same seed, new parameters (Complexity, Peak count, Peak sharpness, Point of view height). Random all: both at once. None of the three touches Landscape type, and the seed lock doesn't block any of them — Random scene never reseeds, and the other two reseed on purpose.
 
 ## Lighting
 

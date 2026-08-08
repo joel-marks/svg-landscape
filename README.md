@@ -20,7 +20,7 @@ No backend, no accounts, no server. Runs entirely client-side, deployed as a sta
 - Presets: drop a settings JSON into `src/core/presets/` and it appears in the dropdown — no code changes
 - Full state persisted between visits; every setting exports to SVG and JSON
 - Keyboard-operable throughout, WCAG AA contrast in both themes, and `prefers-reduced-motion` respected
-- Desktop-first layout that reflows to two columns and then one below 1024px and 640px
+- Desktop-first layout that reflows to two columns and then one below 1024px and 640px — and below 1024px the scene pins to the top of the screen while the panel scrolls under it
 
 Full control-by-control detail is in the app's own **Help** panel — this README stays a quick orientation, not a manual.
 
@@ -91,7 +91,8 @@ src/
     help.js                 Help / Readme.md / About modals
     download.js              SVG + JSON export
     theme.js                  light/dark UI theme
-    uitint.js                  tints the interface from the current theme (opt-in)
+    uitint.js                  tints the interface from the current theme (on by default, switchable)
+    scenepin.js                 the stuck-state hairline for the mobile sticky scene
   archetypes/        one module per landscape type
   help/help.md       in-app Help content
   about/about.md     About content — rendered into index.html at build time and

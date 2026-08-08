@@ -2,21 +2,26 @@
 // Folder structure per CONTEXT.md section 5: Scene, Lighting, Color, Canvas,
 // Actions, Preferences.
 //
-// One Pane per column, each holding collapsible folders. The panes themselves
-// are title-less so the only accordion headings are the folder titles.
+// The panes are title-less so the only accordion headings are the folder
+// titles. **One folder per Pane as of Phase 13.5**, which is where the original
+// one-pane-per-column rule finally ran out: Presets took its own pane in 5.7,
+// Actions and Preferences in 6.6, Lighting and Color at the post-7.5 split, and
+// Canvas and Scene were the last pair still sharing one.
 //
-//   left    Presets (its own pane), then Canvas, Scene
-//   centre  Lighting, then Color — one pane each
-//   right   Actions, then Preferences — one pane each
+//   left    Presets, Canvas, Scene
+//   centre  Lighting
+//   right   Color, Actions, Preferences
 //
-// Presets is a separate Pane instance stacked at the top of the left column,
-// not a control inside the Canvas/Scene pane: it sets a whole parameter set
-// rather than adjusting one, so it reads as its own panel. Phase 6.6 followed
-// that precedent in the right column, splitting Actions and Preferences into a
-// pane each. (Section 5 described this panel as sitting between the header and
-// the canvas frame until Phase 6.7, which is where 5.7 specified it and not
-// where it was ever built; the spec was corrected to match the working UI
-// rather than the panel moved.)
+// The reasoning each split was made on is the same one every time: two things
+// the scene is described by read as two panels rather than two sections of one.
+// 13.5 adds a second reason for finishing the job — the planned drag-layout
+// phase moves *panes*, so a pane holding two folders is a unit that cannot be
+// rearranged without splitting it first. Column membership is index.html's
+// business, not this file's; nothing here knows which column it lands in.
+// (Section 5 described this panel as sitting between the header and the canvas
+// frame until Phase 6.7, which is where 5.7 specified it and not where it was
+// ever built; the spec was corrected to match the working UI rather than the
+// panel moved.)
 //
 // Everything the user touches is a Tweakpane control, including the export
 // buttons — hence Actions living here rather than as separate markup.
@@ -79,7 +84,12 @@ const INFO_ACTIONS = ['Help', 'Readme.md', 'About'];
 // Scene's regenerate row, left to right (CONTEXT.md section 5). Ordered by what
 // each one changes — seed only, both, parameters only — so the combination sits
 // between the two halves it is made of.
-const SCENE_ACTIONS = ['New View', 'Random all', 'Random scene'];
+//
+// The first cell read "New View" from Phase 6.7 to 13.5. Label only: it draws a
+// new seed and nothing else, and "New seed" says which of the three things on
+// this row it is, next to two that also produce a new view. The seed is on
+// screen two rows above it, so the word is already in the user's vocabulary.
+const SCENE_ACTIONS = ['New seed', 'Random all', 'Random scene'];
 
 // Tips (CONTEXT.md section 5, Preferences). One line per folder heading saying
 // what the group is for — still folder-level, not per-control: the Phase 6.5
@@ -126,7 +136,8 @@ const formatHour = (v) => {
 
 export function initControls({
   presetsContainer,
-  leftContainer,
+  canvasContainer,
+  sceneContainer,
   lightingContainer,
   colourContainer,
   actionsContainer,
@@ -138,10 +149,13 @@ export function initControls({
   onAbout,
 }) {
   const presetsPane = new Pane({ container: presetsContainer });
-  const left = new Pane({ container: leftContainer });
-  // Lighting and Color are a pane each, by the same precedent as Presets in the
-  // left column and Actions/Preferences in the right: two separate things the
-  // scene is described by, so two panels rather than two folders in one.
+  // Canvas and Scene became a pane each in Phase 13.5 — the last pair that was
+  // still two folders in one instance. See the note at the head of this file.
+  const canvasPane = new Pane({ container: canvasContainer });
+  const scenePane = new Pane({ container: sceneContainer });
+  // Lighting and Color are a pane each, by the same precedent as Presets and
+  // Actions/Preferences: two separate things the scene is described by, so two
+  // panels rather than two folders in one.
   const lightingPane = new Pane({ container: lightingContainer });
   const colourPane = new Pane({ container: colourContainer });
   // Two instances, not two folders in one (Phase 6.6). Actions is what you do
@@ -151,7 +165,8 @@ export function initControls({
   const preferencesPane = new Pane({ container: preferencesContainer });
   const panes = [
     presetsPane,
-    left,
+    canvasPane,
+    scenePane,
     lightingPane,
     colourPane,
     actionsPane,
@@ -160,8 +175,10 @@ export function initControls({
 
   // Registered before any blade is added, on each pane that hosts a blade from
   // it: Scene's regenerate row, Color's theme row, and Preferences'
-  // Help/Read Me/About row.
-  left.registerPlugin(EssentialsPlugin);
+  // Help/Read Me/About row. Scene's registration moved from the old combined
+  // left pane to `scenePane` with the folder in 13.5 — Canvas hosts no blade
+  // from the plugin and does not need it.
+  scenePane.registerPlugin(EssentialsPlugin);
   colourPane.registerPlugin(EssentialsPlugin);
   preferencesPane.registerPlugin(EssentialsPlugin);
 
@@ -239,7 +256,7 @@ export function initControls({
     refresh();
   };
 
-  // New View exists to change the seed, so the lock never applies to it.
+  // New seed exists to change the seed, so the lock never applies to it.
   const onNewSeed = () => {
     regenerate({ reseed: 'explicit' });
     refresh();
@@ -297,9 +314,9 @@ export function initControls({
     refresh();
   });
 
-  // --- left column, canvas and scene pane -----------------------------------
+  // --- canvas pane ----------------------------------------------------------
 
-  const canvas = left.addFolder({ title: 'Canvas' });
+  const canvas = canvasPane.addFolder({ title: 'Canvas' });
 
   canvas
     .addBinding(state, 'aspect', {
@@ -314,7 +331,9 @@ export function initControls({
       }),
     );
 
-  const scene = left.addFolder({ title: 'Scene' });
+  // --- scene pane -----------------------------------------------------------
+
+  const scene = scenePane.addFolder({ title: 'Scene' });
 
   const archetypeBinding = scene.addBinding(state, 'archetype', {
     label: 'Landscape type',
@@ -359,7 +378,7 @@ export function initControls({
   // variations on "draw me something new" they read better as one row, and the
   // middle cell is the combination of the two either side of it.
   //
-  // Left to right: seed only, both, parameters only. New View and Random all
+  // Left to right: seed only, both, parameters only. New seed and Random all
   // reseed explicitly, so the lock does not apply to either; Random scene never
   // reseeds, so there is nothing for the lock to suppress there (section 5).
   const sceneRow = scene.addBlade({
@@ -382,7 +401,7 @@ export function initControls({
 
   sceneRow.on('click', ({ index: [x] }) => sceneHandlers[x]?.());
 
-  // --- centre column -------------------------------------------------------
+  // --- lighting pane --------------------------------------------------------
 
   const lighting = lightingPane.addFolder({ title: 'Lighting' });
 
@@ -478,6 +497,8 @@ export function initControls({
   // the clock flush against its heading.
   displacedFirst?.classList.remove('tp-v-fst', 'tp-v-vfst');
   clock.element.classList.add('tp-v-fst', 'tp-v-vfst');
+
+  // --- colour pane ----------------------------------------------------------
 
   const colour = colourPane.addFolder({ title: 'Color' });
 

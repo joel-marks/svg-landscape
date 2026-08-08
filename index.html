@@ -294,23 +294,38 @@
         id="control-columns"
         class="tweakpane-scope mt-6 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
-        <!-- The left column stacks two panes: Presets on top as its own panel,
-             then Canvas/Scene. The inner gap matches the grid's own gutter so
-             the stack reads on the same rhythm as the columns beside it. -->
+        <!-- Column membership changed in Phase 13.5 and the source order here is
+             the whole of that change — no pane's internals moved, and the three
+             wrappers are still three wrappers.
+
+             Left stacks three panes since 13.5: Presets, then Canvas, then
+             Scene. Canvas and Scene were two folders in one Pane from Phase 5.7
+             to 13.5; they are a pane each now, by the same precedent Presets,
+             Lighting/Color and Actions/Preferences already set — and it is the
+             panel model the planned drag-layout phase assumes, where a pane is
+             the unit that moves. The inner gap matches the grid's own gutter so
+             each stack reads on the same rhythm as the columns beside it. -->
         <div class="flex flex-col gap-4">
           <section id="panel-presets" aria-label="Presets"></section>
-          <section id="panel-left" aria-label="Canvas and scene controls"></section>
-        </div>
-        <!-- The centre column stacks two panes on the same rhythm as the outer
-             two, Lighting above Color (CONTEXT.md section 5). -->
-        <div class="flex flex-col gap-4">
-          <section id="panel-lighting" aria-label="Lighting controls"></section>
-          <section id="panel-colour" aria-label="Color controls"></section>
+          <section id="panel-canvas" aria-label="Canvas controls"></section>
+          <section id="panel-scene" aria-label="Scene controls"></section>
         </div>
 
-        <!-- The right column stacks two panes on the same rhythm as the left,
-             Actions above Preferences (CONTEXT.md section 5). -->
+        <!-- Centre is Lighting alone since 13.5. Color moved to the right column
+             (CONTEXT.md section 5): the centre column had the two heaviest panes
+             in the panel and the right column the two lightest, and Lighting on
+             its own against Color-over-Actions-over-Preferences is the more even
+             read of the same six panels. -->
         <div class="flex flex-col gap-4">
+          <section id="panel-lighting" aria-label="Lighting controls"></section>
+        </div>
+
+        <!-- Right stacks three panes since 13.5: Color, then Actions, then
+             Preferences. Color first because it is a scene parameter group like
+             the two on the left, and the two beneath it are not — what you do to
+             the scene, then how the app behaves. -->
+        <div class="flex flex-col gap-4">
+          <section id="panel-colour" aria-label="Color controls"></section>
           <section id="panel-actions" aria-label="Actions"></section>
           <section id="panel-preferences" aria-label="Preferences"></section>
         </div>

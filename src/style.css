@@ -882,6 +882,21 @@
          40 — which is the fit model working as CONTEXT.md section 5 has always
          described it, the scene scaled down whole rather than cropped. */
       --scene-pin-max: min(40dvh, 740px);
+
+      /* Breathing room around the pinned scene (Phase 13.5). Phase 13 pinned
+         the frame with `top: 0` and no padding at all, which put its top edge
+         and its rounded corners flush against the viewport edge and its bottom
+         edge flush against the first panel row passing under it — correct, and
+         tight enough to read as a crop rather than a frame.
+
+         **12px**, judged by eye at 375 and 768 in both UI themes against 8 and
+         16. 8 is visible at 375 and disappears at 768, where the frame is three
+         times taller and the same gap reads as none. 16 is comfortable at 768
+         and takes 32px off a 667px phone viewport for a gap nobody asked for.
+         12 is the value that reads as deliberate at both. It is padding on the
+         sticky wrapper, not a margin, so it is inside the opaque band and panel
+         content cannot show through it while pinned. */
+      --scene-pin-pad: 12px;
     }
 
     .scene-pin {
@@ -890,6 +905,7 @@
          `m-0` utility could not stay. */
       margin-block: 0;
       margin-inline: -1rem;
+      padding-block: var(--scene-pin-pad);
       padding-inline: 1rem;
       position: sticky;
       top: 0;
@@ -935,9 +951,17 @@
        Applied to everything focusable in the panel rather than to the pane
        containers: the browser scrolls the *focused* element into view, so the
        margin has to be on that element. `:where()` keeps the list at zero
-       specificity so nothing here competes with Tweakpane's own rules. */
+       specificity so nothing here competes with Tweakpane's own rules.
+
+       The padding is counted twice because the pinned band is the frame plus a
+       pad above *and* below it (Phase 13.5) — the whole band is what a focused
+       control has to clear, not just the frame inside it. Expressed from the
+       same two custom properties the band is built from, so the clearance
+       cannot fall behind the thing it is clearing. */
     #control-columns :where(a, button, input, select, textarea, [tabindex]) {
-      scroll-margin-top: calc(var(--scene-pin-max) + 0.75rem);
+      scroll-margin-top: calc(
+        var(--scene-pin-max) + var(--scene-pin-pad) * 2 + 0.75rem
+      );
     }
   }
 }
