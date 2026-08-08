@@ -807,6 +807,139 @@
     border-radius: inherit;
     overflow: visible;
   }
+
+  /* --- Mobile sticky scene (CONTEXT.md sections 5 and 11, Phase 13) ----------
+
+     Below 1024px the scene pins to the top of the viewport and the control
+     panel scrolls underneath it, so the picture and the control being dragged
+     are on screen together. Everything here is inside one media query and
+     desktop keeps the layout and the 740px cap it has had since Phase 4.
+
+     **It is native `position: sticky` and nothing else** — no scroll listener,
+     no scroll-position state, no header show/hide. The header is ordinary
+     flowing content: it scrolls away on the first scroll and comes back when
+     the user scrolls fully home, the frame releasing in the same motion because
+     that is simply where its flow position is. The one script in the phase is
+     the sentinel that draws the hairline (see `.scene-pin.is-stuck` below), and
+     with it gone everything on this page still behaves exactly as described.
+
+     Two mechanics are worth stating because the obvious version of each fails.
+
+     (a) **The sticky element is the `<figure>`, not `#canvas-frame`.** A sticky
+     box is constrained to its own containing block, so pinning the frame inside
+     a wrapper that is exactly the frame's height gives it zero travel — it
+     would unstick the instant it stuck. The figure's containing block is
+     `<main>`, which spans the panel as well, so the pin holds to the bottom of
+     the page. The ancestry from the figure to `<body>` was walked before any of
+     this was written rather than after it broke: `figure` / `main` / `body` /
+     `html` are all `overflow: visible` with no transform, filter, perspective,
+     containment or will-change anywhere, so the nearest scroll container is the
+     viewport and nothing had to be restructured. `#canvas-frame`'s own
+     `overflow: hidden` is a *descendant* of the sticky box and cannot affect it.
+
+     (b) **The pinned band has to reach the viewport edges.** The figure sits
+     inside `.shell`'s 1rem gutter, so panel content scrolling past would show
+     through a 16px strip down each side of the frame. The negative inline
+     margin takes the band's background out through that gutter and the equal
+     padding puts the frame back where it was — the frame does not move, the
+     paint extends. `.shell`'s `max-width` cannot bind below 1024px, so the two
+     always cancel exactly.
+
+     The band is painted `--surface`, the page's own field, which is what sits
+     behind the frame when nothing is pinned — so pinning changes what the strip
+     *covers*, never what it looks like. The letterboxing itself is unchanged and
+     stays where it has always been: inside the frame, on `--surface-sunken`,
+     because the SVG keeps `preserveAspectRatio="meet"` and the cap below shrinks
+     the scene rather than cropping it. */
+  /* Declared at every width because it costs nothing at any of them: one pixel
+     tall, pulled straight back out of the flow by an equal negative bottom
+     margin, so the pixel it occupies is the figure's own first pixel and nothing
+     below it moves. That coincidence is the point — it leaves the viewport at
+     exactly the scroll position the figure starts sticking at. */
+  #scene-pin-sentinel {
+    height: 1px;
+    margin-bottom: -1px;
+  }
+
+  @media (width < 1024px) {
+    :root {
+      /* The pinned scene's maximum height. `dvh`, not `vh`: mobile browser
+         chrome collapsing on the first scroll changes what `vh` resolves to,
+         which would move the pin under the user's thumb mid-gesture.
+
+         **40dvh, and it stayed at 40 after being measured against real content
+         at 375 / 414 / 768 in every aspect.** The number reads as though it were
+         the binding constraint everywhere and it is nowhere near that: at phone
+         widths the aspect ratio itself keeps the scene well under the cap — a
+         4:3 scene is 39% of a 375×667 viewport and 32% of a 414×896 one, and
+         everything from 16:9 outward is shorter still — so the cap never binds
+         on a phone at all and no scene there is scaled or barred by it. It binds
+         exactly where it should, at tablet width: 4:3 at 768 would run 552px of
+         a 1024px viewport uncapped, and 410 is what keeps the panel the majority
+         of the screen. 38 was tried and rejected: it shaves 4px off a phone's
+         4:3 (invisible) and costs 16:9 at 768 a 22px pillarbox each side where
+         40 costs it 4px. 4:3 at tablet pillarboxes either way — 95px a side at
+         40 — which is the fit model working as CONTEXT.md section 5 has always
+         described it, the scene scaled down whole rather than cropped. */
+      --scene-pin-max: min(40dvh, 740px);
+    }
+
+    .scene-pin {
+      /* Preflight's margin reset is (0,0,0) and this is (0,1,0), so the figure
+         still has no vertical margin — see the note in index.html on why the
+         `m-0` utility could not stay. */
+      margin-block: 0;
+      margin-inline: -1rem;
+      padding-inline: 1rem;
+      position: sticky;
+      top: 0;
+      /* Above the panel content that passes beneath it, below the tips popover
+         at 50, and irrelevant to the modals, which are in the top layer. */
+      z-index: 20;
+      background-color: var(--surface);
+      /* A shadow rather than a border, so the stuck state costs no layout and
+         the pin/release boundary cannot shift by a pixel. Declared transparent
+         here so only the colour changes when `is-stuck` arrives. */
+      box-shadow: 0 1px 0 0 transparent;
+    }
+
+    /* Toggled by src/ui/scenepin.js off the 1px sentinel above the figure —
+       purely the visible edge that says content is passing underneath. */
+    .scene-pin.is-stuck {
+      box-shadow: 0 1px 0 0 var(--border);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .scene-pin {
+        transition: box-shadow 150ms ease-out;
+      }
+    }
+
+    #canvas-frame {
+      max-height: var(--scene-pin-max);
+    }
+
+    /* Focus must never land under the pinned scene. `scroll-margin-top` is the
+       whole fix and it is what makes this work without a scroll listener: the
+       browser's own scroll-into-view — on Tab, on `scrollIntoView`, on an
+       anchor — treats the element's box as extended upward by this much, so it
+       scrolls until the *extended* box clears the scrollport top, which leaves
+       the control itself sitting below the frame.
+
+       The value is the pin's maximum height plus a buffer rather than its actual
+       height, deliberately: the actual height depends on the current aspect
+       ratio and reading it would need the script this phase is built without. A
+       cap-sized margin is never too small at any aspect, and where the scene is
+       shorter than the cap the only cost is a little extra clearance.
+
+       Applied to everything focusable in the panel rather than to the pane
+       containers: the browser scrolls the *focused* element into view, so the
+       margin has to be on that element. `:where()` keeps the list at zero
+       specificity so nothing here competes with Tweakpane's own rules. */
+    #control-columns :where(a, button, input, select, textarea, [tabindex]) {
+      scroll-margin-top: calc(var(--scene-pin-max) + 0.75rem);
+    }
+  }
 }
 
 /* --- Tweakpane input borders (CONTEXT.md section 5, Phase 6.12) --------------

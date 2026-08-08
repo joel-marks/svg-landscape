@@ -10,6 +10,7 @@ Everything generates in your browser — nothing is uploaded. The panel below th
 ## Canvas
 
 - **Aspect ratio** — 4:3 through a 4:1 banner. Feature density scales with width, so a wide canvas doesn't read as stretched.
+- On a phone or a tablet the scene stays pinned to the top of the screen while the panel scrolls underneath it, so you can see what a control is doing while you drag it. Scroll all the way back up to release it and bring the page heading back.
 
 ## Scene
 

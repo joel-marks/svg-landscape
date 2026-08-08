@@ -233,7 +233,25 @@
     </header>
 
     <main class="shell flex-1 py-6">
-      <figure class="m-0">
+      <!-- Cosmetic only (CONTEXT.md section 5, Phase 13). One pixel of nothing,
+           pulled back out of the flow by an equal negative bottom margin, sitting
+           at exactly the y the figure below starts sticking at — so an
+           IntersectionObserver on it says whether the scene is pinned without
+           anything reading a scroll position. `src/ui/scenepin.js` toggles
+           `is-stuck` on the figure from it, which draws the hairline and nothing
+           else. With that script absent, failed, or on a browser without
+           IntersectionObserver, the pin itself is unaffected: it is `position:
+           sticky` and owes the observer nothing. -->
+      <div id="scene-pin-sentinel" aria-hidden="true"></div>
+
+      <!-- `scene-pin` rather than `m-0`: the figure is the canvas frame's
+           wrapper, and below 1024px it is what pins to the top of the viewport
+           while the panel scrolls beneath it (CONTEXT.md sections 5, 11). The
+           class carries `margin: 0` itself, so nothing is lost by dropping the
+           utility — and a utility-layer margin would have beaten the negative
+           inline margin that takes the pinned band out to the viewport edges,
+           since Tailwind's utilities layer outranks @layer base. -->
+      <figure class="scene-pin">
         <div
           id="canvas-frame"
           class="aspect-video overflow-hidden rounded-lg bg-surface-sunken shadow-sm inset-ring-1 inset-ring-border-token"

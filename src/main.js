@@ -8,6 +8,7 @@ import { render } from './core/render.js';
 import { initControls } from './ui/controls.js';
 import { downloadSettings, downloadSVG } from './ui/download.js';
 import { initHelp } from './ui/help.js';
+import { initScenePin } from './ui/scenepin.js';
 import { initTheme } from './ui/theme.js';
 import { slugify } from './core/utils.js';
 
@@ -71,6 +72,12 @@ initControls({
 });
 
 initTheme();
+
+// Cosmetic, and deliberately not guarded by anything (CONTEXT.md section 5,
+// Phase 13): the sticky scene is CSS, and this only draws the hairline that
+// appears once content is passing beneath it.
+initScenePin();
+
 regenerate();
 
 // The other half of the initial-load fade (CONTEXT.md section 9; the critical
